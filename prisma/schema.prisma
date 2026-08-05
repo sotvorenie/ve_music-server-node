@@ -1,13 +1,100 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+datasource db {
+  provider = "postgresql"
+}
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
-datasource db {
-  provider = "postgresql"
+model User {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(20)
+  login     String  @unique @db.VarChar(20)
+  password  String  @db.VarChar(255)
+  avatarUrl String? @map("avatar_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  likes   Like[]
+  history History[]
+
+  @@map("users")
+}
+
+model Music {
+  id             Int     @id @default(autoincrement())
+  name           String
+  url            String  @unique @db.Text
+  duration       Int
+  auditionsCount Int     @default(0)
+  likesCount     Int     @default(0)
+  previewUrl     String? @map("preview_url") @db.Text
+  videoClipUrl   String? @map("video_clip_url") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  genreId Int? @map("genre_id")
+
+  genre   Genre?    @relation(fields: [genreId], references: [id], onDelete: SetNull)
+  artists Artist[]
+  likes   Like[]
+  history History[]
+
+  @@map("musics")
+}
+
+model Genre {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(50)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  music Music[]
+
+  @@map("genres")
+}
+
+model Artist {
+  id        Int    @id @default(autoincrement())
+  name      String @unique @db.VarChar(255)
+  avatarUrl String @map("avatar_url") @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  music Music[]
+
+  @@map("artists")
+}
+
+model Like {
+  id   Int      @id @default(autoincrement())
+  date DateTime @default(now())
+
+  userId  Int? @map("user_id")
+  musicId Int  @map("music_id")
+
+  user  User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  music Music @relation(fields: [musicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, musicId])
+  @@map("likes")
+}
+
+model History {
+  id   Int      @id @default(autoincrement())
+  date DateTime @default(now())
+
+  userId  Int? @map("user_id")
+  musicId Int  @map("music_id")
+
+  user  User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  music Music @relation(fields: [musicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, musicId])
+  @@map("histories")
 }
