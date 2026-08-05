@@ -8,7 +8,8 @@ import {testRouter} from "./routes/test.js";
 import {authRouter} from "./routes/auth.js";
 import {artistRouter} from "./routes/artist.js";
 import {genreRouter} from "./routes/genre.js";
-import {historyRouter} from "./routes/history.js";
+import {historyRouter} from "./routes/history.js"
+import {likeRouter} from "./routes/like.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use('/api/auth', authRouter)
 app.use('/api/artist', artistRouter)
 app.use('/api/genre', genreRouter)
 app.use('/api/history', historyRouter)
+app.use('/api/like', likeRouter)
 
 app.listen(PORT, async () => {
     console.log(`Сервер запущен на порту ${PORT}`)
