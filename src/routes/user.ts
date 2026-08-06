@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import {z} from "zod";
 import bcrypt from "bcryptjs";
 import multer from 'multer';
 import path from 'node:path';
@@ -13,18 +12,13 @@ import {successResponse} from "../responses/successResponse.js";
 import {uploadStorage} from "../composables/useUploadStorage.js";
 import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "../config.js";
 import {createUrl} from "../composables/useCreateUrl.js";
+import {nameSchema} from "../schemas/nameSchema.js";
+import {passwordSchema} from "../schemas/passwordSchema.js";
 
 export const userRouter = Router();
 
-const userPasswordSchema = z.object({
-    password: z.string(),
-})
-
-const redactUserNameBodySchema = z.object({
-    name: z.string(),
-})
 userRouter.get('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {name} = redactUserNameBodySchema.parse(req.query)
+    const {name} = nameSchema.parse(req.query)
     const currentUser = req.user!
 
     const formattedName = name?.trim()
@@ -45,7 +39,7 @@ userRouter.get('/redact_name', getUser(), asyncHandler(async (req: Request, res:
 }))
 
 userRouter.post('/redact_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {password} = userPasswordSchema.parse(req.body)
+    const {password} = passwordSchema.parse(req.body)
     const currentUser = req.user!
 
     const formattedPassword = password?.trim()

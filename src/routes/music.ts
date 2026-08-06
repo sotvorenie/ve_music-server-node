@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import {z} from "zod";
 import {db} from "../db.js";
 
 import {asyncHandler} from "../utils/asyncHandler.js";
@@ -7,6 +6,8 @@ import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
 import {getSkip} from "../composables/useGetSkip.js";
 import {getUser} from "../utils/auth.js";
 import {musicException} from "../utils/httpExceptions.js";
+import {musicBaseWithArtistsSelect} from "../selects/musicSelect.js";
+import {musicIdSchema} from "../schemas/musicIdSchema.js";
 
 export const musicRouter = Router();
 
@@ -66,17 +67,7 @@ musicRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
         db.music.findMany({
             skip,
             take: limit,
-            select: {
-                id: true,
-                name: true,
-                duration: true,
-                artists: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                }
-            }
+            select: musicBaseWithArtistsSelect
         }),
         db.music.count()
     ])
@@ -90,11 +81,8 @@ musicRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-const musicParamsScheme = z.object({
-    music_id: z.string().transform(Number),
-})
 musicRouter.get('/:music_id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
-    const {music_id: musicId} = musicParamsScheme.parse(req.params)
+    const {music_id: musicId} = musicIdSchema.parse(req.params)
     const currentUserId = req.user?.id
 
     if (currentUserId) addMusicToHistory(currentUserId, musicId).then()
@@ -105,20 +93,12 @@ musicRouter.get('/:music_id', getUser(false), asyncHandler(async (req: Request, 
                 id: musicId
             },
             select: {
-                id: true,
-                name: true,
-                duration: true,
+                ...musicBaseWithArtistsSelect,
                 url: true,
                 previewUrl: true,
                 videoClipUrl: true,
                 likesCount: true,
                 auditionsCount: true,
-                artists: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                },
                 likes: {
                     where: {
                         userId: currentUserId ?? -1

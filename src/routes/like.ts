@@ -1,64 +1,19 @@
 import { Router, type Request, type Response } from 'express';
-import {z} from "zod";
 import {db} from "../db.js";
 
 import {asyncHandler} from "../utils/asyncHandler.js";
-import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
-import {getSkip} from "../composables/useGetSkip.js";
 import {getUser} from "../utils/auth.js";
+import {musicIdSchema} from "../schemas/musicIdSchema.js";
+import {getAllMusic, modelMap} from "../services/getAllMusicService.js";
 
 export const likeRouter = Router();
 
 likeRouter.get('/all', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit} = pageLimitSchema.parse(req.query)
-    const currentUserId = req.user!.id
-
-    const skip = getSkip(page, limit)
-
-    const [music, total] = await Promise.all([
-        db.like.findMany({
-            where: {
-                userId: currentUserId
-            },
-            select: {
-                music: {
-                    select: {
-                        id: true,
-                        name: true,
-                        duration: true,
-                        artists: {
-                            select: {
-                                id: true,
-                                name: true,
-                            }
-                        }
-                    }
-                }
-            },
-            skip,
-            take: limit,
-        }),
-        db.history.count({
-            where: {
-                userId: currentUserId
-            }
-        })
-    ])
-
-    res.json({
-        music,
-        page,
-        limit,
-        total,
-        hasMore: (skip + limit) < total,
-    })
+    await getAllMusic(req, res, modelMap.like)
 }))
 
-const likeParamsSchema = z.object({
-    music_id: z.string().transform(Number)
-})
 likeRouter.post('/:music_id', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {music_id: musicId} = likeParamsSchema.parse(req.params)
+    const {music_id: musicId} = musicIdSchema.parse(req.params)
     const currentUserId = req.user!.id
 
     const existingLike = await db.like.findUnique({

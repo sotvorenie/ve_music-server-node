@@ -6,14 +6,15 @@ import {db} from "../db.js";
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {registrationException, authException} from "../utils/httpExceptions.js";
 import {createJWTToken, getUser} from "../utils/auth.js";
+import {nameSchema} from "../schemas/nameSchema.js";
+import {passwordSchema} from "../schemas/passwordSchema.js";
 
 export const authRouter = Router();
 
 const productName: string = process.env.PRODUCT_NAME as string
 
-const authBaseSchema = z.object({
+const authBaseSchema = passwordSchema.extend({
     login: z.string(),
-    password: z.string(),
 })
 
 const authResponse = (
@@ -28,9 +29,7 @@ const authResponse = (
     })
 }
 
-const registerBodySchema = authBaseSchema.extend({
-    name: z.string(),
-})
+const registerBodySchema = authBaseSchema.extend(nameSchema.shape)
 authRouter.post('/register', asyncHandler(async (req: Request, res: Response) => {
     const { login, password, name } = registerBodySchema.parse(req.body)
 
