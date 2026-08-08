@@ -17,8 +17,8 @@ import {passwordSchema} from "../schemas/passwordSchema.js";
 
 export const userRouter = Router();
 
-userRouter.get('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {name} = nameSchema.parse(req.query)
+userRouter.patch('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const {name} = nameSchema.parse(req.body)
     const currentUser = req.user!
 
     const formattedName = name?.trim()
@@ -38,7 +38,7 @@ userRouter.get('/redact_name', getUser(), asyncHandler(async (req: Request, res:
     return successResponse(res)
 }))
 
-userRouter.post('/redact_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.patch('/redact_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {password} = passwordSchema.parse(req.body)
     const currentUser = req.user!
 
