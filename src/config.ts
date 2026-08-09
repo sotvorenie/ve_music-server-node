@@ -4,6 +4,7 @@ export const BASE_STORAGE_DIR = path.resolve(process.env.BASE_STORAGE_DIR as str
 export const MUSIC_DIRECTORY = path.join(BASE_STORAGE_DIR, 'music')
 export const TEMPORARY_DIRECTORY = path.join(BASE_STORAGE_DIR, 'temporary')
 export const AVATARS_DIRECTORY = path.join(BASE_STORAGE_DIR, 'users_avatars')
+export const ARTISTS_AVATARS_DIRECTORY = path.join(BASE_STORAGE_DIR, 'artists_avatars')
 
 export const ALLOWED_MUSIC_SUFFIX = new Set(['.mp3', '.wav'])
 

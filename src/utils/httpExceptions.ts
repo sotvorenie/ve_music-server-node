@@ -30,3 +30,6 @@ export const musicException = HttpError(404, "Музыка не найдена")
 
 // загрузка фото
 export const photoFormatException = HttpError(400, "Неподдерживаемый формат фото");
+
+// исполнитель
+export const artistException = HttpError(404, "Исполнитель не найден");
