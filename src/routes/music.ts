@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express';
+import { Prisma } from "../generated/prisma/client.js";
 import {z} from "zod";
 import {db} from "../db.js";
 
@@ -12,6 +13,11 @@ import {musicIdSchema} from "../schemas/musicIdSchema.js";
 import {nameSchema} from "../schemas/nameSchema.js";
 
 export const musicRouter = Router();
+
+const genreIdAndArtistIdAndNameSchema = nameSchema.extend({
+    genre_id: z.string().transform(Number),
+    artist_id: z.string().transform(Number),
+})
 
 const addMusicToHistory = async (userId: number, musicId: number) => {
     const historyEntry = await db.history.findUnique({
@@ -60,12 +66,58 @@ const addMusicToHistory = async (userId: number, musicId: number) => {
     }
 }
 
-const getMusicListSchema = pageLimitSchema.extend(nameSchema.shape).extend({
-    genre_id: z.string().transform(Number),
-    artist_id: z.string().transform(Number),
-})
+const getMusic = async (
+    res: Response,
+    musicId: number,
+    currentUserId?: number
+) => {
+    if (currentUserId) addMusicToHistory(currentUserId, musicId).catch(err => {
+        console.error('Ошибка добавления музыки в историю: ', err)
+    })
+
+    let [musicFromDB] = await Promise.all([
+        db.music.findUnique({
+            where: {
+                id: musicId
+            },
+            select: {
+                ...musicBaseWithArtistsSelect,
+                url: true,
+                previewUrl: true,
+                videoClipUrl: true,
+                likesCount: true,
+                auditionsCount: true,
+                likes: {
+                    where: {
+                        userId: currentUserId ?? -1
+                    }
+                }
+            }
+        }),
+        db.music.update({
+            where: {
+                id: musicId
+            },
+            data: {
+                auditionsCount: {increment: 1}
+            }
+        })
+    ])
+
+    if (!musicFromDB) throw musicException
+
+    const music = {
+        ...musicFromDB,
+        isLiked: !!musicFromDB?.likes?.length,
+        likes: undefined,
+    }
+
+    res.json(music)
+}
+
 musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, name, genre_id: genreId, artist_id: artistId} = getMusicListSchema.parse(req.query)
+    const {page, limit, name, genre_id: genreId, artist_id: artistId} =
+        genreIdAndArtistIdAndNameSchema.extend(pageLimitSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
@@ -109,44 +161,38 @@ musicRouter.get('/:music_id', getUser(false), asyncHandler(async (req: Request, 
     const {music_id: musicId} = musicIdSchema.parse(req.params)
     const currentUserId = req.user?.id
 
-    if (currentUserId) addMusicToHistory(currentUserId, musicId).then()
+    await getMusic(res, musicId, currentUserId)
+}))
 
-    let [musicFromDB] = await Promise.all([
-        db.music.findUnique({
-            where: {
-                id: musicId
-            },
-            select: {
-                ...musicBaseWithArtistsSelect,
-                url: true,
-                previewUrl: true,
-                videoClipUrl: true,
-                likesCount: true,
-                auditionsCount: true,
-                likes: {
-                    where: {
-                        userId: currentUserId ?? -1
-                    }
-                }
-            }
-        }),
-        db.music.update({
-            where: {
-                id: musicId
-            },
-            data: {
-                auditionsCount: {increment: 1}
-            }
-        })
-    ])
+const getRandomMusicSchema = genreIdAndArtistIdAndNameSchema.extend({
+    seed: z.string().transform(Number),
+    offset: z.string().transform(Number),
+})
+musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res: Response) => {
+    const {
+        name,
+        seed,
+        offset,
+        genre_id: genreId,
+        artist_id: artistId
+    } = getRandomMusicSchema.parse(req.query)
+    const currentUserId = req.user?.id
 
-    if (!musicFromDB) throw musicException
+    const conditions: Prisma.Sql[] = []
+    const formattedName = name?.trim()
+    if (formattedName) conditions.push(Prisma.sql`name ILIKE ${'%' + formattedName + '%'}`)
+    if (genreId >= 0) conditions.push(Prisma.sql`genre_id = ${genreId}`)
+    if (artistId >= 0) conditions.push(Prisma.sql`id IN (SELECT "B" FROM "_ArtistToMusic" WHERE "A" = ${artistId})`)
+    const whereClause = conditions?.length
+        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+        : Prisma.empty
 
-    const music = {
-        ...musicFromDB,
-        isLiked: !!musicFromDB?.likes?.length,
-        likes: undefined,
-    }
+    const [_, [firstRow]] = await db.$transaction([
+        db.$executeRaw`SELECT setseed(${seed})`,
+        db.$queryRaw`SELECT id FROM "musics" ${whereClause} ORDER BY RANDOM() LIMIT 1 OFFSET ${offset}`
+    ]) as [unknown, {id: number}[]]
+    const musicId = firstRow?.id
+    if (!musicId) throw musicException
 
-    res.json(music)
+    await getMusic(res, musicId, currentUserId)
 }))
