@@ -1,8 +1,10 @@
 import { type Request, type Response } from 'express';
+import {db} from "../db.js";
 
 import {getSkip} from "../composables/useGetSkip.js";
 import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
 import {idSchema} from "../schemas/idSchema.js";
+import {modelMap} from "./modelMap.js";
 
 export const getAllMusic = async (
     req: Request,
@@ -13,14 +15,25 @@ export const getAllMusic = async (
 
     const skip = getSkip(page, limit)
 
-    const music = await model.findMany({
-        where: {
+    let where
+    if (model === modelMap.artist) {
+        where = {
             artists: {
                 some: {
                     id
                 }
             }
-        },
+        }
+    }
+    if (model === modelMap.genre) {
+        where = {
+            genreId: id
+        }
+    }
+    if (!where) return
+
+    const music = await db.music.findMany({
+        where,
         select: {
             id: true,
             name: true,

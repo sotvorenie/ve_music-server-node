@@ -9,9 +9,9 @@ export const getAllUserMusic = async (
     req: Request,
     res: Response,
     model: any,
+    currentUserId: number
 ) => {
     const {page, limit} = pageLimitSchema.parse(req.query)
-    const currentUserId = req.user!.id
 
     const skip = getSkip(page, limit)
 
