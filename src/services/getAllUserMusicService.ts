@@ -1,17 +1,11 @@
 import { type Request, type Response } from 'express';
-import {db} from "../db.js";
 
 import {getSkip} from "../composables/useGetSkip.js";
 import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
 import {musicBaseWithArtistsSelect} from "../selects/musicSelect.js";
 import {getHasMore} from "../composables/useGetHasMore.js";
 
-export const modelMap = {
-    like: db.like,
-    history: db.history,
-}
-
-export const getAllMusic = async (
+export const getAllUserMusic = async (
     req: Request,
     res: Response,
     model: any,

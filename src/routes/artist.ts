@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import {z} from "zod";
 import path from "node:path";
 import fs from "node:fs/promises";
 import multer from "multer";
@@ -17,31 +16,17 @@ import {artistException, emptyUserDataException, photoFormatException} from "../
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "../config.js";
 import {createUrl} from "../composables/useCreateUrl.js";
 import {userRouter} from "./user.js";
-import {successResponse} from "../responses/successResponse.js";
+import {idSchema} from "../schemas/idSchema.js";
+import {getAllMusic} from "../services/getMusicService.js";
+import {createInDB} from "../services/createService.js";
+import {modelMap} from "../services/modelMap.js";
+import {deleteFromDB} from "../services/deleteService.js";
+import {redactNameInDB} from "../services/redactNameService.js";
 
 export const artistRouter = Router();
 
 artistRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    const { page, limit } = pageLimitSchema.parse(req.query)
-
-    const skip = getSkip(page, limit)
-
-    const [artists, total] = await Promise.all([
-        db.artist.findMany({
-            select: artistFullSelect,
-            skip,
-            take: limit,
-        }),
-        db.artist.count()
-    ])
-
-    res.json({
-        artists,
-        page,
-        limit,
-        total,
-        hasMore: getHasMore(skip, limit, total),
-    })
+    await getAllMusic(req, res, modelMap.artist)
 }))
 
 const searchArtistsQuerySchema = pageLimitSchema.extend(nameSchema.shape)
@@ -78,35 +63,31 @@ artistRouter.get('/search', asyncHandler(async (req: Request, res: Response) => 
 
 
 // --- для админки --- //
-const artistIdSchema = z.object({
-    artist_id: z.string().transform(Number),
-})
+artistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await getAllMusic(req, res, modelMap.artist)
+}))
 
 artistRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {name} = nameSchema.parse(req.body)
+    await createInDB(req, res, modelMap.artist)
+}))
 
-    const newArtist = await db.artist.create({
-        data: {
-            name,
-        },
-        select: {
-            id: true,
-            name: true,
-        }
-    })
+artistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await deleteFromDB(req, res, modelMap.artist)
+}))
 
-    res.status(201).json(newArtist)
+artistRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await redactNameInDB(req, res, modelMap.artist)
 }))
 
 const upload = multer({storage: uploadStorage})
 userRouter.post(
-    '/upload_avatar/:artist_id',
+    '/upload_avatar/:id',
     getAdmin(),
     upload.fields([
         {name: 'avatar', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        const {artist_id: artistId} = artistIdSchema.parse(req.params)
+        const {id} = idSchema.parse(req.params)
 
         const files = req.files as { [fieldname: string]: Express.Multer.File[] }
         const avatarFile = files?.avatar?.[0]
@@ -115,7 +96,7 @@ userRouter.post(
 
         const artist = await db.artist.findUnique({
             where: {
-                id: artistId
+                id
             },
             select: {
                 avatarUrl: true,
@@ -131,13 +112,13 @@ userRouter.post(
         try {
             await fs.mkdir(ARTISTS_AVATARS_DIRECTORY, {recursive: true})
 
-            targetAvatarPath = path.join(ARTISTS_AVATARS_DIRECTORY, `${artistId}_${Date.now()}${avatarSuffix}`)
+            targetAvatarPath = path.join(ARTISTS_AVATARS_DIRECTORY, `${id}_${Date.now()}${avatarSuffix}`)
             await fs.rename(avatarFile.path, targetAvatarPath)
 
             const newAvatarUrl = createUrl(targetAvatarPath)
             await db.artist.update({
                 where: {
-                    id: artistId
+                    id
                 },
                 data: {
                     avatarUrl: newAvatarUrl,
@@ -171,31 +152,3 @@ userRouter.post(
         }
     })
 )
-
-artistRouter.delete('/delete', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {artist_id: artistId} = artistIdSchema.parse(req.params)
-
-    await db.artist.delete({
-        where: {
-            id: artistId
-        }
-    })
-
-    successResponse(res)
-}))
-
-artistRouter.patch('/redact_name', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {artist_id: artistId} = artistIdSchema.parse(req.params)
-    const {name} = nameSchema.parse(req.body)
-
-    await db.artist.update({
-        where: {
-            id: artistId
-        },
-        data: {
-            name
-        }
-    })
-
-    successResponse(res)
-}))

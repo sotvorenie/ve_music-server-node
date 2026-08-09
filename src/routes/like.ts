@@ -3,24 +3,25 @@ import {db} from "../db.js";
 
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {getUser} from "../utils/auth.js";
-import {musicIdSchema} from "../schemas/musicIdSchema.js";
-import {getAllMusic, modelMap} from "../services/getAllMusicService.js";
+import {getAllUserMusic} from "../services/getAllUserMusicService.js";
+import {idSchema} from "../schemas/idSchema.js";
+import {modelMap} from "../services/modelMap.js";
 
 export const likeRouter = Router();
 
 likeRouter.get('/all', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    await getAllMusic(req, res, modelMap.like)
+    await getAllUserMusic(req, res, modelMap.like)
 }))
 
-likeRouter.post('/:music_id', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const {music_id: musicId} = musicIdSchema.parse(req.params)
+likeRouter.post('/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
     const currentUserId = req.user!.id
 
     const existingLike = await db.like.findUnique({
         where: {
             userId_musicId: {
                 userId: currentUserId,
-                musicId
+                musicId: id
             }
         }
     })
@@ -33,13 +34,13 @@ likeRouter.post('/:music_id', getUser(), asyncHandler(async (req: Request, res: 
                 where: {
                     userId_musicId: {
                         userId: currentUserId,
-                        musicId
+                        musicId: id
                     }
                 }
             })
             await tx.music.update({
                 where: {
-                    id: musicId
+                    id
                 },
                 data: {
                     likesCount: {decrement: 1}
@@ -49,12 +50,12 @@ likeRouter.post('/:music_id', getUser(), asyncHandler(async (req: Request, res: 
             await tx.like.create({
                 data: {
                     userId: currentUserId,
-                    musicId,
+                    musicId: id,
                 }
             })
             await tx.music.update({
                 where: {
-                    id: musicId
+                    id
                 },
                 data: {
                     likesCount: {increment: 1}
@@ -65,6 +66,6 @@ likeRouter.post('/:music_id', getUser(), asyncHandler(async (req: Request, res: 
     })
 
     res.json({
-        isLiked: isLiked,
+        isLiked,
     })
 }))

@@ -9,8 +9,8 @@ import {getSkip} from "../composables/useGetSkip.js";
 import {getUser} from "../utils/auth.js";
 import {musicException} from "../utils/httpExceptions.js";
 import {musicBaseWithArtistsSelect} from "../selects/musicSelect.js";
-import {musicIdSchema} from "../schemas/musicIdSchema.js";
 import {nameSchema} from "../schemas/nameSchema.js";
+import {idSchema} from "../schemas/idSchema.js";
 
 export const musicRouter = Router();
 
@@ -157,11 +157,11 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-musicRouter.get('/:music_id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
-    const {music_id: musicId} = musicIdSchema.parse(req.params)
+musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
     const currentUserId = req.user?.id
 
-    await getMusic(res, musicId, currentUserId)
+    await getMusic(res, id, currentUserId)
 }))
 
 const getRandomMusicSchema = genreIdAndArtistIdAndNameSchema.extend({
