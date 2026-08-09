@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express';
+import {z} from "zod";
 import {db} from "../db.js";
 
 import {asyncHandler} from "../utils/asyncHandler.js";
@@ -8,6 +9,7 @@ import {getUser} from "../utils/auth.js";
 import {musicException} from "../utils/httpExceptions.js";
 import {musicBaseWithArtistsSelect} from "../selects/musicSelect.js";
 import {musicIdSchema} from "../schemas/musicIdSchema.js";
+import {nameSchema} from "../schemas/nameSchema.js";
 
 export const musicRouter = Router();
 
@@ -58,18 +60,40 @@ const addMusicToHistory = async (userId: number, musicId: number) => {
     }
 }
 
-musicRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit} = pageLimitSchema.parse(req.query)
+const getMusicListSchema = pageLimitSchema.extend(nameSchema.shape).extend({
+    genre_id: z.string().transform(Number),
+    artist_id: z.string().transform(Number),
+})
+musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
+    const {page, limit, name, genre_id: genreId, artist_id: artistId} = getMusicListSchema.parse(req.query)
 
     const skip = getSkip(page, limit)
 
+    const where = {
+        ...(name && {
+            name: {
+                contains: name,
+                mode: 'insensitive' as const
+            }
+        }),
+        ...(genreId >= 0 && { genreId }),
+        ...(artistId >= 0 && {
+            artists: {
+                some: {
+                    id: artistId
+                }
+            }
+        })
+    }
+
     const [music, total] = await Promise.all([
         db.music.findMany({
+            where,
             skip,
             take: limit,
             select: musicBaseWithArtistsSelect
         }),
-        db.music.count()
+        db.music.count({where})
     ])
 
     res.json({
@@ -119,7 +143,7 @@ musicRouter.get('/:music_id', getUser(false), asyncHandler(async (req: Request, 
     if (!musicFromDB) throw musicException
 
     const music = {
-        music: musicFromDB,
+        ...musicFromDB,
         isLiked: !!musicFromDB?.likes?.length,
         likes: undefined,
     }
