@@ -7,6 +7,7 @@ import {getSkip} from "../composables/useGetSkip.js";
 import {getHasMore} from "../composables/useGetHasMore.js";
 import {artistFullSelect} from "../selects/artistSelect.js";
 import {nameSchema} from "../schemas/nameSchema.js";
+import {getAdmin} from "../utils/auth.js";
 
 export const artistRouter = Router();
 
@@ -63,4 +64,22 @@ artistRouter.get('/search', asyncHandler(async (req: Request, res: Response) => 
         total,
         hasMore: getHasMore(skip, limit, total),
     })
+}))
+
+
+// --- для админки --- //
+artistRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {name} = nameSchema.parse(req.body)
+
+    const newArtist = await db.artist.create({
+        data: {
+            name,
+        },
+        select: {
+            id: true,
+            name: true,
+        }
+    })
+
+    res.status(201).json(newArtist)
 }))

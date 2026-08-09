@@ -23,6 +23,18 @@ model User {
   @@map("users")
 }
 
+model Admin {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(20)
+  login    String @unique @db.VarChar(20)
+  password String @db.VarChar(255)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
 model Music {
   id             Int     @id @default(autoincrement())
   name           String
@@ -59,9 +71,9 @@ model Genre {
 }
 
 model Artist {
-  id        Int    @id @default(autoincrement())
-  name      String @unique @db.VarChar(255)
-  avatarUrl String @map("avatar_url") @db.Text
+  id        Int     @id @default(autoincrement())
+  name      String  @unique @db.VarChar(255)
+  avatarUrl String? @map("avatar_url") @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

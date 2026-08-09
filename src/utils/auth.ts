@@ -39,3 +39,27 @@ export const getUser = (required: boolean = true) => {
         next()
     })
 }
+
+export const getAdmin = () => {
+    return asyncHandler(async (req: Request, _: Response, next: NextFunction) => {
+        const authHeader = req.headers.authorization
+        if (!authHeader?.startsWith('Bearer ')) throw jwtException
+
+        const token = authHeader.split(' ')[1] as string
+        let payload: { sub: string }
+
+        try {
+            payload = jwt.verify(token, SECRET_KEY) as { sub: string }
+        } catch {
+            throw jwtException
+        }
+
+        const admin = await db.admin.findUnique({
+            where: { id: Number(payload.sub) }
+        })
+        if (!admin) throw jwtException
+
+        if (admin) req.admin = admin
+        next()
+    })
+}
