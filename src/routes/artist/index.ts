@@ -11,13 +11,29 @@ import {nameSchema} from "@schemas/nameSchema.js";
 
 import {artistFullSelect} from "@selects/artistSelect.js";
 
-import {getAllMusic} from "@services/getMusicService.js";
-import {modelMap} from "@services/modelMap.js";
-
 export const artistRouter = Router();
 
 artistRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    await getAllMusic(req, res, modelMap.artist)
+    const {page, limit} = pageLimitSchema.parse(req.params)
+
+    const skip = getSkip(page, limit)
+
+    const [artists, total] = await Promise.all([
+        db.artist.findMany({
+            select: artistFullSelect,
+            skip,
+            take: limit,
+        }),
+        db.artist.count()
+    ])
+
+    res.json({
+        artists,
+        page,
+        limit,
+        total,
+        hasMore: getHasMore(skip, limit, total),
+    })
 }))
 
 const searchArtistsQuerySchema = pageLimitSchema.extend(nameSchema.shape)
