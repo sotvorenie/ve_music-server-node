@@ -16,18 +16,7 @@ import {
     musicServiceDeleteFromDBAndFile,
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
-
-const allUpdateTypes = {
-    audio: (url: string) => ({
-        url
-    }),
-    preview: (url: string) => ({
-        previewUrl: url
-    }),
-    video: (url: string) => ({
-        videoClipUrl: url
-    })
-}
+import {musicConstantUpdateTypes} from "@routes/music/constants.js";
 
 musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
@@ -51,17 +40,17 @@ musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, r
 
 musicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = musicSchemaUrl.parse(req.body)
-    await musicServiceUpdateUrl(req, res, allUpdateTypes.audio(url))
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(url))
 }))
 
 musicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = musicSchemaUrl.parse(req.body)
-    await musicServiceUpdateUrl(req, res, allUpdateTypes.preview(url))
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(url))
 }))
 
 musicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = musicSchemaUrl.parse(req.body)
-    await musicServiceUpdateUrl(req, res, allUpdateTypes.video(url))
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(url))
 }))
 
 const auditionsCountSchema = z.object({
