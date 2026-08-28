@@ -3,16 +3,16 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 
-import {DataSynchronizer} from "./cache.js";
-import {testRouter} from "./routes/test.js";
-import {authRouter} from "./routes/auth.js";
-import {artistRouter} from "./routes/artist.js";
-import {genreRouter} from "./routes/genre.js";
-import {historyRouter} from "./routes/history.js"
-import {likeRouter} from "./routes/like.js";
-import {musicRouter} from "./routes/music.js";
-import {userRouter} from "./routes/user.js";
-import {uploadRouter} from "./routes/upload.js";
+import {DataSynchronizer} from "@/cache.js";
+import {testRouter} from "@/routes/test.js";
+import {authRouter} from "@/routes/auth.js";
+import {artistRouter} from "@/routes/artist/index.js";
+import {genreRouter} from "@/routes/genre.js";
+import {historyRouter} from "@/routes/history.js"
+import {likeRouter} from "@/routes/like.js";
+import {musicRouter} from "@/routes/music.js";
+import {userRouter} from "@/routes/user.js";
+import {uploadRouter} from "@/routes/upload.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;

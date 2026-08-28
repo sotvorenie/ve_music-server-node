@@ -40,6 +40,18 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@composables/*": ["src/composables/*"],
+      "@responses/*": ["src/responses/*"],
+      "@routes/*": ["src/routes/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@selects/*": ["src/selects/*"],
+      "@services/*": ["src/services/*"],
+      "@utils/*": ["src/utils/*"],
+    }
   }
 }
