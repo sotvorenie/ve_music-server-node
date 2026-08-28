@@ -12,7 +12,7 @@ import {historyRouter} from "@/routes/history/index.js"
 import {likeRouter} from "@/routes/like/index.js";
 import {musicRouter} from "@/routes/music/index.js";
 import {userRouter} from "@/routes/user.js";
-import {uploadRouter} from "@/routes/upload.js";
+import {uploadRouter} from "@/routes/upload/admin.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;

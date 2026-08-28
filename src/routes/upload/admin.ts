@@ -2,26 +2,27 @@ import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs/promises'
-import {db} from "../db.js";
+import {db} from "@/db.js";
 
-import {asyncHandler} from "../utils/asyncHandler.js";
-import {getUser} from "../utils/auth.js";
+import {asyncHandler} from "@utils/asyncHandler.js";
+import {getUser} from "@utils/auth.js";
 import {
     audioFormatException,
     emptyMusicDataException,
     photoFormatException, videoFormatException
-} from "../utils/httpExceptions.js";
-import {uploadStorage} from "../composables/useUploadStorage.js";
+} from "@utils/httpExceptions.js";
+import {uploadStorage} from "@composables/useUploadStorage.js";
 import {
     ALLOWED_MUSIC_SUFFIX,
     ALLOWED_PHOTO_SUFFIX,
     ALLOWED_VIDEO_SUFFIX,
     MUSIC_DIRECTORY
-} from "../config.js";
-import {createUrl} from "../composables/useCreateUrl.js";
-import {getMusicDuration} from "../composables/useGetAudioDuration.js";
-import {musicInfoSchema} from "../schemas/musicInfoSchema.js";
-import {idSchema} from "../schemas/idSchema.js";
+} from "@/config.js";
+import {createUrl} from "@composables/useCreateUrl.js";
+import {getMusicDuration} from "@composables/useGetAudioDuration.js";
+import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
+import {uploadServiceUploadFile} from "@routes/upload/services.js";
+import {uploadConstantTypes} from "@routes/upload/constants.js";
 
 export const uploadRouter = Router();
 
@@ -117,89 +118,6 @@ uploadRouter.post(
     })
 )
 
-const allUploadTypes = {
-    audio: {
-        title: 'music',
-        allowedSuffix: ALLOWED_MUSIC_SUFFIX,
-        formatException: audioFormatException,
-        dirName: 'music',
-        data: async (musicUrl: string, targetPath: string) => ({
-            url: musicUrl,
-            duration: await getMusicDuration(targetPath),
-        })
-    },
-    preview: {
-        title: 'preview',
-        allowedSuffix: ALLOWED_PHOTO_SUFFIX,
-        formatException: photoFormatException,
-        dirName: 'previews',
-        data: (previewUrl: string) => ({
-            previewUrl,
-        })
-    },
-    video: {
-        title: 'video',
-        allowedSuffix: ALLOWED_VIDEO_SUFFIX,
-        formatException: videoFormatException,
-        dirName: 'videos',
-        data: (videoUrl: string) => ({
-            videoClipUrl: videoUrl,
-        })
-    }
-}
-
-const uploadFile = async (
-    req: Request,
-    res: Response,
-    type: {
-        title: string
-        allowedSuffix: Set<string>,
-        formatException: any,
-        dirName: string,
-        data: Function
-    }
-) => {
-    const {id} = idSchema.parse(req.params)
-
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-    const file = files?.[type.title]?.[0]
-
-    if (!file) throw emptyMusicDataException
-
-    const suffix = path.extname(file.originalname).toLowerCase()
-    if (!type.allowedSuffix.has(suffix)) throw type.formatException
-
-    let targetPath: string | null = null
-
-    try {
-        const directory = path.join(MUSIC_DIRECTORY, type.dirName)
-
-        await fs.mkdir(directory, {recursive: true})
-
-        targetPath = path.join(directory, `${Date.now()}${suffix}`)
-        await fs.rename(file.path, targetPath)
-
-        const url = createUrl(targetPath)
-
-        await db.music.update({
-            where: {
-                id
-            },
-            data: await type.data(url, targetPath)
-        })
-
-        res.status(201).json({
-            newUrl: url,
-        })
-    } catch (err) {
-        if (targetPath) await fs.unlink(targetPath).catch()
-
-        await fs.unlink(files?.[type.title]?.[0]?.path ?? '').catch()
-
-        throw err
-    }
-}
-
 const uploadMusic = multer({storage: uploadStorage})
 uploadRouter.post(
     '/audio/:id',
@@ -208,7 +126,7 @@ uploadRouter.post(
         {name: 'music', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        await uploadFile(req, res, allUploadTypes.audio)
+        await uploadServiceUploadFile(req, res, uploadConstantTypes.audio)
     })
 )
 
@@ -220,7 +138,7 @@ uploadRouter.post(
         {name: 'preview', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        await uploadFile(req, res, allUploadTypes.preview)
+        await uploadServiceUploadFile(req, res, uploadConstantTypes.preview)
     })
 )
 
@@ -232,6 +150,6 @@ uploadRouter.post(
         {name: 'video', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        await uploadFile(req, res, allUploadTypes.video)
+        await uploadServiceUploadFile(req, res, uploadConstantTypes.video)
     })
 )
