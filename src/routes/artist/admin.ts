@@ -4,20 +4,28 @@ import fs from "node:fs/promises";
 import multer from "multer";
 import {db} from "@/db.js";
 import {artistRouter} from "@routes/artist/index.js";
+import {userRouter} from "@routes/user/index.js";
+
+import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
+
+import {uploadStorage} from "@composables/useUploadStorage.js";
+import {createUrl} from "@composables/useCreateUrl.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
+import {
+    artistException,
+    emptyUserDataException,
+    photoFormatException
+} from "@utils/httpExceptions.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {userRouter} from "@routes/user.js";
-import {idSchema} from "@schemas/idSchema.js";
-import {artistException, emptyUserDataException, photoFormatException} from "@utils/httpExceptions.js";
-import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
-import {createUrl} from "@composables/useCreateUrl.js";
 
 artistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.artist)

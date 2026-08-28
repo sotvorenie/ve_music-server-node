@@ -1,6 +1,6 @@
 import { type Request, type Response } from 'express';
 
-import {nameSchema} from "../schemas/nameSchema.js";
+import {nameSchema} from "@schemas/nameSchema.js";
 
 export const createInDB = async (
     req: Request,

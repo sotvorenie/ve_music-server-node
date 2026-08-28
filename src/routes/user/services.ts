@@ -1,21 +1,26 @@
 import {type Request, type Response} from "express";
+import bcrypt from "bcryptjs";
+import path from "node:path";
+import fs from "node:fs/promises";
+import {db} from "@/db.js";
+
 import {type User} from "@/types/express.js";
-import {nameSchema} from "@schemas/nameSchema.js";
+import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
+
+import {createUrl} from "@composables/useCreateUrl.js";
+
 import {
     duplicationPasswordException,
     emptyUserDataException,
     photoFormatException,
     userException
 } from "@utils/httpExceptions.js";
-import {db} from "@/db.js";
-import {successResponse} from "@responses/successResponse.js";
+
+import {nameSchema} from "@schemas/nameSchema.js";
 import {passwordSchema} from "@schemas/passwordSchema.js";
-import bcrypt from "bcryptjs";
-import path from "node:path";
-import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
-import fs from "node:fs/promises";
-import {createUrl} from "@composables/useCreateUrl.js";
 import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const userServiceRedactName = async (req: Request, res: Response, currentUser: User) => {
     const {name} = nameSchema.parse(req.body)

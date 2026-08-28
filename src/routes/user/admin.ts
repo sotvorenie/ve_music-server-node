@@ -1,17 +1,9 @@
-import {db} from "@/db.js";
 import {type Request, type Response} from "express";
-import {idSchema} from "@schemas/idSchema.js";
-import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
-import {asyncHandler} from "@utils/asyncHandler.js";
-import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {getSkip} from "@composables/useGetSkip.js";
-import {getHasMore} from "@composables/useGetHasMore.js";
-import {getAdmin} from "@utils/auth.js";
-import {z} from "zod";
-import {successResponse} from "@responses/successResponse.js";
 import path from "node:path";
-import {BASE_STORAGE_DIR} from "@/config.js";
 import fs from "node:fs/promises";
+import {z} from "zod";
+import {db} from "@/db.js";
+
 import {userRouter} from "@routes/user/index.js";
 import {
     userServiceGetUserAndRedact,
@@ -19,6 +11,20 @@ import {
     userServiceRedactName,
     userServiceRedactPassword, userServiceUploadAvatar
 } from "@routes/user/services.js";
+
+import {BASE_STORAGE_DIR} from "@/config.js";
+
+import {getSkip} from "@composables/useGetSkip.js";
+import {getHasMore} from "@composables/useGetHasMore.js";
+
+import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
+import {asyncHandler} from "@utils/asyncHandler.js";
+import {getAdmin} from "@utils/auth.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit} = pageLimitSchema.parse(req.query)

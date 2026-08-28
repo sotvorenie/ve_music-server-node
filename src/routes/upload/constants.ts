@@ -1,6 +1,8 @@
 import {ALLOWED_MUSIC_SUFFIX, ALLOWED_PHOTO_SUFFIX, ALLOWED_VIDEO_SUFFIX} from "@/config.js";
-import {audioFormatException, photoFormatException, videoFormatException} from "@utils/httpExceptions.js";
+
 import {getMusicDuration} from "@composables/useGetAudioDuration.js";
+
+import {audioFormatException, photoFormatException, videoFormatException} from "@utils/httpExceptions.js";
 
 export const uploadConstantTypes = {
     audio: {

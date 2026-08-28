@@ -1,10 +1,12 @@
 import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
 
+import {userServiceRedactName, userServiceRedactPassword, userServiceUploadAvatar} from "@routes/user/services.js";
+
+import {uploadStorage} from "@composables/useUploadStorage.js";
+
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {userServiceRedactName, userServiceRedactPassword, userServiceUploadAvatar} from "@routes/user/services.js";
 
 export const userRouter = Router();
 

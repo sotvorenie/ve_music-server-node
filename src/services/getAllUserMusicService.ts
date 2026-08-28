@@ -1,9 +1,11 @@
 import { type Request, type Response } from 'express';
 
-import {getSkip} from "../composables/useGetSkip.js";
-import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
-import {musicBaseWithArtistsSelect} from "../selects/musicSelect.js";
-import {getHasMore} from "../composables/useGetHasMore.js";
+import {getSkip} from "@composables/useGetSkip.js";
+import {getHasMore} from "@composables/useGetHasMore.js";
+
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+
+import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
 export const getAllUserMusic = async (
     req: Request,

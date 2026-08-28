@@ -1,7 +1,8 @@
 import { type Request, type Response } from 'express';
 
-import {idSchema} from "../schemas/idSchema.js";
-import {successResponse} from "../responses/successResponse.js";
+import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const deleteFromDB = async (
     req: Request,

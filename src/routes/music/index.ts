@@ -3,15 +3,19 @@ import { Prisma } from "@/generated/prisma/client.js";
 import {z} from "zod";
 import {db} from "@/db.js";
 
-import {asyncHandler} from "@utils/asyncHandler.js";
-import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {getSkip} from "@composables/useGetSkip.js";
-import {getUser} from "@utils/auth.js";
-import {musicException} from "@utils/httpExceptions.js";
-import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
-import {idSchema} from "@schemas/idSchema.js";
 import {musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
 import {musicServiceGetMusic} from "@routes/music/services.js";
+
+import {getSkip} from "@composables/useGetSkip.js";
+
+import {asyncHandler} from "@utils/asyncHandler.js";
+import {getUser} from "@utils/auth.js";
+import {musicException} from "@utils/httpExceptions.js";
+
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+import {idSchema} from "@schemas/idSchema.js";
+
+import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
 export const musicRouter = Router();
 

@@ -1,4 +1,4 @@
-import {artistBaseSelect} from "./artistSelect.js";
+import {artistBaseSelect} from "@selects/artistSelect.js";
 
 export const musicBaseSelect = {
     id: true,

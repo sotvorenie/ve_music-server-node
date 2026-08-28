@@ -1,14 +1,18 @@
 import { Router, type Request, type Response } from 'express';
 import {db} from "@/db.js";
 
-import {asyncHandler} from "@utils/asyncHandler.js";
-import {getAllMusic} from "@services/getMusicService.js";
-import {modelMap} from "@services/modelMap.js";
 import {getSkip} from "@composables/useGetSkip.js";
-import {artistFullSelect} from "@selects/artistSelect.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
+
+import {asyncHandler} from "@utils/asyncHandler.js";
+
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
+
+import {artistFullSelect} from "@selects/artistSelect.js";
+
+import {getAllMusic} from "@services/getMusicService.js";
+import {modelMap} from "@services/modelMap.js";
 
 export const artistRouter = Router();
 

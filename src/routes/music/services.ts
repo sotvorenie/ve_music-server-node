@@ -1,13 +1,19 @@
-import {db} from "@/db.js";
 import {type Request, type Response} from "express";
-import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
-import {musicException} from "@utils/httpExceptions.js";
-import {idSchema} from "@schemas/idSchema.js";
-import {successResponse} from "@responses/successResponse.js";
 import path from "node:path";
-import {BASE_STORAGE_DIR} from "@/config.js";
 import fs from "node:fs/promises";
+import {db} from "@/db.js";
+
 import {musicSchemaUrl} from "@routes/music/schemas.js";
+
+import {BASE_STORAGE_DIR} from "@/config.js";
+
+import {musicException} from "@utils/httpExceptions.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+
+import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 const musicServiceAddMusicToHistory = async (userId: number, musicId: number) => {
     const historyEntry = await db.history.findUnique({

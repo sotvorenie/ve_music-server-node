@@ -1,11 +1,15 @@
 import {type Request, type Response} from "express";
-import {idSchema} from "@schemas/idSchema.js";
-import {emptyMusicDataException} from "@utils/httpExceptions.js";
 import path from "node:path";
-import {MUSIC_DIRECTORY} from "@/config.js";
 import fs from "node:fs/promises";
-import {createUrl} from "@composables/useCreateUrl.js";
 import {db} from "@/db.js";
+
+import {MUSIC_DIRECTORY} from "@/config.js";
+
+import {createUrl} from "@composables/useCreateUrl.js";
+
+import {emptyMusicDataException} from "@utils/httpExceptions.js";
+
+import {idSchema} from "@schemas/idSchema.js";
 
 export const uploadServiceUploadFile = async (
     req: Request,

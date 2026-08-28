@@ -1,10 +1,11 @@
 import path from "node:path";
-import {db} from "./db.js";
+import {db} from "@/db.js";
 
-import {MUSIC_DIRECTORY, ALLOWED_VIDEO_SUFFIX, ALLOWED_PHOTO_SUFFIX, ALLOWED_MUSIC_SUFFIX} from "./config.js";
-import {safeReaddir} from "./composables/useSafeReaddir.js";
-import {createUrl} from "./composables/useCreateUrl.js";
-import {getMusicDuration} from "./composables/useGetAudioDuration.js";
+import {MUSIC_DIRECTORY, ALLOWED_VIDEO_SUFFIX, ALLOWED_PHOTO_SUFFIX, ALLOWED_MUSIC_SUFFIX} from "@/config.js";
+
+import {safeReaddir} from "@composables/useSafeReaddir.js";
+import {createUrl} from "@composables/useCreateUrl.js";
+import {getMusicDuration} from "@composables/useGetAudioDuration.js";
 
 export class DataSynchronizer {
     private musicFromDB = new Map<string, { id: number; url: string; name: string }>()

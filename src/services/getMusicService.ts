@@ -1,10 +1,12 @@
 import { type Request, type Response } from 'express';
-import {db} from "../db.js";
+import {db} from "@/db.js";
 
-import {getSkip} from "../composables/useGetSkip.js";
-import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
-import {idSchema} from "../schemas/idSchema.js";
-import {modelMap} from "./modelMap.js";
+import {getSkip} from "@composables/useGetSkip.js";
+
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+import {idSchema} from "@schemas/idSchema.js";
+
+import {modelMap} from "@services/modelMap.js";
 
 export const getAllMusic = async (
     req: Request,

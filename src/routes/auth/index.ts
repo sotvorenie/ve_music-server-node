@@ -6,6 +6,7 @@ import {db} from "@/db.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {registrationException, authException} from "@utils/httpExceptions.js";
 import {createJWTToken, getUser} from "@utils/auth.js";
+
 import {nameSchema} from "@schemas/nameSchema.js";
 import {passwordSchema} from "@schemas/passwordSchema.js";
 

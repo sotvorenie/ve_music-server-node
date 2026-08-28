@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import {type NextFunction, type Request, type Response} from 'express';
-import {db} from "../db.js";
+import {db} from "@/db.js";
 
-import {jwtException} from "./httpExceptions.js";
-import {asyncHandler} from "./asyncHandler.js";
+import {jwtException} from "@utils/httpExceptions.js";
+import {asyncHandler} from "@utils/asyncHandler.js";
 
 const SECRET_KEY: string = process.env.SECRET_KEY as string
 

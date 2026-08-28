@@ -1,8 +1,9 @@
 import { type Request, type Response } from 'express';
 
-import {idSchema} from "../schemas/idSchema.js";
-import {nameSchema} from "../schemas/nameSchema.js";
-import {successResponse} from "../responses/successResponse.js";
+import {idSchema} from "@schemas/idSchema.js";
+import {nameSchema} from "@schemas/nameSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const redactNameInDB = async (
     req: Request,

@@ -4,6 +4,20 @@ import path from 'node:path';
 import fs from 'node:fs/promises'
 import {db} from "@/db.js";
 
+import {uploadServiceUploadFile} from "@routes/upload/services.js";
+import {uploadConstantTypes} from "@routes/upload/constants.js";
+
+import {
+    ALLOWED_MUSIC_SUFFIX,
+    ALLOWED_PHOTO_SUFFIX,
+    ALLOWED_VIDEO_SUFFIX,
+    MUSIC_DIRECTORY
+} from "@/config.js";
+
+import {uploadStorage} from "@composables/useUploadStorage.js";
+import {createUrl} from "@composables/useCreateUrl.js";
+import {getMusicDuration} from "@composables/useGetAudioDuration.js";
+
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
 import {
@@ -11,18 +25,8 @@ import {
     emptyMusicDataException,
     photoFormatException, videoFormatException
 } from "@utils/httpExceptions.js";
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {
-    ALLOWED_MUSIC_SUFFIX,
-    ALLOWED_PHOTO_SUFFIX,
-    ALLOWED_VIDEO_SUFFIX,
-    MUSIC_DIRECTORY
-} from "@/config.js";
-import {createUrl} from "@composables/useCreateUrl.js";
-import {getMusicDuration} from "@composables/useGetAudioDuration.js";
+
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {uploadServiceUploadFile} from "@routes/upload/services.js";
-import {uploadConstantTypes} from "@routes/upload/constants.js";
 
 export const uploadRouter = Router();
 

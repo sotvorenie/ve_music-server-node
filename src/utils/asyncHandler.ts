@@ -1,7 +1,7 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import { ZodError } from 'zod';
 
-import {dbException} from "./httpExceptions.js";
+import {dbException} from "@utils/httpExceptions.js";
 
 export const asyncHandler = (fn: Function) => {
     return async (req: Request, res: Response, next: NextFunction) => {

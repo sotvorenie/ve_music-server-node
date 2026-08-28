@@ -1,14 +1,17 @@
 import { type Request, type Response } from 'express';
-import {likeRouter} from "@routes/like/index.js";
 import {db} from "@/db.js";
+import {likeRouter} from "@routes/like/index.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
+import {musicException} from "@utils/httpExceptions.js";
+
 import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
+
 import {getAllUserMusic} from "@services/getAllUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
-import {musicException} from "@utils/httpExceptions.js";
-import {successResponse} from "@responses/successResponse.js";
 
 likeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)

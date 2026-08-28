@@ -3,12 +3,6 @@ import {z} from "zod";
 import {db} from "@/db.js";
 import {musicRouter} from "@routes/music/index.js";
 
-import {idSchema} from "@schemas/idSchema.js";
-import {successResponse} from "@responses/successResponse.js";
-import {getAdmin} from "@utils/auth.js";
-import {asyncHandler} from "@utils/asyncHandler.js";
-import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {musicException} from "@utils/httpExceptions.js";
 import {musicSchemaUrl} from "@routes/music/schemas.js";
 import {
     musicServiceCleanUrl,
@@ -17,6 +11,15 @@ import {
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
 import {musicConstantUpdateTypes} from "@routes/music/constants.js";
+
+import {getAdmin} from "@utils/auth.js";
+import {asyncHandler} from "@utils/asyncHandler.js";
+import {musicException} from "@utils/httpExceptions.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
