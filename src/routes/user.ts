@@ -4,10 +4,12 @@ import multer from 'multer';
 import path from 'node:path';
 import fs from 'node:fs/promises'
 import {db} from "../db.js";
+import {z} from "zod";
 
 import {asyncHandler} from "../utils/asyncHandler.js";
 import {getAdmin, getUser} from "../utils/auth.js";
 import {
+    duplicationLoginException,
     duplicationPasswordException,
     emptyUserDataException,
     photoFormatException,
@@ -21,6 +23,9 @@ import {nameSchema} from "../schemas/nameSchema.js";
 import {passwordSchema} from "../schemas/passwordSchema.js";
 import type {User} from "../types/express.js";
 import {idSchema} from "../schemas/idSchema.js";
+import {pageLimitSchema} from "../schemas/pageLimitSchema.js";
+import {getSkip} from "../composables/useGetSkip.js";
+import {getHasMore} from "../composables/useGetHasMore.js";
 
 export const userRouter = Router();
 
@@ -61,6 +66,38 @@ const redactPassword = async (req: Request, res: Response, currentUser: User) =>
         },
         data: {
             password: newPassword,
+        }
+    })
+
+    return successResponse(res)
+}
+
+export const loginSchema = z.object({
+    login: z.string(),
+})
+const redactLogin = async (req: Request, res: Response, currentUser: User) => {
+    const {login} = loginSchema.parse(req.body)
+
+    const formattedLogin = login?.trim()
+    if (!formattedLogin) throw emptyUserDataException
+
+    const userWithLogin = await db.user.findUnique({
+        where: {
+            login
+        },
+        select: {
+            id: true,
+        }
+    })
+
+    if (userWithLogin) throw duplicationLoginException
+
+    await db.user.update({
+        where: {
+            id: currentUser.id
+        },
+        data: {
+            login: formattedLogin,
         }
     })
 
@@ -168,8 +205,40 @@ const getUserAndRedact = async (req: Request, res: Response, func: Function) => 
     await func(req, res, user)
 }
 
+userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
+    const {page, limit} = pageLimitSchema.parse(req.query)
+
+    const skip = getSkip(page, limit)
+
+    let [users, total] = await Promise.all([
+        db.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                login: true,
+                avatarUrl: true,
+            },
+            skip,
+            take: limit,
+        }),
+        db.user.count()
+    ])
+
+    res.json({
+        users,
+        page,
+        limit,
+        total,
+        hasMore: getHasMore(skip, limit, total),
+    })
+}))
+
 userRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getUserAndRedact(req, res, redactName)
+}))
+
+userRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await getUserAndRedact(req, res, redactLogin)
 }))
 
 userRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
