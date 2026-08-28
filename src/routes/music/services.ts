@@ -147,6 +147,7 @@ export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Respons
 
     const formattedUrl = url.replace('/static/', '')
 
+    req.checkAborted()
     await Promise.all([
         db.music.update({
             where: {

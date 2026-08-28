@@ -144,6 +144,7 @@ userRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Requ
     const avatarPath = path.join(BASE_STORAGE_DIR, avatarUrl)
 
     try {
+        req.checkAborted()
         await fs.unlink(avatarPath)
     } catch (err: any) {
         if (err.code === 'ENOENT') {

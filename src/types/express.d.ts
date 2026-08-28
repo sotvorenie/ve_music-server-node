@@ -14,6 +14,9 @@ declare global {
         interface Request {
             user?: User
             admin?: BasePeople
+            checkAborted: () => boolean | never
+            signal: AbortSignal
+            aborted: boolean
         }
     }
 }

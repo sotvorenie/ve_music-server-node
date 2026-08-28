@@ -42,6 +42,8 @@ uploadRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
+        req.checkAborted()
+
         const files = req.files as { [fieldname: string]: Express.Multer.File[] }
         const musicFile = files?.music?.[0]
         const previewFile = files?.preview?.[0]
@@ -73,23 +75,35 @@ uploadRouter.post(
             const previewsDirectory = path.join(MUSIC_DIRECTORY, 'previews')
             const videosDirectory = path.join(MUSIC_DIRECTORY, 'videos')
 
+            req.checkAborted()
+
             await fs.mkdir(musicDirectory, {recursive: true})
             await fs.mkdir(previewsDirectory, {recursive: true})
             await fs.mkdir(videosDirectory, {recursive: true})
 
+            req.checkAborted()
+
             targetMusicPath = path.join(musicDirectory, `${Date.now()}${musicSuffix}`)
             await fs.rename(musicFile.path, targetMusicPath)
+
+            req.checkAborted()
             if (previewFile) {
                 targetPreviewPath = path.join(previewsDirectory, `${Date.now()}${previewSuffix}`)
                 await fs.rename(previewFile.path, targetPreviewPath)
             }
+
+            req.checkAborted()
             if (videoFile) {
                 targetVideoPath = path.join(videosDirectory, `${Date.now()}${videoSuffix}`)
                 await fs.rename(videoFile.path, targetVideoPath)
             }
 
+            req.checkAborted()
+
             const musicUrl = createUrl(targetMusicPath)
             const musicDuration = await getMusicDuration(targetMusicPath)
+
+            req.checkAborted()
 
             const newMusic = await db.music.create({
                 data: {

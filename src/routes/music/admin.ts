@@ -91,6 +91,8 @@ musicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, 
         }
     })
 
+    req.checkAborted()
+
     await Promise.all([
         musicServiceDeleteFile(musicServiceCleanUrl(music.url)),
         musicServiceDeleteFile(musicServiceCleanUrl(music.previewUrl)),

@@ -66,6 +66,8 @@ export const userServiceRedactPassword = async (req: Request, res: Response, cur
 }
 
 export const userServiceUploadAvatar = async (req: Request, res: Response, currentUser: User) => {
+    req.checkAborted()
+
     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
     const avatarFile = files?.avatar?.[0]
 
@@ -77,10 +79,16 @@ export const userServiceUploadAvatar = async (req: Request, res: Response, curre
     let targetAvatarPath: string | null = null
 
     try {
+        req.checkAborted()
+
         await fs.mkdir(AVATARS_DIRECTORY, {recursive: true})
+
+        req.checkAborted()
 
         targetAvatarPath = path.join(AVATARS_DIRECTORY, `${currentUser.id}_${Date.now()}${avatarSuffix}`)
         await fs.rename(avatarFile.path, targetAvatarPath)
+
+        req.checkAborted()
 
         const newAvatarUrl = createUrl(targetAvatarPath)
         await db.user.update({
@@ -91,6 +99,8 @@ export const userServiceUploadAvatar = async (req: Request, res: Response, curre
                 avatarUrl: newAvatarUrl,
             }
         })
+
+        req.checkAborted()
 
         if (currentUser.avatarUrl) {
             const oldAvatarName = currentUser.avatarUrl.replace('/static/', '')
