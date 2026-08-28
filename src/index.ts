@@ -9,7 +9,7 @@ import {authRouter} from "@/routes/auth/index.js";
 import {artistRouter} from "@/routes/artist/index.js";
 import {genreRouter} from "@/routes/genre/index.js";
 import {historyRouter} from "@/routes/history/index.js"
-import {likeRouter} from "@/routes/like.js";
+import {likeRouter} from "@/routes/like/index.js";
 import {musicRouter} from "@/routes/music.js";
 import {userRouter} from "@/routes/user.js";
 import {uploadRouter} from "@/routes/upload.js";
