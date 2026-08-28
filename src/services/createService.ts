@@ -12,6 +12,10 @@ export const createInDB = async (
     const newItem = await model.create({
         data: {
             name,
+        },
+        select: {
+            id: true,
+            name: true,
         }
     })
 
