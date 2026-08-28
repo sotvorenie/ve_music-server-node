@@ -4,7 +4,6 @@ import fs from "node:fs/promises";
 import multer from "multer";
 import {db} from "@/db.js";
 import {artistRouter} from "@routes/artist/index.js";
-import {userRouter} from "@routes/user/index.js";
 
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
 
@@ -26,6 +25,7 @@ import {modelMap} from "@services/modelMap.js";
 import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
+import {deleteAvatar} from "@services/deleteAvatar.js";
 
 artistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.artist)
@@ -44,7 +44,7 @@ artistRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Requ
 }))
 
 const upload = multer({storage: uploadStorage})
-userRouter.post(
+artistRouter.post(
     '/upload_avatar/:id',
     getAdmin(),
     upload.fields([
@@ -116,3 +116,7 @@ userRouter.post(
         }
     })
 )
+
+artistRouter.patch('/delete_avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await deleteAvatar(req, res, modelMap.artist, artistException)
+}))

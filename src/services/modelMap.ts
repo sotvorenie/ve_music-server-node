@@ -5,4 +5,5 @@ export const modelMap = {
     history: db.history,
     artist: db.artist,
     genre: db.genre,
+    user: db.user,
 }

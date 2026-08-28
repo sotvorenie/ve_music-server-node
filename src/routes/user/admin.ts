@@ -1,6 +1,4 @@
 import {type Request, type Response} from "express";
-import path from "node:path";
-import fs from "node:fs/promises";
 import {z} from "zod";
 import {db} from "@/db.js";
 
@@ -11,8 +9,6 @@ import {
     userServiceRedactName,
     userServiceRedactPassword, userServiceUploadAvatar
 } from "@routes/user/services.js";
-
-import {BASE_STORAGE_DIR} from "@/config.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
@@ -25,6 +21,9 @@ import {idSchema} from "@schemas/idSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
+
+import {deleteAvatar} from "@services/deleteAvatar.js";
+import {modelMap} from "@services/modelMap.js";
 
 userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit} = pageLimitSchema.parse(req.query)
@@ -126,33 +125,5 @@ userRouter.post('/upload_avatar/:id', getAdmin(), asyncHandler(async (req: Reque
 }))
 
 userRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
-
-    const user = await userServiceGetUserFromDB(id)
-    if (!user || !user.avatarUrl) throw userException
-
-    await db.user.update({
-        where: {
-            id
-        },
-        data: {
-            avatarUrl: '',
-        }
-    })
-
-    const avatarUrl = user.avatarUrl.replace('/static/', '')
-    const avatarPath = path.join(BASE_STORAGE_DIR, avatarUrl)
-
-    try {
-        req.checkAborted()
-        await fs.unlink(avatarPath)
-    } catch (err: any) {
-        if (err.code === 'ENOENT') {
-            console.log('Старый файл аватарки не найден, пропускаем удаление')
-        } else {
-            console.error('Ошибка при удалении аватарки:', err)
-        }
-    }
-
-    successResponse(res)
+    await deleteAvatar(req, res, modelMap.user, userException)
 }))
