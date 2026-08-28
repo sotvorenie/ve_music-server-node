@@ -72,38 +72,6 @@ const redactPassword = async (req: Request, res: Response, currentUser: User) =>
     return successResponse(res)
 }
 
-export const loginSchema = z.object({
-    login: z.string(),
-})
-const redactLogin = async (req: Request, res: Response, currentUser: User) => {
-    const {login} = loginSchema.parse(req.body)
-
-    const formattedLogin = login?.trim()
-    if (!formattedLogin) throw emptyUserDataException
-
-    const userWithLogin = await db.user.findUnique({
-        where: {
-            login
-        },
-        select: {
-            id: true,
-        }
-    })
-
-    if (userWithLogin) throw duplicationLoginException
-
-    await db.user.update({
-        where: {
-            id: currentUser.id
-        },
-        data: {
-            login: formattedLogin,
-        }
-    })
-
-    return successResponse(res)
-}
-
 const uploadAvatar = async (req: Request, res: Response, currentUser: User) => {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
     const avatarFile = files?.avatar?.[0]
@@ -233,12 +201,50 @@ userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
+userRouter.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+
+    const user = await getUserFromDB(id)
+    if (!user) throw userException
+
+    res.json(user)
+}))
+
 userRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getUserAndRedact(req, res, redactName)
 }))
 
+export const loginSchema = z.object({
+    login: z.string(),
+})
 userRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await getUserAndRedact(req, res, redactLogin)
+    const {login} = loginSchema.parse(req.body)
+    const {id} = idSchema.parse(req.params)
+
+    const formattedLogin = login?.trim()
+    if (!formattedLogin) throw emptyUserDataException
+
+    const userWithLogin = await db.user.findUnique({
+        where: {
+            login
+        },
+        select: {
+            id: true,
+        }
+    })
+
+    if (userWithLogin) throw duplicationLoginException
+
+    await db.user.update({
+        where: {
+            id
+        },
+        data: {
+            login: formattedLogin,
+        }
+    })
+
+    return successResponse(res)
 }))
 
 userRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
