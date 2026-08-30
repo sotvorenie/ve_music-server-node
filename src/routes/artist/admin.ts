@@ -119,7 +119,7 @@ artistRouter.post(
     })
 )
 
-artistRouter.post('/add_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+artistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {url} = urlSchema.parse(req.body)
 

@@ -59,7 +59,7 @@ musicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: 
 const auditionsCountSchema = z.object({
     auditions_count: z.string().transform(Number),
 })
-musicRouter.patch('/add_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+musicRouter.patch('/redact_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)
 
