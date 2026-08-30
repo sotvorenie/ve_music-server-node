@@ -6,9 +6,9 @@ import {likeService} from "@routes/like/services.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
+import {userIdSchema} from "@schemas/userIdSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
@@ -21,29 +21,22 @@ likeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Reques
 }))
 
 likeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id: userId} = idSchema.parse(req.query)
+    const {user_id: userId} = userIdSchema.parse(req.query)
 
     await likeService(req, res, userId, true)
 }))
 
 likeRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
-
-    const music = await db.like.findUnique({
-        where: {
-            id
-        },
-        select: {
-            musicId: true
-        }
-    })
-    const musicId = music?.musicId
-    if (!musicId) throw musicException
+    const {id: musicId} = idSchema.parse(req.params)
+    const {user_id: userId} = userIdSchema.parse(req.query)
 
     await db.$transaction(async (tx) => {
         await tx.like.delete({
             where: {
-                id
+                userId_musicId: {
+                    userId,
+                    musicId
+                }
             }
         })
         await tx.music.update({
