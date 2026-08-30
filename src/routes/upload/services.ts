@@ -60,7 +60,7 @@ export const uploadServiceUploadFile = async (
         })
 
         res.status(201).json({
-            newUrl: url,
+            url: url,
         })
     } catch (err) {
         if (targetPath) await fs.unlink(targetPath).catch()
