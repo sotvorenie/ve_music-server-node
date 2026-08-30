@@ -19,6 +19,7 @@ import {
 } from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
+import {avatarUrlSchema} from "@schemas/avatarUrlSchema.js";
 
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
@@ -26,6 +27,7 @@ import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
+import {successResponse} from "@responses/successResponse.js";
 
 artistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.artist)
@@ -116,6 +118,22 @@ artistRouter.post(
         }
     })
 )
+
+artistRouter.post('/add_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {avatarUrl} = avatarUrlSchema.parse(req.body)
+
+    await db.artist.update({
+        where: {
+            id
+        },
+        data: {
+            avatarUrl
+        }
+    })
+
+    successResponse(res)
+}))
 
 artistRouter.patch('/delete_avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteAvatar(req, res, modelMap.artist, artistException)
