@@ -118,7 +118,7 @@ export const userServiceUploadAvatar = async (req: Request, res: Response, curre
         }
 
         res.status(201).json({
-            newAvatarUrl: newAvatarUrl
+            url: newAvatarUrl
         })
     } catch (err) {
         if (targetAvatarPath) await fs.unlink(targetAvatarPath).catch()
