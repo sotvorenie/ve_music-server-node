@@ -2,6 +2,8 @@ import { type Request, type Response } from 'express';
 import {db} from "@/db.js";
 import {likeRouter} from "@routes/like/index.js";
 
+import {likeService} from "@routes/like/services.js";
+
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {musicException} from "@utils/httpExceptions.js";
@@ -16,6 +18,12 @@ import {modelMap} from "@services/modelMap.js";
 likeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     await getAllUserMusic(req, res, modelMap.like, id)
+}))
+
+likeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id: userId} = idSchema.parse(req.query)
+
+    await likeService(req, res, userId, true)
 }))
 
 likeRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
