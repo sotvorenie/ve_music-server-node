@@ -3,13 +3,12 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
-import {musicSchemaUrl} from "@routes/music/schemas.js";
-
 import {BASE_STORAGE_DIR} from "@/config.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
+import {urlSchema} from "@schemas/urlSchema.js";
 
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
@@ -143,7 +142,7 @@ export const musicServiceCleanUrl = (fileUrl: string | null | undefined) => file
 
 export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Response, data: any) => {
     const {id} = idSchema.parse(req.params)
-    const {url} = musicSchemaUrl.parse(req.body)
+    const {url} = urlSchema.parse(req.body)
 
     const formattedUrl = url.replace('/static/', '')
 

@@ -3,7 +3,6 @@ import {z} from "zod";
 import {db} from "@/db.js";
 import {musicRouter} from "@routes/music/index.js";
 
-import {musicSchemaUrl} from "@routes/music/schemas.js";
 import {
     musicServiceCleanUrl,
     musicServiceDeleteFile,
@@ -18,6 +17,7 @@ import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
+import {urlSchema} from "@schemas/urlSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
@@ -42,17 +42,17 @@ musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, r
 }))
 
 musicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = musicSchemaUrl.parse(req.body)
+    const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(url))
 }))
 
 musicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = musicSchemaUrl.parse(req.body)
+    const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(url))
 }))
 
 musicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = musicSchemaUrl.parse(req.body)
+    const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(url))
 }))
 

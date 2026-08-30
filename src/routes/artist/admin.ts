@@ -19,7 +19,7 @@ import {
 } from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
-import {avatarUrlSchema} from "@schemas/avatarUrlSchema.js";
+import {urlSchema} from "@schemas/urlSchema.js";
 
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
@@ -121,14 +121,14 @@ artistRouter.post(
 
 artistRouter.post('/add_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
-    const {avatarUrl} = avatarUrlSchema.parse(req.body)
+    const {url} = urlSchema.parse(req.body)
 
     await db.artist.update({
         where: {
             id
         },
         data: {
-            avatarUrl
+            avatarUrl: url
         }
     })
 
