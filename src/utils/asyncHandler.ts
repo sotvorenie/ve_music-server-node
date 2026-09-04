@@ -25,6 +25,11 @@ export const asyncHandler = (fn: Function) => {
                     details: err.issues.map(e => ({ field: e.path.join('.'), message: e.message }))
                 })
             }
+            if (err?.code === 'P2002') {
+                return res.status(409).json({
+                    error: "Запись с такими уникальными данными уже существует"
+                })
+            }
             if (err.status && err.detail) return res.status(err.status).json({ detail: err.detail })
             res.status(dbException.status).json({ error: dbException.detail })
         }

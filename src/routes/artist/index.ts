@@ -8,19 +8,20 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
+import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
-import {artistFullSelect} from "@selects/artistSelect.js";
+import {artistAdminSelect, artistFullSelect} from "@selects/artistSelect.js";
 
 export const artistRouter = Router();
 
 artistRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit} = pageLimitSchema.parse(req.params)
+    const {page, limit, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).parse(req.params)
 
     const skip = getSkip(page, limit)
 
     const [artists, total] = await Promise.all([
         db.artist.findMany({
-            select: artistFullSelect,
+            select: isAdmin ? artistAdminSelect : artistFullSelect,
             skip,
             take: limit,
         }),

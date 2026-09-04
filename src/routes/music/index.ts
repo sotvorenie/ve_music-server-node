@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client.js";
 import {z} from "zod";
 import {db} from "@/db.js";
 
+import {adminMusicRouter} from "@routes/music/admin.js";
 import {musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
 import {musicServiceGetMusic} from "@routes/music/services.js";
 
@@ -14,14 +15,16 @@ import {musicException} from "@utils/httpExceptions.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {idSchema} from "@schemas/idSchema.js";
+import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
-import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+import {musicAdminSelect, musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
 export const musicRouter = Router();
+musicRouter.use('/', adminMusicRouter)
 
 musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, name, genre_id: genreId, artist_id: artistId} =
-        musicSchemaGenreIdAndArtistIdAndName.extend(pageLimitSchema.shape).parse(req.query)
+    const {page, limit, name, genre_id: genreId, artist_id: artistId, is_admin: isAdmin} =
+        musicSchemaGenreIdAndArtistIdAndName.extend(pageLimitSchema.shape).extend(isAdminSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
@@ -47,7 +50,7 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
             where,
             skip,
             take: limit,
-            select: musicBaseWithArtistsSelect
+            select: isAdmin ? musicAdminSelect : musicBaseWithArtistsSelect
         }),
         db.music.count({where})
     ])

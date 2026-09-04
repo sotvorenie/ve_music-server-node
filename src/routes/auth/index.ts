@@ -35,7 +35,8 @@ authRouter.post('/register', asyncHandler(async (req: Request, res: Response) =>
     const { login, password, name } = registerBodySchema.parse(req.body)
 
     const existingUser = await db.user.findUnique({
-        where: {login}
+        where: {login},
+        select: {id: true}
     })
     if (existingUser) throw registrationException
 
@@ -58,7 +59,13 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
     const { login, password} = authBaseSchema.parse(req.body)
 
     const user = await db.user.findUnique({
-        where: {login}
+        where: {login},
+        select: {
+            id: true,
+            login: true,
+            password: true,
+            name: true,
+        }
     })
     if (!user) throw authException
 

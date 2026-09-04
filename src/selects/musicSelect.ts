@@ -4,6 +4,7 @@ export const musicBaseSelect = {
     id: true,
     name: true,
     duration: true,
+    previewUrl: true,
 }
 
 export const musicBaseWithArtistsSelect = {
@@ -11,4 +12,10 @@ export const musicBaseWithArtistsSelect = {
     artists: {
         select: artistBaseSelect
     }
+}
+
+export const musicAdminSelect = {
+    ... musicBaseWithArtistsSelect,
+    createdAt: true,
+    updatedAt: true,
 }

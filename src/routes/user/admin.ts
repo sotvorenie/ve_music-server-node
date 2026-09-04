@@ -38,6 +38,8 @@ adminUserRouter.get('/all', asyncHandler(async (req: Request, res: Response) => 
                 name: true,
                 login: true,
                 avatarUrl: true,
+                createdAt: true,
+                updatedAt: true,
             },
             skip,
             take: limit,

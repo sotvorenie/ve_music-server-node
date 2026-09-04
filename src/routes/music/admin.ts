@@ -1,7 +1,6 @@
-import {type Request, type Response} from "express";
+import {type Request, type Response, Router} from "express";
 import {z} from "zod";
 import {db} from "@/db.js";
-import {musicRouter} from "@routes/music/index.js";
 
 import {
     musicServiceCleanUrl,
@@ -21,7 +20,9 @@ import {urlSchema} from "@schemas/urlSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
-musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+export const adminMusicRouter = Router();
+
+adminMusicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
@@ -41,17 +42,17 @@ musicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, r
     successResponse(res)
 }))
 
-musicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(url))
 }))
 
-musicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(url))
 }))
 
-musicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { url } = urlSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(url))
 }))
@@ -59,7 +60,7 @@ musicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: 
 const auditionsCountSchema = z.object({
     auditions_count: z.string().transform(Number),
 })
-musicRouter.patch('/redact_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/redact_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)
 
@@ -75,7 +76,7 @@ musicRouter.patch('/redact_auditions/:id', getAdmin(), asyncHandler(async (req: 
     successResponse(res)
 }))
 
-musicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     const music = await db.music.findUnique({
@@ -102,14 +103,14 @@ musicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, 
     successResponse(res)
 }))
 
-musicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const data = {
         previewUrl: '',
     }
     await musicServiceDeleteFromDBAndFile(req, res, data)
 }))
 
-musicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const data = {
         videoClipUrl: '',
     }

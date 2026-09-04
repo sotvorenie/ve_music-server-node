@@ -7,3 +7,9 @@ export const artistFullSelect = {
     ...artistBaseSelect,
     avatarUrl: true,
 }
+
+export const artistAdminSelect = {
+    ...artistFullSelect,
+    createdAt: true,
+    updatedAt: true,
+}

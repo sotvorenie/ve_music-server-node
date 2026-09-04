@@ -13,7 +13,6 @@ declare global {
     namespace Express {
         interface Request {
             user?: User
-            admin?: BasePeople
             checkAborted: () => boolean | never
             signal: AbortSignal
             aborted: boolean
