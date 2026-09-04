@@ -65,6 +65,7 @@ authRouter.post('/login', asyncHandler(async (req: Request, res: Response) => {
             login: true,
             password: true,
             name: true,
+            avatarUrl: true,
         }
     })
     if (!user) throw authException
