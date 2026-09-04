@@ -4,7 +4,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
-import {type User} from "@/types/express.js";
+import type {User} from "@/types/express.js";
 import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
