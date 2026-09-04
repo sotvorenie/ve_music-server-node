@@ -42,8 +42,6 @@ uploadRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
-        req.checkAborted()
-
         const files = req.files as { [fieldname: string]: Express.Multer.File[] }
         const musicFile = files?.music?.[0]
         const previewFile = files?.preview?.[0]

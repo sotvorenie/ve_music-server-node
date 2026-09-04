@@ -66,8 +66,6 @@ export const userServiceRedactPassword = async (req: Request, res: Response, cur
 }
 
 export const userServiceUploadAvatar = async (req: Request, res: Response, currentUser: User) => {
-    req.checkAborted()
-
     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
     const avatarFile = files?.avatar?.[0]
 

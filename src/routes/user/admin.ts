@@ -1,8 +1,7 @@
-import {type Request, type Response} from "express";
+import {Router, type Request, type Response} from "express";
 import {z} from "zod";
 import {db} from "@/db.js";
 
-import {userRouter} from "@routes/user/index.js";
 import {
     userServiceGetUserAndRedact,
     userServiceGetUserFromDB,
@@ -25,7 +24,9 @@ import {successResponse} from "@responses/successResponse.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
 import {modelMap} from "@services/modelMap.js";
 
-userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
+export const adminUserRouter = Router();
+
+adminUserRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit} = pageLimitSchema.parse(req.query)
 
     const skip = getSkip(page, limit)
@@ -53,7 +54,7 @@ userRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-userRouter.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.get('/:id', asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     const user = await userServiceGetUserFromDB(id)
@@ -62,14 +63,14 @@ userRouter.get('/:id', asyncHandler(async (req: Request, res: Response) => {
     res.json(user)
 }))
 
-userRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await userServiceGetUserAndRedact(req, res, userServiceRedactName)
 }))
 
 const loginSchema = z.object({
     login: z.string(),
 })
-userRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {login} = loginSchema.parse(req.body)
     const {id} = idSchema.parse(req.params)
 
@@ -99,11 +100,11 @@ userRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Reque
     return successResponse(res)
 }))
 
-userRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await userServiceGetUserAndRedact(req, res, userServiceRedactPassword)
 }))
 
-userRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await db.user.delete({
@@ -115,7 +116,7 @@ userRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, r
     successResponse(res)
 }))
 
-userRouter.post('/upload_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.post('/upload_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     const user = await userServiceGetUserFromDB(id)
@@ -124,6 +125,6 @@ userRouter.post('/upload_avatar/:id', getAdmin(), asyncHandler(async (req: Reque
     await userServiceUploadAvatar(req, res, user)
 }))
 
-userRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteAvatar(req, res, modelMap.user, userException)
 }))

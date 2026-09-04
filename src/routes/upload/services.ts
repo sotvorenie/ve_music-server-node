@@ -24,8 +24,6 @@ export const uploadServiceUploadFile = async (
 ) => {
     const {id} = idSchema.parse(req.params)
 
-    req.checkAborted()
-
     const files = req.files as { [fieldname: string]: Express.Multer.File[] }
     const file = files?.[type.title]?.[0]
 

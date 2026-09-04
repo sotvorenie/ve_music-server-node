@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
 
+import {adminUserRouter} from "@routes/user/admin.js";
 import {userServiceRedactName, userServiceRedactPassword, userServiceUploadAvatar} from "@routes/user/services.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
@@ -9,6 +10,7 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
 
 export const userRouter = Router();
+userRouter.use('/', adminUserRouter)
 
 userRouter.patch('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUser = req.user!
