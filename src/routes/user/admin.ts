@@ -26,7 +26,7 @@ import {modelMap} from "@services/modelMap.js";
 
 export const adminUserRouter = Router();
 
-adminUserRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.get('/all', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {page, limit} = pageLimitSchema.parse(req.query)
 
     const skip = getSkip(page, limit)
@@ -56,7 +56,7 @@ adminUserRouter.get('/all', asyncHandler(async (req: Request, res: Response) => 
     })
 }))
 
-adminUserRouter.get('/:id', asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     const user = await userServiceGetUserFromDB(id)
