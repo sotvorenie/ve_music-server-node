@@ -1,4 +1,5 @@
 import {type Request, type Response, Router} from 'express';
+import {db} from "@/db.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -9,7 +10,25 @@ import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
 
+import {idSchema} from "@schemas/idSchema.js";
+
 export const adminGenreRouter = Router();
+
+adminGenreRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+
+    const genre = await db.genre.findUnique({
+        where: {
+            id
+        },
+        select: {
+            id: true,
+            name: true,
+        }
+    })
+
+    res.json(genre)
+}))
 
 adminGenreRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.genre)

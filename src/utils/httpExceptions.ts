@@ -16,6 +16,9 @@ export const HttpError = (status: number, detail: string) => {
 // база данных
 export const dbException = HttpError(500, "Ошибка БД");
 
+// signal
+export const abortedException = HttpError(408, "Запрос отменен");
+
 // авторизация и токен
 export const jwtException = HttpError(401, "Не удалось валидировать токен");
 export const registrationException = HttpError(409, "Пользователь с таким логином уже существует");
