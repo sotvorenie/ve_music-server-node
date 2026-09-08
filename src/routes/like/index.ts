@@ -1,5 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 
+import {adminLikeRouter} from "@routes/like/admin.js";
+
 import {likeService} from "@routes/like/services.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -20,3 +22,5 @@ likeRouter.post('/:id', getUser(), asyncHandler(async (req: Request, res: Respon
 
     await likeService(req, res, currentUserId)
 }))
+
+likeRouter.use('/', adminLikeRouter)

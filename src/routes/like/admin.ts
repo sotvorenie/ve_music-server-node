@@ -1,6 +1,5 @@
-import { type Request, type Response } from 'express';
+import { type Request, type Response, Router } from 'express';
 import {db} from "@/db.js";
-import {likeRouter} from "@routes/like/index.js";
 
 import {likeService} from "@routes/like/services.js";
 
@@ -15,18 +14,20 @@ import {successResponse} from "@responses/successResponse.js";
 import {getAllUserMusic} from "@services/getAllUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 
-likeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+export const adminLikeRouter = Router();
+
+adminLikeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     await getAllUserMusic(req, res, modelMap.like, id)
 }))
 
-likeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminLikeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {user_id: userId} = userIdSchema.parse(req.query)
 
     await likeService(req, res, userId, true)
 }))
 
-likeRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminLikeRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: musicId} = idSchema.parse(req.params)
     const {user_id: userId} = userIdSchema.parse(req.query)
 

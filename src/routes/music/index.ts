@@ -20,7 +20,6 @@ import {isAdminSchema} from "@schemas/isAdminSchema.js";
 import {musicAdminSelect, musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
 export const musicRouter = Router();
-musicRouter.use('/', adminMusicRouter)
 
 musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name, genre_id: genreId, artist_id: artistId, is_admin: isAdmin} =
@@ -103,3 +102,5 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
 
     await musicServiceGetMusic(res, musicId, currentUserId)
 }))
+
+musicRouter.use('/', adminMusicRouter)

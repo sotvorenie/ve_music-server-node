@@ -1,9 +1,8 @@
-import { type Request, type Response } from 'express';
+import {type Request, type Response, Router} from 'express';
 import path from "node:path";
 import fs from "node:fs/promises";
 import multer from "multer";
 import {db} from "@/db.js";
-import {artistRouter} from "@routes/artist/index.js";
 
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
 
@@ -29,24 +28,26 @@ import {redactNameInDB} from "@services/redactNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
 import {successResponse} from "@responses/successResponse.js";
 
-artistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+export const adminArtistRouter = Router();
+
+adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.artist)
 }))
 
-artistRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await createInDB(req, res, modelMap.artist)
 }))
 
-artistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteFromDB(req, res, modelMap.artist)
 }))
 
-artistRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await redactNameInDB(req, res, modelMap.artist)
 }))
 
 const upload = multer({storage: uploadStorage})
-artistRouter.post(
+adminArtistRouter.post(
     '/upload_avatar/:id',
     getAdmin(),
     upload.fields([
@@ -119,7 +120,7 @@ artistRouter.post(
     })
 )
 
-artistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {url} = urlSchema.parse(req.body)
 
@@ -135,6 +136,6 @@ artistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req:
     successResponse(res)
 }))
 
-artistRouter.patch('/delete_avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/delete_avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteAvatar(req, res, modelMap.artist, artistException)
 }))

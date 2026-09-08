@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from 'express';
 import {db} from "@/db.js";
 
+import {adminArtistRouter} from "@routes/artist/admin.js";
+
 import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
 
@@ -68,3 +70,5 @@ artistRouter.get('/search', asyncHandler(async (req: Request, res: Response) => 
         hasMore: getHasMore(skip, limit, total),
     })
 }))
+
+artistRouter.use('/', adminArtistRouter)

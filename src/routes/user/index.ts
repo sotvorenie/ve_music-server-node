@@ -10,7 +10,6 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
 
 export const userRouter = Router();
-userRouter.use('/', adminUserRouter)
 
 userRouter.patch('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUser = req.user!
@@ -34,3 +33,5 @@ userRouter.post(
         await userServiceUploadAvatar(req, res, currentUser)
     })
 )
+
+userRouter.use('/', adminUserRouter)
