@@ -17,7 +17,7 @@ import {artistAdminSelect, artistFullSelect} from "@selects/artistSelect.js";
 export const artistRouter = Router();
 
 artistRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).parse(req.params)
+    const {page, limit, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
