@@ -152,6 +152,6 @@ adminArtistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async 
     successResponse(res)
 }))
 
-adminArtistRouter.patch('/delete_avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteAvatar(req, res, modelMap.artist, artistException)
 }))

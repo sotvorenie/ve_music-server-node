@@ -16,7 +16,7 @@ export const deleteAvatar = async (
 ) => {
     const {id} = idSchema.parse(req.params)
 
-    const item = model.findUnique({
+    const item = await model.findUnique({
         where: {
             id
         }
