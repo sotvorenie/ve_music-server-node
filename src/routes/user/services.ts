@@ -45,13 +45,10 @@ export const userServiceRedactName = async (req: Request, res: Response, current
 export const userServiceRedactPassword = async (req: Request, res: Response, currentUser: User) => {
     const {password} = passwordSchema.parse(req.body)
 
-    const formattedPassword = password?.trim()
-    if (!formattedPassword) throw emptyUserDataException
-
-    const check: boolean = await bcrypt.compare(formattedPassword, currentUser.password)
+    const check: boolean = await bcrypt.compare(password, currentUser.password)
     if (check) throw duplicationPasswordException
 
-    const newPassword = await bcrypt.hash(formattedPassword, 10)
+    const newPassword = await bcrypt.hash(password, 10)
 
     await db.user.update({
         where: {
