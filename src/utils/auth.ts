@@ -16,13 +16,18 @@ export const getUser = (required: boolean = true) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             const authHeader = req.headers.authorization
-            if (!authHeader?.startsWith('Bearer ')) {
+            if (!authHeader?.startsWith('Bearer ') && required) {
                 if (required) return res.status(jwtException.status).json({ detail: jwtException.detail })
                 return next()
             }
-            const token = authHeader.split(' ')[1] as string
+            const token = authHeader?.split(' ')[1] as string
             let payload: { sub: string }
-            payload = jwt.verify(token, SECRET_KEY) as { sub: string }
+            try {
+                payload = jwt.verify(token, SECRET_KEY) as { sub: string }
+            } catch {
+                if (!required) return next()
+                return res.status(jwtException.status).json({ detail: jwtException.detail })
+            }
             const user = await db.user.findUnique({
                 where: { id: Number(payload.sub) },
                 select: {
