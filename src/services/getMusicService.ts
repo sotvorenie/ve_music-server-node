@@ -7,6 +7,7 @@ import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {idSchema} from "@schemas/idSchema.js";
 
 import {modelMap} from "@services/modelMap.js";
+import {musicAdminSelect} from "@selects/musicSelect.js";
 
 export const getAllMusic = async (
     req: Request,
@@ -36,10 +37,7 @@ export const getAllMusic = async (
 
     const music = await db.music.findMany({
         where,
-        select: {
-            id: true,
-            name: true,
-        },
+        select: musicAdminSelect,
         skip,
         take: limit,
     })

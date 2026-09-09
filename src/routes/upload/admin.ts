@@ -19,7 +19,7 @@ import {createUrl} from "@composables/useCreateUrl.js";
 import {getMusicDuration} from "@composables/useGetAudioDuration.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {getUser} from "@utils/auth.js";
+import {getAdmin} from "@utils/auth.js";
 import {
     audioFormatException,
     emptyMusicDataException,
@@ -33,7 +33,7 @@ export const uploadRouter = Router();
 const upload = multer({storage: uploadStorage})
 uploadRouter.post(
     '/music',
-    getUser(),
+    getAdmin(),
     upload.fields([
         {name: 'music', maxCount: 1},
         {name: 'preview', maxCount: 1},
@@ -137,7 +137,7 @@ uploadRouter.post(
 const uploadMusic = multer({storage: uploadStorage})
 uploadRouter.post(
     '/audio/:id',
-    getUser(),
+    getAdmin(),
     uploadMusic.fields([
         {name: 'music', maxCount: 1},
     ]),
@@ -149,7 +149,7 @@ uploadRouter.post(
 const uploadPreview = multer({storage: uploadStorage})
 uploadRouter.post(
     '/preview/:id',
-    getUser(),
+    getAdmin(),
     uploadPreview.fields([
         {name: 'preview', maxCount: 1},
     ]),
@@ -161,7 +161,7 @@ uploadRouter.post(
 const uploadVideo = multer({storage: uploadStorage})
 uploadRouter.post(
     '/video/:id',
-    getUser(),
+    getAdmin(),
     uploadVideo.fields([
         {name: 'video', maxCount: 1},
     ]),
