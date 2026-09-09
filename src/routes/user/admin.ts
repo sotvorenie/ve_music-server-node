@@ -23,6 +23,8 @@ import {successResponse} from "@responses/successResponse.js";
 
 import {deleteAvatar} from "@services/deleteAvatar.js";
 import {modelMap} from "@services/modelMap.js";
+import multer from "multer";
+import {uploadStorage} from "@composables/useUploadStorage.js";
 
 export const adminUserRouter = Router();
 
@@ -118,7 +120,14 @@ adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Reque
     successResponse(res)
 }))
 
-adminUserRouter.post('/upload_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+const upload = multer({storage: uploadStorage})
+adminUserRouter.post(
+    '/upload_avatar/:id',
+    getAdmin(),
+    upload.fields([
+        {name: 'avatar', maxCount: 1},
+    ]),
+    asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     const user = await userServiceGetUserFromDB(id)
