@@ -26,9 +26,25 @@ import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
+
 import {successResponse} from "@responses/successResponse.js";
 
+import {artistAdminSelect} from "@selects/artistSelect.js";
+
 export const adminArtistRouter = Router();
+
+adminArtistRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+
+    const artist = await db.artist.findUnique({
+        where: {
+            id
+        },
+        select: artistAdminSelect
+    })
+
+    res.json(artist)
+}))
 
 adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await getAllMusic(req, res, modelMap.artist)

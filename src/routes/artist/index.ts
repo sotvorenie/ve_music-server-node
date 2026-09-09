@@ -16,32 +16,8 @@ import {artistAdminSelect, artistFullSelect} from "@selects/artistSelect.js";
 
 export const artistRouter = Router();
 
-artistRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).parse(req.query)
-
-    const skip = getSkip(page, limit)
-
-    const [artists, total] = await Promise.all([
-        db.artist.findMany({
-            select: isAdmin ? artistAdminSelect : artistFullSelect,
-            skip,
-            take: limit,
-        }),
-        db.artist.count()
-    ])
-
-    res.json({
-        artists,
-        page,
-        limit,
-        total,
-        hasMore: getHasMore(skip, limit, total),
-    })
-}))
-
-const searchArtistsQuerySchema = pageLimitSchema.extend(nameSchema.shape)
-artistRouter.get('/search', asyncHandler(async (req: Request, res: Response) => {
-    const { page, limit, name } = searchArtistsQuerySchema.parse(req.query)
+artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
+    const {page, limit, name, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).extend(nameSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
@@ -55,7 +31,7 @@ artistRouter.get('/search', asyncHandler(async (req: Request, res: Response) => 
     const [artists, total] = await Promise.all([
         db.artist.findMany({
             where,
-            select: artistFullSelect,
+            select: isAdmin ? artistAdminSelect : artistFullSelect,
             skip,
             take: limit,
         }),
