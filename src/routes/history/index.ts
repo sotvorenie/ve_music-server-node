@@ -12,7 +12,7 @@ export const historyRouter = Router();
 
 historyRouter.get('/all', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUserId = req.user!.id
-    await getAllUserMusic(req, res, modelMap.history, currentUserId)
+    await getAllUserMusic(req, res, modelMap.history, currentUserId, true)
 }))
 
 historyRouter.use('/', adminHistoryRouter)
