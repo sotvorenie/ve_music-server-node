@@ -37,8 +37,12 @@ export const getAllUserMusic = async (
         })
     ])
 
+    const formattedMusic = music.map((m: any) => ({
+        ...m.music
+    }))
+
     res.json({
-        music,
+        music: formattedMusic,
         page,
         limit,
         total,
