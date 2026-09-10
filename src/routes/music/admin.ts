@@ -8,7 +8,7 @@ import {
     musicServiceDeleteFromDBAndFile,
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
-import {musicConstantUpdateTypes} from "@routes/music/constants.js";
+import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -16,7 +16,7 @@ import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {urlSchema} from "@schemas/urlSchema.js";
+import {pathSchema} from "@schemas/pathSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
@@ -43,18 +43,18 @@ adminMusicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Reque
 }))
 
 adminMusicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = urlSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(url))
+    const { path } = pathSchema.parse(req.body)
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(path), musicConstantUpdateSelectsTypes.audio)
 }))
 
 adminMusicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = urlSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(url))
+    const { path } = pathSchema.parse(req.body)
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(path), musicConstantUpdateSelectsTypes.preview)
 }))
 
 adminMusicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { url } = urlSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(url))
+    const { path } = pathSchema.parse(req.body)
+    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(path), musicConstantUpdateSelectsTypes.video)
 }))
 
 const auditionsCountSchema = z.object({

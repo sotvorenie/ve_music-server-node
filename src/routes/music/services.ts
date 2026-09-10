@@ -8,7 +8,6 @@ import {BASE_STORAGE_DIR} from "@/config.js";
 import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
-import {urlSchema} from "@schemas/urlSchema.js";
 
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
@@ -64,7 +63,8 @@ const musicServiceAddMusicToHistory = async (userId: number, musicId: number) =>
 export const musicServiceGetMusic = async (
     res: Response,
     musicId: number,
-    currentUserId?: number
+    updateAuditions: boolean = true,
+    currentUserId?: number,
 ) => {
     if (currentUserId) musicServiceAddMusicToHistory(currentUserId, musicId).catch(err => {
         console.error('Ошибка добавления музыки в историю: ', err)
@@ -89,14 +89,14 @@ export const musicServiceGetMusic = async (
                 }
             }
         }),
-        db.music.update({
+        (updateAuditions ? db.music.update({
             where: {
                 id: musicId
             },
             data: {
                 auditionsCount: {increment: 1}
             }
-        })
+        }) : Promise.resolve(0))
     ])
 
     if (!musicFromDB) throw musicException
@@ -110,17 +110,25 @@ export const musicServiceGetMusic = async (
     res.json(music)
 }
 
-export const musicServiceUpdateUrl = async (req: Request, res: Response, data: any) => {
+export const musicServiceUpdateUrl = async (
+    req: Request,
+    res: Response,
+    data: any,
+    select: any,
+) => {
     const {id} = idSchema.parse(req.params)
 
-    await db.music.update({
+    const url = await db.music.update({
         where: {
             id
         },
-        data
+        data,
+        select
     })
 
-    successResponse(res)
+    res.json({
+        url
+    })
 }
 
 export const musicServiceDeleteFile = async (url: string | undefined) => {
@@ -142,9 +150,19 @@ export const musicServiceCleanUrl = (fileUrl: string | null | undefined) => file
 
 export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Response, data: any) => {
     const {id} = idSchema.parse(req.params)
-    const {url} = urlSchema.parse(req.body)
 
-    const formattedUrl = url.replace('/static/', '')
+    const urlKey = Object.keys(data)[0] ?? 'url'
+
+    const url = await db.music.findUnique({
+        where: {
+            id
+        },
+        select: {
+            [urlKey]: true
+        }
+    }) as Record<string, string | null> | null
+
+    const formattedUrl = musicServiceCleanUrl(url?.[urlKey])
 
     req.checkAborted()
     await Promise.all([

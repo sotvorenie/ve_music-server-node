@@ -1,11 +1,25 @@
+import {createUrl} from "@composables/useCreateUrl.js";
+
 export const musicConstantUpdateTypes = {
-    audio: (url: string) => ({
-        url
+    audio: (path: string) => ({
+        url: createUrl(path)
     }),
-    preview: (url: string) => ({
-        previewUrl: url
+    preview: (path: string) => ({
+        previewUrl: createUrl(path)
     }),
-    video: (url: string) => ({
-        videoClipUrl: url
+    video: (path: string) => ({
+        videoClipUrl: createUrl(path)
     })
+}
+
+export const musicConstantUpdateSelectsTypes = {
+    audio: {
+        url: true
+    },
+    preview: {
+        previewUrl: true
+    },
+    video: {
+        videoClipUrl: true
+    }
 }

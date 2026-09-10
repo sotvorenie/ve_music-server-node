@@ -65,9 +65,11 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
 
 musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
+    const {is_admin: isAdmin} = isAdminSchema.parse(req.query)
+
     const currentUserId = req.user?.id
 
-    await musicServiceGetMusic(res, id, currentUserId)
+    await musicServiceGetMusic(res, id, !isAdmin, currentUserId)
 }))
 
 const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend({
@@ -100,7 +102,7 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
     const musicId = firstRow?.id
     if (!musicId) throw musicException
 
-    await musicServiceGetMusic(res, musicId, currentUserId)
+    await musicServiceGetMusic(res, musicId, true, currentUserId)
 }))
 
 musicRouter.use('/', adminMusicRouter)
