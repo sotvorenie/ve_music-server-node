@@ -12,9 +12,10 @@ export const deleteAvatar = async (
     req: Request,
     res: Response,
     model: any,
-    emptyException: any
+    emptyException: any,
+    isUser: boolean = false
 ) => {
-    const {id} = idSchema.parse(req.params)
+    const id = isUser ? req.user!.id : idSchema.parse(req.params)
 
     const item = await model.findUnique({
         where: {

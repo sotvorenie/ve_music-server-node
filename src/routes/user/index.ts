@@ -8,6 +8,9 @@ import {uploadStorage} from "@composables/useUploadStorage.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
+import {deleteAvatar} from "@services/deleteAvatar.js";
+import {modelMap} from "@services/modelMap.js";
+import {userException} from "@utils/httpExceptions.js";
 
 export const userRouter = Router();
 
@@ -33,5 +36,9 @@ userRouter.post(
         await userServiceUploadAvatar(req, res, currentUser)
     })
 )
+
+userRouter.patch('/delete_avatar', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    await deleteAvatar(req, res, modelMap.user, userException, true)
+}))
 
 userRouter.use('/', adminUserRouter)
