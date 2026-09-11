@@ -19,19 +19,21 @@ export const getAllUserMusic = async (
 
     const skip = getSkip(page, limit)
 
+    const where = {
+        userId: currentUserId,
+        ...(name?.length && {
+            music : {
+                name: {
+                    contains: name,
+                    mode: 'insensitive' as const
+                }
+            }
+        })
+    }
+
     const [music, total] = await Promise.all([
         model.findMany({
-            where: {
-                userId: currentUserId,
-                ...(name?.length && {
-                    music : {
-                        name: {
-                            contains: name,
-                            mode: 'insensitive' as const
-                        }
-                    }
-                })
-            },
+            where,
             select: {
                 music: {
                     select: musicBaseWithArtistsSelect
@@ -43,11 +45,7 @@ export const getAllUserMusic = async (
                 date: isHistory ? 'desc' : 'asc'
             }
         }),
-        model.count({
-            where: {
-                userId: currentUserId
-            }
-        })
+        model.count({where})
     ])
 
     const formattedMusic = music.map((m: any) => ({
