@@ -9,6 +9,8 @@ import {getUser} from "@utils/auth.js";
 
 import {getAllUserMusic} from "@services/getAllUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
+import {idSchema} from "@schemas/idSchema.js";
+import {db} from "@/db.js";
 
 export const likeRouter = Router();
 
@@ -21,6 +23,24 @@ likeRouter.post('/:id', getUser(), asyncHandler(async (req: Request, res: Respon
     const currentUserId = req.user!.id
 
     await likeService(req, res, currentUserId)
+}))
+
+likeRouter.get('/check/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const currentUserId = req.user!.id
+
+    const existingLike = await db.like.findUnique({
+        where: {
+            userId_musicId: {
+                userId: currentUserId,
+                musicId: id
+            }
+        }
+    })
+
+    res.json({
+        isLiked: !!existingLike
+    })
 }))
 
 likeRouter.use('/', adminLikeRouter)

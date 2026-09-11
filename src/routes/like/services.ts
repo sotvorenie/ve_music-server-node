@@ -19,6 +19,9 @@ export const likeService = async (
                 userId: currentUserId,
                 musicId: id
             }
+        },
+        select: {
+            id: true
         }
     })
 
