@@ -10,7 +10,7 @@ import {modelMap} from "@services/modelMap.js";
 
 export const historyRouter = Router();
 
-historyRouter.get('/all', getUser(), asyncHandler(async (req: Request, res: Response) => {
+historyRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUserId = req.user!.id
     await getAllUserMusic(req, res, modelMap.history, currentUserId, true)
 }))

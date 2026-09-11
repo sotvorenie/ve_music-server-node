@@ -4,6 +4,7 @@ import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+import {nameSchema} from "@schemas/nameSchema.js";
 
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
@@ -14,14 +15,22 @@ export const getAllUserMusic = async (
     currentUserId: number,
     isHistory: boolean = false,
 ) => {
-    const {page, limit} = pageLimitSchema.parse(req.query)
+    const {page, limit, name} = pageLimitSchema.extend(nameSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
     const [music, total] = await Promise.all([
         model.findMany({
             where: {
-                userId: currentUserId
+                userId: currentUserId,
+                ...(name?.length && {
+                    music : {
+                        name: {
+                            contains: name,
+                            mode: 'insensitive' as const
+                        }
+                    }
+                })
             },
             select: {
                 music: {

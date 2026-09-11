@@ -14,7 +14,7 @@ import {db} from "@/db.js";
 
 export const likeRouter = Router();
 
-likeRouter.get('/all', getUser(), asyncHandler(async (req: Request, res: Response) => {
+likeRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUserId = req.user!.id
     await getAllUserMusic(req, res, modelMap.like, currentUserId)
 }))
