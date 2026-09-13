@@ -1,28 +1,22 @@
 import {type Request, type Response, Router} from 'express';
-import path from "node:path";
-import fs from "node:fs/promises";
 import multer from "multer";
 import {db} from "@/db.js";
 
-import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
+import {artistUploadAvatarService} from "@routes/artist/services.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {
-    artistException,
-    emptyUserDataException,
-    photoFormatException
-} from "@utils/httpExceptions.js";
+import {artistException,} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
+import {nameSchema} from "@schemas/nameSchema.js";
 
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
-import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
 import {redactNameInDB} from "@services/redactNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
@@ -48,8 +42,26 @@ adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request
     await getAllMusic(req, res, modelMap.artist)
 }))
 
-adminArtistRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await createInDB(req, res, modelMap.artist)
+const create = multer({storage: uploadStorage})
+adminArtistRouter.post(
+    '/create',
+    getAdmin(),
+    create.fields([
+        {name: 'avatar', maxCount: 1},
+    ]),
+    asyncHandler(async (req: Request, res: Response) => {
+        const {name} = nameSchema.parse(req.body)
+
+        const {id} = await db.artist.create({
+            data: {
+                name,
+            },
+            select: {
+                id: true,
+            }
+        })
+
+    await artistUploadAvatarService(req, res, id)
 }))
 
 adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -70,67 +82,7 @@ adminArtistRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-        const avatarFile = files?.avatar?.[0]
-
-        if (!avatarFile) throw emptyUserDataException
-
-        const artist = await db.artist.findUnique({
-            where: {
-                id
-            },
-            select: {
-                avatarUrl: true,
-            }
-        })
-        if (!artist) throw artistException
-
-        const avatarSuffix = path.extname(avatarFile.originalname).toLowerCase()
-        if (!ALLOWED_PHOTO_SUFFIX.has(avatarSuffix)) throw photoFormatException
-
-        let targetAvatarPath: string | null = null
-
-        try {
-            await fs.mkdir(ARTISTS_AVATARS_DIRECTORY, {recursive: true})
-
-            targetAvatarPath = path.join(ARTISTS_AVATARS_DIRECTORY, `${id}_${Date.now()}${avatarSuffix}`)
-            await fs.rename(avatarFile.path, targetAvatarPath)
-
-            const newAvatarUrl = createUrl(targetAvatarPath)
-            await db.artist.update({
-                where: {
-                    id
-                },
-                data: {
-                    avatarUrl: newAvatarUrl,
-                }
-            })
-
-            if (artist.avatarUrl) {
-                const oldAvatarName = artist.avatarUrl.replace('/static/', '')
-                const oldAvatarPath = path.join(ARTISTS_AVATARS_DIRECTORY, oldAvatarName)
-
-                try {
-                    await fs.unlink(oldAvatarPath)
-                } catch (err: any) {
-                    if (err.code === 'ENOENT') {
-                        console.log('Старый файл аватарки не найден, пропускаем удаление')
-                    } else {
-                        console.error('Ошибка при удалении аватарки:', err)
-                    }
-                }
-            }
-
-            res.status(201).json({
-                url: newAvatarUrl
-            })
-        } catch (err) {
-            if (targetAvatarPath) await fs.unlink(targetAvatarPath).catch()
-
-            await fs.unlink(files?.avatar?.[0]?.path ?? '').catch()
-
-            throw err
-        }
+        await artistUploadAvatarService(req, res, id)
     })
 )
 
