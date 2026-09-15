@@ -82,11 +82,17 @@ export const musicServiceGetMusic = async (
                 videoClipUrl: true,
                 likesCount: true,
                 auditionsCount: true,
+                genre: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
                 likes: {
                     where: {
                         userId: currentUserId ?? -1
                     }
-                }
+                },
             }
         }),
         (updateAuditions ? db.music.update({
