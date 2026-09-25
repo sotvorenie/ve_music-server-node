@@ -6,7 +6,8 @@ import {BASE_STORAGE_DIR} from "@/config.js";
 
 export const createUrl = (filePath: string): string => {
     if (!filePath) return ''
-    const relativePath = path.relative(BASE_STORAGE_DIR, filePath)
+    const clearPath = filePath.replaceAll('"', '')
+    const relativePath = path.relative(BASE_STORAGE_DIR, clearPath)
     const normalizedPath = relativePath.split(path.sep).join('/')
     return `/static/${normalizedPath}`
 }
