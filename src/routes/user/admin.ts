@@ -1,5 +1,6 @@
 import {Router, type Request, type Response} from "express";
 import {z} from "zod";
+import multer from "multer";
 import {db} from "@/db.js";
 
 import {
@@ -11,6 +12,7 @@ import {
 
 import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
+import {uploadStorage} from "@composables/useUploadStorage.js";
 
 import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -18,23 +20,32 @@ import {getAdmin} from "@utils/auth.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+import {nameSchema} from "@schemas/nameSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
 import {deleteAvatar} from "@services/deleteAvatar.js";
 import {modelMap} from "@services/modelMap.js";
-import multer from "multer";
-import {uploadStorage} from "@composables/useUploadStorage.js";
 
 export const adminUserRouter = Router();
 
-adminUserRouter.get('/all', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit} = pageLimitSchema.parse(req.query)
+adminUserRouter.get('/list', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {page, limit, name} = pageLimitSchema.extend(nameSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
+    const where = {
+        ...(name && {
+            name: {
+                contains: name,
+                mode: 'insensitive' as const
+            }
+        })
+    }
+
     let [users, total] = await Promise.all([
         db.user.findMany({
+            where,
             select: {
                 id: true,
                 name: true,
@@ -46,7 +57,7 @@ adminUserRouter.get('/all', getAdmin(), asyncHandler(async (req: Request, res: R
             skip,
             take: limit,
         }),
-        db.user.count()
+        db.user.count({where})
     ])
 
     res.json({
