@@ -46,7 +46,7 @@ app.use('/api/history', historyRouter)
 app.use('/api/like', likeRouter)
 app.use('/api/music', musicRouter)
 app.use('/api/user', userRouter)
-app.use('/api/upload', uploadRouter)
+app.use('/api/upload/admin', uploadRouter)
 
 app.listen(PORT, async () => {
     console.log(`Сервер запущен на порту ${PORT}`)

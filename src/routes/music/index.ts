@@ -105,4 +105,4 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
     await musicServiceGetMusic(res, musicId, true, currentUserId)
 }))
 
-musicRouter.use('/', adminMusicRouter)
+musicRouter.use('/admin', adminMusicRouter)

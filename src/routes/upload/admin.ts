@@ -27,6 +27,9 @@ import {
 } from "@utils/httpExceptions.js";
 
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
+import {pathSchema} from "@schemas/pathSchema.js";
+import {idSchema} from "@schemas/idSchema.js";
+import {successResponse} from "@responses/successResponse.js";
 
 export const uploadRouter = Router();
 
@@ -40,7 +43,7 @@ uploadRouter.post(
         {name: 'video', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
+        const { title, genre_id: genreId, artists, path: previewPath } = musicInfoSchema.extend(pathSchema.shape).parse(req.body)
 
         const files = req.files as { [fieldname: string]: Express.Multer.File[] }
         const musicFile = files?.music?.[0]
@@ -108,7 +111,7 @@ uploadRouter.post(
                     name: title,
                     url: musicUrl,
                     duration: musicDuration,
-                    previewUrl: targetPreviewPath ? createUrl(targetPreviewPath) : '',
+                    previewUrl: previewPath ? previewPath : targetPreviewPath ? createUrl(targetPreviewPath) : '',
                     videoClipUrl: targetVideoPath ? createUrl(targetVideoPath) : '',
                     genreId,
                     ...(artists.length > 0 && {
@@ -157,6 +160,22 @@ uploadRouter.post(
         await uploadServiceUploadFile(req, res, uploadConstantTypes.preview)
     })
 )
+
+uploadRouter.post('/preview_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {path} = pathSchema.parse(req.body)
+
+    await db.music.update({
+        where: {
+            id
+        },
+        data: {
+            previewUrl: path
+        }
+    })
+
+    successResponse(res)
+}))
 
 const uploadVideo = multer({storage: uploadStorage})
 uploadRouter.post(

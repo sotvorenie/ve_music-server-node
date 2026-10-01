@@ -133,7 +133,7 @@ export const musicServiceUpdateUrl = async (
     })
 
     res.json({
-        url
+        url: url[Object.keys(select)[0] as string]
     })
 }
 

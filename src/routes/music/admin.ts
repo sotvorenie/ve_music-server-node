@@ -1,6 +1,10 @@
 import {type Request, type Response, Router} from "express";
 import {z} from "zod";
+import path from 'node:path';
+import fs from 'node:fs/promises'
 import {db} from "@/db.js";
+
+import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
 
 import {
     musicServiceCleanUrl,
@@ -9,6 +13,8 @@ import {
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
 import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
+
+import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -19,6 +25,7 @@ import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
+import {createUrl} from "@composables/useCreateUrl.js";
 
 export const adminMusicRouter = Router();
 
@@ -115,4 +122,28 @@ adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req:
         videoClipUrl: '',
     }
     await musicServiceDeleteFromDBAndFile(req, res, data)
+}))
+
+adminMusicRouter.get('/get_posters', getAdmin(), asyncHandler(async (_: Request, res: Response) => {
+    try {
+        const previewsDirectory = path.join(MUSIC_DIRECTORY, 'previews')
+
+        await fs.mkdir(previewsDirectory, {recursive: true})
+
+        let posters: string[]
+
+        const entries = await safeReaddir(previewsDirectory)
+        posters = entries
+            .filter(entry => entry.isFile())
+            .filter(file => {
+                const suffix = file.name.split('.')[1]?.toLowerCase() || '.not_photo'
+                return ALLOWED_PHOTO_SUFFIX.has(`.${suffix}`)
+            }).map(photo => createUrl(path.join(previewsDirectory, photo.name)))
+
+        res.json({
+            posters
+        })
+    } catch (err) {
+        throw err
+    }
 }))

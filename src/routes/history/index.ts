@@ -15,4 +15,4 @@ historyRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Res
     await getAllUserMusic(req, res, modelMap.history, currentUserId, true)
 }))
 
-historyRouter.use('/', adminHistoryRouter)
+historyRouter.use('/admin', adminHistoryRouter)

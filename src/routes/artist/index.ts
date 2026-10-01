@@ -47,4 +47,4 @@ artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-artistRouter.use('/', adminArtistRouter)
+artistRouter.use('/admin', adminArtistRouter)
