@@ -18,7 +18,7 @@ export const adminLikeRouter = Router();
 
 adminLikeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
-    await getAllUserMusic(req, res, modelMap.like, id)
+    await getAllUserMusic(req, res, modelMap.like, id, true)
 }))
 
 adminLikeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
