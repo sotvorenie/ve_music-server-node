@@ -8,6 +8,7 @@ import type {User} from "@/types/express.js";
 import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {
     duplicationPasswordException,
@@ -97,20 +98,7 @@ export const userServiceUploadAvatar = async (req: Request, res: Response, curre
 
         req.checkAborted()
 
-        if (currentUser.avatarUrl) {
-            const oldAvatarName = currentUser.avatarUrl.replace('/static/', '')
-            const oldAvatarPath = path.join(AVATARS_DIRECTORY, oldAvatarName)
-
-            try {
-                await fs.unlink(oldAvatarPath)
-            } catch (err: any) {
-                if (err.code === 'ENOENT') {
-                    console.log('Старый файл аватарки не найден, пропускаем удаление')
-                } else {
-                    console.error('Ошибка при удалении аватарки:', err)
-                }
-            }
-        }
+        if (currentUser.avatarUrl) await deleteFile(currentUser.avatarUrl)
 
         res.status(201).json({
             url: newAvatarUrl

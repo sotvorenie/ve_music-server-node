@@ -1,8 +1,6 @@
 import { type Request, type Response } from 'express';
-import path from "node:path";
-import fs from "node:fs/promises";
 
-import {BASE_STORAGE_DIR} from "@/config.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 
@@ -33,19 +31,9 @@ export const deleteAvatar = async (
         }
     })
 
-    const avatarUrl = item.avatarUrl.replace('/static/', '')
-    const avatarPath = path.join(BASE_STORAGE_DIR, avatarUrl)
+    req.checkAborted()
 
-    try {
-        req.checkAborted()
-        await fs.unlink(avatarPath)
-    } catch (err: any) {
-        if (err.code === 'ENOENT') {
-            console.log('Старый файл аватарки не найден, пропускаем удаление')
-        } else {
-            console.error('Ошибка при удалении аватарки:', err)
-        }
-    }
+    await deleteFile(item.avatarUrl)
 
     successResponse(res)
 }

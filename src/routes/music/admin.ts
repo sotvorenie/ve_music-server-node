@@ -6,9 +6,9 @@ import {db} from "@/db.js";
 
 import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
 
+import {deleteFile} from "@composables/useDeleteFile.js";
+
 import {
-    musicServiceCleanUrl,
-    musicServiceDeleteFile,
     musicServiceDeleteFromDBAndFile,
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
@@ -49,10 +49,6 @@ adminMusicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Reque
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/redact_audio_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { path } = pathSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.audio(path), musicConstantUpdateSelectsTypes.audio)
-}))
 
 adminMusicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { path } = pathSchema.parse(req.body)
@@ -102,9 +98,8 @@ adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Requ
     req.checkAborted()
 
     await Promise.all([
-        musicServiceDeleteFile(musicServiceCleanUrl(music.url)),
-        musicServiceDeleteFile(musicServiceCleanUrl(music.previewUrl)),
-        musicServiceDeleteFile(musicServiceCleanUrl(music.videoClipUrl)),
+        deleteFile(music.url),
+        deleteFile(music?.videoClipUrl || ''),
     ])
 
     successResponse(res)

@@ -1,9 +1,7 @@
 import {type Request, type Response} from "express";
-import path from "node:path";
-import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
-import {BASE_STORAGE_DIR} from "@/config.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
@@ -137,23 +135,6 @@ export const musicServiceUpdateUrl = async (
     })
 }
 
-export const musicServiceDeleteFile = async (url: string | undefined) => {
-    if (!url) return
-    const filePath = path.join(BASE_STORAGE_DIR, url)
-
-    try {
-        await fs.unlink(filePath)
-    } catch (err: any) {
-        if (err.code === 'ENOENT') {
-            console.log('Старый файл аватарки не найден, пропускаем удаление')
-        } else {
-            console.error('Ошибка при удалении аватарки:', err)
-        }
-    }
-}
-
-export const musicServiceCleanUrl = (fileUrl: string | null | undefined) => fileUrl?.replace('/static/', '')
-
 export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Response, data: any) => {
     const {id} = idSchema.parse(req.params)
 
@@ -168,8 +149,6 @@ export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Respons
         }
     }) as Record<string, string | null> | null
 
-    const formattedUrl = musicServiceCleanUrl(url?.[urlKey])
-
     req.checkAborted()
     await Promise.all([
         db.music.update({
@@ -178,7 +157,7 @@ export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Respons
             },
             data,
         }),
-        musicServiceDeleteFile(formattedUrl)
+        deleteFile(url?.[urlKey] || '')
     ])
 
     successResponse(res)

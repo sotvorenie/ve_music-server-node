@@ -26,6 +26,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 import {deleteAvatar} from "@services/deleteAvatar.js";
 import {modelMap} from "@services/modelMap.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 export const adminUserRouter = Router();
 
@@ -121,6 +122,13 @@ adminUserRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (re
 
 adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
+
+    const data = await db.user.findUnique({
+        where: {id},
+        select: {avatarUrl: true}
+    })
+
+    if (data?.avatarUrl) await deleteFile(data.avatarUrl)
 
     await db.user.delete({
         where: {
