@@ -48,6 +48,6 @@ app.use('/api/music', musicRouter)
 app.use('/api/user', userRouter)
 app.use('/api/upload', uploadRouter)
 
-app.listen(PORT, async () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Сервер запущен на порту ${PORT}`)
 })
