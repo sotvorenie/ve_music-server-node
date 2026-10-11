@@ -41,4 +41,4 @@ userRouter.patch('/delete_avatar', getUser(), asyncHandler(async (req: Request, 
     await deleteAvatar(req, res, modelMap.user, userException, true)
 }))
 
-userRouter.use('/', adminUserRouter)
+userRouter.use('/admin', adminUserRouter)

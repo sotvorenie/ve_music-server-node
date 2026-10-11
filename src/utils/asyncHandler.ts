@@ -8,6 +8,7 @@ export const asyncHandler = (fn: Function) => {
         try {
             await fn(req, res, next)
         } catch (err: any) {
+            console.error('ASYNC HANDLER ERR:', err)
             if (err?.name === 'AbortError') return
             if (err instanceof ZodError) {
                 return res.status(400).json({

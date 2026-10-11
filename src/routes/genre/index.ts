@@ -28,4 +28,4 @@ genreRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-genreRouter.use('/', adminGenreRouter)
+genreRouter.use('/admin', adminGenreRouter)

@@ -6,6 +6,7 @@ import {db} from "@/db.js";
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {artistException, emptyUserDataException, photoFormatException} from "@utils/httpExceptions.js";
 
@@ -50,20 +51,7 @@ export const artistUploadAvatarService = async (
             }
         })
 
-        if (artist.avatarUrl) {
-            const oldAvatarName = artist.avatarUrl.replace('/static/', '')
-            const oldAvatarPath = path.join(ARTISTS_AVATARS_DIRECTORY, oldAvatarName)
-
-            try {
-                await fs.unlink(oldAvatarPath)
-            } catch (err: any) {
-                if (err.code === 'ENOENT') {
-                    console.log('Старый файл аватарки не найден, пропускаем удаление')
-                } else {
-                    console.error('Ошибка при удалении аватарки:', err)
-                }
-            }
-        }
+        if (artist.avatarUrl) await deleteFile(artist.avatarUrl)
 
         res.status(201).json({
             url: newAvatarUrl

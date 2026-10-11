@@ -6,6 +6,7 @@ import {artistUploadAvatarService} from "@routes/artist/services.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
 import {createUrl} from "@composables/useCreateUrl.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -65,6 +66,17 @@ adminArtistRouter.post(
 }))
 
 adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+
+    const data = await db.artist.findUnique({
+        where: {id},
+        select: {
+            avatarUrl: true
+        }
+    })
+
+    if (data?.avatarUrl) await deleteFile(data.avatarUrl)
+
     await deleteFromDB(req, res, modelMap.artist)
 }))
 
@@ -86,7 +98,7 @@ adminArtistRouter.post(
     })
 )
 
-adminArtistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {path} = pathSchema.parse(req.body)
 
@@ -105,7 +117,7 @@ adminArtistRouter.post('/redact_avatar_url/:id', getAdmin(), asyncHandler(async 
     })
 
     res.json({
-        url: newUrl
+        url: newUrl.avatarUrl
     })
 }))
 

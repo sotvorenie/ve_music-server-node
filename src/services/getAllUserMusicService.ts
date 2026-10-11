@@ -13,7 +13,7 @@ export const getAllUserMusic = async (
     res: Response,
     model: any,
     currentUserId: number,
-    isHistory: boolean = false,
+    isAdmin: boolean = false,
 ) => {
     const {page, limit, name} = pageLimitSchema.extend(nameSchema.shape).parse(req.query)
 
@@ -42,7 +42,7 @@ export const getAllUserMusic = async (
             skip,
             take: limit,
             orderBy: {
-                date: isHistory ? 'desc' : 'asc'
+                date: isAdmin ? 'desc' : 'asc'
             }
         }),
         model.count({where})

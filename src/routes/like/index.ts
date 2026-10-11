@@ -43,4 +43,4 @@ likeRouter.get('/check/:id', getUser(), asyncHandler(async (req: Request, res: R
     })
 }))
 
-likeRouter.use('/', adminLikeRouter)
+likeRouter.use('/admin', adminLikeRouter)

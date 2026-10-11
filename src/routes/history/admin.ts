@@ -16,7 +16,7 @@ export const adminHistoryRouter = Router();
 
 adminHistoryRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
-    await getAllUserMusic(req, res, modelMap.history, id)
+    await getAllUserMusic(req, res, modelMap.history, id, true)
 }))
 
 adminHistoryRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
