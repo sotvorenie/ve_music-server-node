@@ -63,15 +63,6 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
-    const {is_admin: isAdmin} = isAdminSchema.parse(req.query)
-
-    const currentUserId = req.user?.id
-
-    await musicServiceGetMusic(res, id, !isAdmin, currentUserId)
-}))
-
 const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend({
     seed: z.string().transform(Number),
     offset: z.string().transform(Number),
@@ -103,6 +94,15 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
     if (!musicId) throw musicException
 
     await musicServiceGetMusic(res, musicId, true, currentUserId)
+}))
+
+musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {is_admin: isAdmin} = isAdminSchema.parse(req.query)
+
+    const currentUserId = req.user?.id
+
+    await musicServiceGetMusic(res, id, !isAdmin, currentUserId)
 }))
 
 musicRouter.use('/admin', adminMusicRouter)
