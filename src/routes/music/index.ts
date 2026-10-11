@@ -8,6 +8,7 @@ import {musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
 import {musicServiceGetMusic} from "@routes/music/services.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
+import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
@@ -44,7 +45,7 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
         })
     }
 
-    const [music, total] = await Promise.all([
+    let [music, total] = await Promise.all([
         db.music.findMany({
             where,
             skip,
@@ -53,6 +54,13 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
         }),
         db.music.count({where})
     ])
+
+    music = await Promise.all(
+        music.map(async (m) => {
+            m.previewUrl = m.previewUrl || await getBackupPreview()
+            return m
+        })
+    )
 
     res.json({
         music,

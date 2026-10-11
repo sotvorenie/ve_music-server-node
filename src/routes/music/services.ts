@@ -2,6 +2,7 @@ import {type Request, type Response} from "express";
 import {db} from "@/db.js";
 
 import {deleteFile} from "@composables/useDeleteFile.js";
+import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
@@ -104,6 +105,10 @@ export const musicServiceGetMusic = async (
     ])
 
     if (!musicFromDB) throw musicException
+
+    if (!musicFromDB.previewUrl) {
+        musicFromDB.previewUrl = await getBackupPreview()
+    }
 
     const music = {
         ...musicFromDB,
