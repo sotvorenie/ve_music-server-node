@@ -62,7 +62,7 @@ const musicServiceAddMusicToHistory = async (userId: number, musicId: number) =>
 export const musicServiceGetMusic = async (
     res: Response,
     musicId: number,
-    updateAuditions: boolean = true,
+    isAdmin: boolean = false,
     currentUserId?: number,
 ) => {
     if (currentUserId) musicServiceAddMusicToHistory(currentUserId, musicId).catch(err => {
@@ -94,7 +94,7 @@ export const musicServiceGetMusic = async (
                 },
             }
         }),
-        (updateAuditions ? db.music.update({
+        (!isAdmin ? db.music.update({
             where: {
                 id: musicId
             },
@@ -106,7 +106,7 @@ export const musicServiceGetMusic = async (
 
     if (!musicFromDB) throw musicException
 
-    if (!musicFromDB.previewUrl) {
+    if (!musicFromDB.previewUrl && !isAdmin) {
         musicFromDB.previewUrl = await getBackupPreview()
     }
 

@@ -55,12 +55,14 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
         db.music.count({where})
     ])
 
-    music = await Promise.all(
-        music.map(async (m) => {
-            m.previewUrl = m.previewUrl || await getBackupPreview()
-            return m
-        })
-    )
+    if (!isAdmin) {
+        music = await Promise.all(
+            music.map(async (m) => {
+                m.previewUrl = m.previewUrl || await getBackupPreview()
+                return m
+            })
+        )
+    }
 
     res.json({
         music,
@@ -102,7 +104,7 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
     const musicId = firstRow?.id
     if (!musicId) throw musicException
 
-    await musicServiceGetMusic(res, musicId, true, currentUserId)
+    await musicServiceGetMusic(res, musicId, false, currentUserId)
 }))
 
 musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
@@ -111,7 +113,7 @@ musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: R
 
     const currentUserId = req.user?.id
 
-    await musicServiceGetMusic(res, id, !isAdmin, currentUserId)
+    await musicServiceGetMusic(res, id, isAdmin, currentUserId)
 }))
 
 musicRouter.use('/admin', adminMusicRouter)
