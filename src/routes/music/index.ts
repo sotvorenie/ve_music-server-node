@@ -66,6 +66,7 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
 const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend({
     seed: z.string().transform(Number),
     offset: z.string().transform(Number),
+    exclude_id: z.string().transform(Number),
 })
 musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res: Response) => {
     const {
@@ -73,18 +74,18 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
         seed,
         offset,
         genre_id: genreId,
-        artist_id: artistId
+        artist_id: artistId,
+        exclude_id: excludeId,
     } = getRandomMusicSchema.parse(req.query)
     const currentUserId = req.user?.id
 
     const conditions: Prisma.Sql[] = []
     const formattedName = name?.trim()
+    conditions.push(Prisma.sql`id != ${excludeId}`)
     if (formattedName) conditions.push(Prisma.sql`name ILIKE ${'%' + formattedName + '%'}`)
     if (genreId >= 0) conditions.push(Prisma.sql`genre_id = ${genreId}`)
     if (artistId >= 0) conditions.push(Prisma.sql`id IN (SELECT "B" FROM "_ArtistToMusic" WHERE "A" = ${artistId})`)
-    const whereClause = conditions?.length
-        ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
-        : Prisma.empty
+    const whereClause = Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
 
     const [_, [firstRow]] = await db.$transaction([
         db.$executeRaw`SELECT setseed(${seed})`,
