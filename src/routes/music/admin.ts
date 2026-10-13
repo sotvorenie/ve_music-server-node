@@ -7,14 +7,14 @@ import {db} from "@/db.js";
 import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
 
 import {deleteFile} from "@composables/useDeleteFile.js";
+import {createUrl} from "@composables/useCreateUrl.js";
+import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 import {
     musicServiceDeleteFromDBAndFile,
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
 import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
-
-import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -25,7 +25,6 @@ import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
-import {createUrl} from "@composables/useCreateUrl.js";
 
 export const adminMusicRouter = Router();
 
