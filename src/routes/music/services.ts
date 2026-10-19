@@ -140,7 +140,12 @@ export const musicServiceUpdateUrl = async (
     })
 }
 
-export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Response, data: any) => {
+export const musicServiceDeleteFromDBAndFile = async (
+    req: Request,
+    res: Response,
+    data: any,
+    isDeleteFile = true
+) => {
     const {id} = idSchema.parse(req.params)
 
     const urlKey = Object.keys(data)[0] ?? 'url'
@@ -162,7 +167,7 @@ export const musicServiceDeleteFromDBAndFile = async (req: Request, res: Respons
             },
             data,
         }),
-        deleteFile(url?.[urlKey] || '')
+        (isDeleteFile ? deleteFile(url?.[urlKey] || '') : Promise.resolve(0))
     ])
 
     successResponse(res)

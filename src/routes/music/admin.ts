@@ -108,7 +108,7 @@ adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (re
     const data = {
         previewUrl: '',
     }
-    await musicServiceDeleteFromDBAndFile(req, res, data)
+    await musicServiceDeleteFromDBAndFile(req, res, data, false)
 }))
 
 adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {

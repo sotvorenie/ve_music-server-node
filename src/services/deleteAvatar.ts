@@ -13,11 +13,14 @@ export const deleteAvatar = async (
     emptyException: any,
     isUser: boolean = false
 ) => {
-    const id = isUser ? req.user!.id : idSchema.parse(req.params)
+    const id = isUser ? req.user!.id : idSchema.parse(req.params)?.id
 
     const item = await model.findUnique({
         where: {
             id
+        },
+        select: {
+            avatarUrl: true
         }
     })
     if (!item?.avatarUrl) throw emptyException
