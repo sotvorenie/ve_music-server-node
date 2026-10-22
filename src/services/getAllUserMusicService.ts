@@ -7,6 +7,7 @@ import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
 
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 export const getAllUserMusic = async (
     req: Request,
@@ -48,9 +49,12 @@ export const getAllUserMusic = async (
         model.count({where})
     ])
 
-    const formattedMusic = music.map((m: any) => ({
-        ...m.music
-    }))
+    const formattedMusic = await Promise.all(
+        music.map(async (m: any) => {
+            m.music.previewUrl = m.music.previewUrl || await getBackupPreview()
+            return m.music
+        })
+    )
 
     res.json({
         music: formattedMusic,
