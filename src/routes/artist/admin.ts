@@ -19,7 +19,7 @@ import {nameSchema} from "@schemas/nameSchema.js";
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 import {deleteFromDB} from "@services/deleteService.js";
-import {redactNameInDB} from "@services/updateNameService.js";
+import {updateNameInDB} from "@services/updateNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
 
 import {artistAdminSelect} from "@selects/artistSelect.js";
@@ -81,7 +81,7 @@ adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Req
 }))
 
 adminArtistRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await redactNameInDB(req, res, modelMap.artist)
+    await updateNameInDB(req, res, modelMap.artist)
 }))
 
 const upload = multer({storage: uploadStorage})
