@@ -9,24 +9,25 @@ import {
     userServiceRedactName,
     userServiceRedactPassword, userServiceUploadAvatar
 } from "@routes/user/services.js";
+import {roleSchema} from "@routes/user/schemas.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
 import {uploadStorage} from "@composables/useUploadStorage.js";
+import {deleteFile} from "@composables/useDeleteFile.js";
 
 import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
+
+import {deleteAvatar} from "@services/deleteAvatar.js";
+import {modelMap} from "@services/modelMap.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
-
-import {deleteAvatar} from "@services/deleteAvatar.js";
-import {modelMap} from "@services/modelMap.js";
-import {deleteFile} from "@composables/useDeleteFile.js";
 
 export const adminUserRouter = Router();
 
@@ -157,4 +158,20 @@ adminUserRouter.post(
 
 adminUserRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await deleteAvatar(req, res, modelMap.user, userException)
+}))
+
+adminUserRouter.patch('/update_role/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {role} = roleSchema.parse(req.body)
+
+    await db.user.update({
+        where: {
+            id
+        },
+        data: {
+            role
+        }
+    })
+
+    successResponse(res)
 }))

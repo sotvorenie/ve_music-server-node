@@ -122,7 +122,8 @@ export const userServiceGetUserFromDB = async (id: number) => {
             name: true,
             login: true,
             password: true,
-            avatarUrl: true
+            avatarUrl: true,
+            role: true,
         }
     })
 }

@@ -36,6 +36,7 @@ export const getUser = (required: boolean = true) => {
                     login: true,
                     password: true,
                     avatarUrl: true,
+                    role: true,
                 }
             })
             if (!user && required) return res.status(jwtException.status).json({ detail: jwtException.detail })
