@@ -23,7 +23,7 @@ import {idSchema} from "@schemas/idSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
-export const userServiceRedactName = async (req: Request, res: Response, currentUser: User) => {
+export const userServiceUpdateName = async (req: Request, res: Response, currentUser: User) => {
     const {name} = nameSchema.parse(req.body)
 
     const formattedName = name?.trim()
@@ -43,7 +43,7 @@ export const userServiceRedactName = async (req: Request, res: Response, current
     return successResponse(res)
 }
 
-export const userServiceRedactPassword = async (req: Request, res: Response, currentUser: User) => {
+export const userServiceUpdatePassword = async (req: Request, res: Response, currentUser: User) => {
     const {password} = passwordSchema.parse(req.body)
 
     const check: boolean = await bcrypt.compare(password, currentUser.password)
@@ -127,7 +127,7 @@ export const userServiceGetUserFromDB = async (id: number) => {
         }
     })
 }
-export const userServiceGetUserAndRedact = async (req: Request, res: Response, func: Function) => {
+export const userServiceGetUserAndUpdate = async (req: Request, res: Response, func: Function) => {
     const {id} = idSchema.parse(req.params)
 
     const user = await userServiceGetUserFromDB(id)

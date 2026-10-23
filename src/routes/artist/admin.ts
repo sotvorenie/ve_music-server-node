@@ -19,7 +19,7 @@ import {nameSchema} from "@schemas/nameSchema.js";
 import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 import {deleteFromDB} from "@services/deleteService.js";
-import {redactNameInDB} from "@services/redactNameService.js";
+import {redactNameInDB} from "@services/updateNameService.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
 
 import {artistAdminSelect} from "@selects/artistSelect.js";
@@ -80,7 +80,7 @@ adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Req
     await deleteFromDB(req, res, modelMap.artist)
 }))
 
-adminArtistRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     await redactNameInDB(req, res, modelMap.artist)
 }))
 
@@ -98,7 +98,7 @@ adminArtistRouter.post(
     })
 )
 
-adminArtistRouter.patch('/redact_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/update_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {path} = pathSchema.parse(req.body)
 

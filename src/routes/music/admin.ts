@@ -1,5 +1,4 @@
 import {type Request, type Response, Router} from "express";
-import {z} from "zod";
 import path from 'node:path';
 import fs from 'node:fs/promises'
 import {db} from "@/db.js";
@@ -15,6 +14,7 @@ import {
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
 import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
+import {auditionsCountSchema} from "@routes/music/schemas.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -28,7 +28,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const adminMusicRouter = Router();
 
-adminMusicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
@@ -48,21 +48,17 @@ adminMusicRouter.patch('/redact/:id', getAdmin(), asyncHandler(async (req: Reque
     successResponse(res)
 }))
 
-
-adminMusicRouter.patch('/redact_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { path } = pathSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(path), musicConstantUpdateSelectsTypes.preview)
 }))
 
-adminMusicRouter.patch('/redact_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { path } = pathSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(path), musicConstantUpdateSelectsTypes.video)
 }))
 
-const auditionsCountSchema = z.object({
-    auditions_count: z.string().transform(Number),
-})
-adminMusicRouter.patch('/redact_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)
 

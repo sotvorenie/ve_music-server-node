@@ -5,7 +5,7 @@ import {nameSchema} from "@schemas/nameSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
-export const redactNameInDB = async (
+export const updateNameInDB = async (
     req: Request,
     res: Response,
     model: any,

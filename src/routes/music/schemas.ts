@@ -6,3 +6,7 @@ export const musicSchemaGenreIdAndArtistIdAndName = nameSchema.extend({
     genre_id: z.string().transform(Number),
     artist_id: z.string().transform(Number),
 })
+
+export const auditionsCountSchema = z.object({
+    auditions_count: z.string().transform(Number),
+})

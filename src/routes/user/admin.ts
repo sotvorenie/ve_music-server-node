@@ -4,10 +4,10 @@ import multer from "multer";
 import {db} from "@/db.js";
 
 import {
-    userServiceGetUserAndRedact,
+    userServiceGetUserAndUpdate,
     userServiceGetUserFromDB,
-    userServiceRedactName,
-    userServiceRedactPassword, userServiceUploadAvatar
+    userServiceUpdateName,
+    userServiceUpdatePassword, userServiceUploadAvatar
 } from "@routes/user/services.js";
 import {roleSchema} from "@routes/user/schemas.js";
 
@@ -80,14 +80,14 @@ adminUserRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: R
     res.json(user)
 }))
 
-adminUserRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await userServiceGetUserAndRedact(req, res, userServiceRedactName)
+adminUserRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await userServiceGetUserAndUpdate(req, res, userServiceUpdateName)
 }))
 
 const loginSchema = z.object({
     login: z.string(),
 })
-adminUserRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/update_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {login} = loginSchema.parse(req.body)
     const {id} = idSchema.parse(req.params)
 
@@ -117,8 +117,8 @@ adminUserRouter.patch('/redact_login/:id', getAdmin(), asyncHandler(async (req: 
     return successResponse(res)
 }))
 
-adminUserRouter.patch('/redact_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await userServiceGetUserAndRedact(req, res, userServiceRedactPassword)
+adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await userServiceGetUserAndUpdate(req, res, userServiceUpdatePassword)
 }))
 
 adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {

@@ -8,7 +8,7 @@ import {getAllMusic} from "@services/getMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 import {createInDB} from "@services/createService.js";
 import {deleteFromDB} from "@services/deleteService.js";
-import {redactNameInDB} from "@services/redactNameService.js";
+import {updateNameInDB} from "@services/updateNameService.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 
@@ -42,6 +42,6 @@ adminGenreRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Requ
     await deleteFromDB(req, res, modelMap.genre)
 }))
 
-adminGenreRouter.patch('/redact_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await redactNameInDB(req, res, modelMap.genre)
+adminGenreRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    await updateNameInDB(req, res, modelMap.genre)
 }))

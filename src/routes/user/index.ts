@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
 
 import {adminUserRouter} from "@routes/user/admin.js";
-import {userServiceRedactName, userServiceRedactPassword, userServiceUploadAvatar} from "@routes/user/services.js";
+import {userServiceUpdateName, userServiceUpdatePassword, userServiceUploadAvatar} from "@routes/user/services.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
 
@@ -14,14 +14,14 @@ import {userException} from "@utils/httpExceptions.js";
 
 export const userRouter = Router();
 
-userRouter.patch('/redact_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.patch('/update_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUser = req.user!
-    await userServiceRedactName(req, res, currentUser)
+    await userServiceUpdateName(req, res, currentUser)
 }))
 
-userRouter.patch('/redact_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.patch('/update_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUser = req.user!
-    await userServiceRedactPassword(req, res, currentUser)
+    await userServiceUpdatePassword(req, res, currentUser)
 }))
 
 const upload = multer({storage: uploadStorage})
