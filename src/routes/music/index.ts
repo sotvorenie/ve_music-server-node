@@ -1,10 +1,9 @@
 import { Router, type Request, type Response } from 'express';
 import { Prisma } from "@/generated/prisma/client.js";
-import {z} from "zod";
 import {db} from "@/db.js";
 
 import {adminMusicRouter} from "@routes/music/admin.js";
-import {musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
+import {getRandomMusicSchema, musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
 import {musicServiceGetMusic} from "@routes/music/services.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
@@ -12,7 +11,6 @@ import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
-import {musicException} from "@utils/httpExceptions.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {idSchema} from "@schemas/idSchema.js";
@@ -73,21 +71,18 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend({
-    seed: z.string().transform(Number),
-    offset: z.string().transform(Number),
-    exclude_id: z.string().transform(Number),
-})
-musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res: Response) => {
+musicRouter.get('/random_list', getUser(false), asyncHandler(async (req: Request, res: Response) => {
     const {
         name,
         seed,
-        offset,
         genre_id: genreId,
         artist_id: artistId,
         exclude_id: excludeId,
+        page,
+        limit,
     } = getRandomMusicSchema.parse(req.query)
-    const currentUserId = req.user?.id
+
+    const skip = getSkip(page, limit)
 
     const conditions: Prisma.Sql[] = []
     const formattedName = name?.trim()
@@ -97,14 +92,21 @@ musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res
     if (artistId >= 0) conditions.push(Prisma.sql`id IN (SELECT "B" FROM "_ArtistToMusic" WHERE "A" = ${artistId})`)
     const whereClause = Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
 
-    const [_, [firstRow]] = await db.$transaction([
+    const [_, rows] = await db.$transaction([
         db.$executeRaw`SELECT setseed(${seed})`,
-        db.$queryRaw`SELECT id FROM "musics" ${whereClause} ORDER BY RANDOM() LIMIT 1 OFFSET ${offset}`
+        db.$queryRaw`SELECT id FROM "musics" ${whereClause} ORDER BY RANDOM() LIMIT ${limit + 1} OFFSET ${skip}`
     ]) as [unknown, {id: number}[]]
-    const musicId = firstRow?.id
-    if (!musicId) throw musicException
 
-    await musicServiceGetMusic(res, musicId, false, currentUserId)
+    const hasMore = rows?.length > limit
+    const formattedRows = rows.map(row => row.id)
+    const ids = hasMore ? formattedRows.slice(0, limit) : formattedRows
+
+    res.json({
+        ids,
+        page,
+        limit,
+        hasMore,
+    })
 }))
 
 musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
