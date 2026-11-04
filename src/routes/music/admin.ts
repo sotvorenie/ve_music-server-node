@@ -5,7 +5,7 @@ import {db} from "@/db.js";
 
 import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
 
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 import {safeReaddir} from "@composables/useSafeReaddir.js";
 
@@ -93,8 +93,8 @@ adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Requ
     req.checkAborted()
 
     await Promise.all([
-        deleteFile(music.url),
-        deleteFile(music?.videoClipUrl || ''),
+        deletePath(music.url),
+        deletePath(music?.videoClipUrl || ''),
     ])
 
     successResponse(res)

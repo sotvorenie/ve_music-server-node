@@ -1,7 +1,7 @@
 import {type Request, type Response} from "express";
 import {db} from "@/db.js";
 
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {musicException} from "@utils/httpExceptions.js";
@@ -72,7 +72,8 @@ export const musicServiceGetMusic = async (
     let [musicFromDB] = await Promise.all([
         db.music.findUnique({
             where: {
-                id: musicId
+                id: musicId,
+                ...(!isAdmin && { status: 'READY' })
             },
             select: {
                 ...musicBaseWithArtistsSelect,
@@ -167,7 +168,7 @@ export const musicServiceDeleteFromDBAndFile = async (
             },
             data,
         }),
-        (isDeleteFile ? deleteFile(url?.[urlKey] || '') : Promise.resolve(0))
+        (isDeleteFile ? deletePath(url?.[urlKey] || '') : Promise.resolve(0))
     ])
 
     successResponse(res)

@@ -6,7 +6,7 @@ import {artistUploadAvatarService} from "@routes/artist/services.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
 import {createUrl} from "@composables/useCreateUrl.js";
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -75,7 +75,7 @@ adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Req
         }
     })
 
-    if (data?.avatarUrl) await deleteFile(data.avatarUrl)
+    if (data?.avatarUrl) await deletePath(data.avatarUrl)
 
     await deleteFromDB(req, res, modelMap.artist)
 }))

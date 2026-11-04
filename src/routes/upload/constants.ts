@@ -1,20 +1,8 @@
-import {ALLOWED_MUSIC_SUFFIX, ALLOWED_PHOTO_SUFFIX, ALLOWED_VIDEO_SUFFIX} from "@/config.js";
+import {ALLOWED_PHOTO_SUFFIX, ALLOWED_VIDEO_SUFFIX} from "@/config.js";
 
-import {getMusicDuration} from "@composables/useGetAudioDuration.js";
-
-import {audioFormatException, photoFormatException, videoFormatException} from "@utils/httpExceptions.js";
+import {photoFormatException, videoFormatException} from "@utils/httpExceptions.js";
 
 export const uploadConstantTypes = {
-    audio: {
-        title: 'music',
-        allowedSuffix: ALLOWED_MUSIC_SUFFIX,
-        formatException: audioFormatException,
-        dirName: 'music',
-        data: async (musicUrl: string, targetPath: string) => ({
-            url: musicUrl,
-            duration: await getMusicDuration(targetPath),
-        })
-    },
     preview: {
         title: 'preview',
         allowedSuffix: ALLOWED_PHOTO_SUFFIX,

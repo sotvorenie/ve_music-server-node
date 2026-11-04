@@ -8,7 +8,7 @@ import type {User} from "@/types/express.js";
 import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {
     duplicationPasswordException,
@@ -98,7 +98,7 @@ export const userServiceUploadAvatar = async (req: Request, res: Response, curre
 
         req.checkAborted()
 
-        if (currentUser.avatarUrl) await deleteFile(currentUser.avatarUrl)
+        if (currentUser.avatarUrl) await deletePath(currentUser.avatarUrl)
 
         res.status(201).json({
             url: newAvatarUrl

@@ -1,6 +1,6 @@
 import { type Request, type Response } from 'express';
 
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 
@@ -36,7 +36,7 @@ export const deleteAvatar = async (
 
     req.checkAborted()
 
-    await deleteFile(item.avatarUrl)
+    await deletePath(item.avatarUrl)
 
     successResponse(res)
 }

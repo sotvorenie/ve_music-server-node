@@ -22,14 +22,15 @@ export const getAllUserMusic = async (
 
     const where = {
         userId: currentUserId,
-        ...(name?.length && {
-            music : {
+        music : {
+            ...(!isAdmin && { status: 'READY' }),
+            ...(name?.length && {
                 name: {
                     contains: name,
                     mode: 'insensitive' as const
                 }
-            }
-        })
+            }),
+        },
     }
 
     const [music, total] = await Promise.all([

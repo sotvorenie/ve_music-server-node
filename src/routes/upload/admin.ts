@@ -5,23 +5,21 @@ import fs from 'node:fs/promises'
 import {db} from "@/db.js";
 
 import {
-    ALLOWED_MUSIC_SUFFIX,
     ALLOWED_PHOTO_SUFFIX,
     ALLOWED_VIDEO_SUFFIX,
-    MUSIC_DIRECTORY
+    MUSIC_DIRECTORY,
+    segmentTime
 } from "@/config.js";
 
-import {uploadServiceUploadFile} from "@routes/upload/services.js";
+import {uploadServiceUpdateAudio, uploadServiceUploadAudio, uploadServiceUploadFile} from "@routes/upload/services.js";
 import {uploadConstantTypes} from "@routes/upload/constants.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
 import {createUrl} from "@composables/useCreateUrl.js";
-import {getMusicDuration} from "@composables/useGetAudioDuration.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
 import {
-    audioFormatException,
     emptyMusicDataException,
     photoFormatException, videoFormatException
 } from "@utils/httpExceptions.js";
@@ -53,9 +51,6 @@ uploadRouter.post(
 
         if (!musicFile) throw emptyMusicDataException
 
-        const musicSuffix = path.extname(musicFile.originalname).toLowerCase()
-        if (!ALLOWED_MUSIC_SUFFIX.has(musicSuffix)) throw audioFormatException
-
         let previewSuffix: string = ''
         if (previewFile) {
             previewSuffix = path.extname(previewFile.originalname).toLowerCase()
@@ -68,25 +63,19 @@ uploadRouter.post(
             if (!ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) throw videoFormatException
         }
 
-        let targetMusicPath: string | null = null
         let targetPreviewPath: string | null = null
         let targetVideoPath: string | null = null
 
         try {
-            const musicDirectory = path.join(MUSIC_DIRECTORY, 'music')
             const previewsDirectory = path.join(MUSIC_DIRECTORY, 'previews')
             const videosDirectory = path.join(MUSIC_DIRECTORY, 'videos')
 
             req.checkAborted()
 
-            await fs.mkdir(musicDirectory, {recursive: true})
             await fs.mkdir(previewsDirectory, {recursive: true})
             await fs.mkdir(videosDirectory, {recursive: true})
 
             req.checkAborted()
-
-            targetMusicPath = path.join(musicDirectory, `${Date.now()}${musicSuffix}`)
-            await fs.rename(musicFile.path, targetMusicPath)
 
             req.checkAborted()
             if (previewFile) {
@@ -102,30 +91,33 @@ uploadRouter.post(
 
             req.checkAborted()
 
-            const musicUrl = createUrl(targetMusicPath)
-            const musicDuration = await getMusicDuration(targetMusicPath)
-
             req.checkAborted()
 
-            const newMusic = await db.music.create({
+            const {id, segmentsCount} = await uploadServiceUploadAudio(
+                musicFile,
+                title,
+                genreId,
+                artists,
+                'aac',
+                segmentTime,
+                req,
+            )
+
+            const newMusic = await db.music.update({
+                where: {
+                    id
+                },
                 data: {
-                    name: title,
-                    url: musicUrl,
-                    duration: musicDuration,
+                    url: createUrl(path.join(MUSIC_DIRECTORY, 'music', String(id), 'playlist.m3u8')),
                     previewUrl: previewPath ? previewPath : targetPreviewPath ? createUrl(targetPreviewPath) : '',
                     videoClipUrl: targetVideoPath ? createUrl(targetVideoPath) : '',
-                    genreId,
-                    ...(artists.length > 0 && {
-                        artists: {
-                            connect: artists.map(artistId => ({ id: artistId }))
-                        }
-                    })
+                    status: 'READY',
+                    segmentsCount,
                 }
             })
 
             res.status(201).json(newMusic)
         } catch (err) {
-            if (targetMusicPath) await fs.unlink(targetMusicPath).catch()
             if (targetPreviewPath) await fs.unlink(targetPreviewPath).catch()
             if (targetVideoPath) await fs.unlink(targetVideoPath).catch()
 
@@ -146,7 +138,7 @@ uploadRouter.post(
         {name: 'music', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        await uploadServiceUploadFile(req, res, uploadConstantTypes.audio)
+        await uploadServiceUpdateAudio(req, res, segmentTime)
     })
 )
 

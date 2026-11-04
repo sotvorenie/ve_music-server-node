@@ -10,3 +10,5 @@ export const ALLOWED_MUSIC_SUFFIX = new Set(['.mp3', '.wav'])
 
 export const ALLOWED_VIDEO_SUFFIX = new Set(['.mp4', '.mkv', '.avi', '.mov'])
 export const ALLOWED_PHOTO_SUFFIX = new Set(['.jpg', '.jpeg', '.png', '.webp'])
+
+export const segmentTime: number = 6

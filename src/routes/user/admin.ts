@@ -14,7 +14,7 @@ import {roleSchema} from "@routes/user/schemas.js";
 import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
 import {uploadStorage} from "@composables/useUploadStorage.js";
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -129,7 +129,7 @@ adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Reque
         select: {avatarUrl: true}
     })
 
-    if (data?.avatarUrl) await deleteFile(data.avatarUrl)
+    if (data?.avatarUrl) await deletePath(data.avatarUrl)
 
     await db.user.delete({
         where: {

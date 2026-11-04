@@ -40,8 +40,9 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
                     id: artistId
                 }
             }
-        })
-    }
+        }),
+        ...(!isAdmin && { status: 'READY' }),
+    } satisfies Prisma.MusicWhereInput
 
     let [music, total] = await Promise.all([
         db.music.findMany({
@@ -87,6 +88,7 @@ musicRouter.get('/random_list', getUser(false), asyncHandler(async (req: Request
     const conditions: Prisma.Sql[] = []
     const formattedName = name?.trim()
     conditions.push(Prisma.sql`id != ${excludeId}`)
+    conditions.push(Prisma.sql`status = 'READY'`)
     if (formattedName) conditions.push(Prisma.sql`name ILIKE ${'%' + formattedName + '%'}`)
     if (genreId >= 0) conditions.push(Prisma.sql`genre_id = ${genreId}`)
     if (artistId >= 0) conditions.push(Prisma.sql`id IN (SELECT "B" FROM "_ArtistToMusic" WHERE "A" = ${artistId})`)

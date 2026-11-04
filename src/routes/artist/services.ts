@@ -6,7 +6,7 @@ import {db} from "@/db.js";
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
-import {deleteFile} from "@composables/useDeleteFile.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {artistException, emptyUserDataException, photoFormatException} from "@utils/httpExceptions.js";
 
@@ -51,7 +51,7 @@ export const artistUploadAvatarService = async (
             }
         })
 
-        if (artist.avatarUrl) await deleteFile(artist.avatarUrl)
+        if (artist.avatarUrl) await deletePath(artist.avatarUrl)
 
         res.status(201).json({
             url: newAvatarUrl
