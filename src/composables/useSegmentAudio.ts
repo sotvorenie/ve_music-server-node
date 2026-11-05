@@ -5,14 +5,15 @@ export const segmentAudio = (
     inputPath: string,
     outputDir: string,
     segmentTime: number,
-    req: Request
+    bitrate: number,
+    req: Request,
 ): Promise<void> => {
     return new Promise((resolve, reject) => {
         const args = [
             '-i', inputPath,
             '-map', '0:a',
             '-c:a', 'aac',
-            '-b:a', '128k',
+            '-b:a', `${bitrate}k`,
             '-f', 'hls',
             '-hls_time', String(segmentTime),
             '-hls_playlist_type', 'vod',

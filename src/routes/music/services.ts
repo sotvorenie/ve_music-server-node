@@ -93,6 +93,8 @@ export const musicServiceGetMusic = async (
                         userId: currentUserId ?? -1
                     }
                 },
+                segmentsCount: true,
+                bitrates: true,
             }
         }),
         (!isAdmin ? db.music.update({

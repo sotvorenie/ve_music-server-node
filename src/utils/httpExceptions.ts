@@ -33,6 +33,7 @@ export const duplicationLoginException = HttpError(400, "Данный логин
 
 // музыка
 export const musicException = HttpError(404, "Музыка не найдена");
+export const musicBitrateException = HttpError(400, "Неизвестный битрейт аудио..");
 
 // загрузка файлов
 export const photoFormatException = HttpError(400, "Неподдерживаемый формат фото");

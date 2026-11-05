@@ -47,6 +47,7 @@ model Music {
   segmentTime   Int         @default(0) @map("segment_map")
   segmentsCount Int         @default(0) @map("segments_count")
   codec         String      @default("mp3")
+  bitrates      Int[]       @default([])
   status        MusicStatus @default(PROCESSING)
 
   createdAt DateTime @default(now()) @map("created_at")

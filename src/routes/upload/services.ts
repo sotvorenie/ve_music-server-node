@@ -7,12 +7,12 @@ import {ALLOWED_MUSIC_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {getMusicDuration} from "@composables/useGetAudioDuration.js";
-import {segmentAudio} from "@composables/useSegmentAudio.js";
+import {safeReaddir} from "@composables/useSafeReaddir.js";
+import {createAudio} from "@composables/useCreateAudio.js";
 
 import {audioFormatException, emptyMusicDataException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
-import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 export const uploadServiceUploadFile = async (
     req: Request,
@@ -116,16 +116,23 @@ export const uploadServiceUploadAudio = async (
         const targetMusicPath = path.join(musicDirectory, String(id))
         await fs.mkdir(targetMusicPath, {recursive: true})
 
-        await segmentAudio(audioFile.path, targetMusicPath, segmentTime, req)
+        const bitrates = await createAudio(audioFile.path, targetMusicPath, segmentTime, req)
 
-        const files = await safeReaddir(targetMusicPath)
-        const segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+        let segmentsCount: number = 0
+        const entries = await safeReaddir(targetMusicPath)
+        const firstFolder = entries.find(entry => entry.isDirectory())
+        if (firstFolder) {
+            const folderPath = path.join(targetMusicPath, firstFolder.name)
+            const files = await safeReaddir(folderPath)
+            segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+        }
 
         await fs.unlink(audioFile.path).catch()
 
         return {
             id,
             segmentsCount,
+            bitrates
         }
     } catch (err) {
         if (id !== -1) {
@@ -164,7 +171,7 @@ export const uploadServiceUpdateAudio = async (
 
         targetPath = path.join(directory, String(id))
 
-        await segmentAudio(file.path, targetPath, segmentTime, req)
+        const bitrates = await createAudio(file.path, targetPath, segmentTime, req)
 
         const files = await safeReaddir(targetPath)
         const segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
@@ -182,6 +189,7 @@ export const uploadServiceUpdateAudio = async (
                 url,
                 duration,
                 segmentsCount,
+                bitrates,
             }
         })
 

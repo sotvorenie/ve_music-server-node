@@ -93,7 +93,7 @@ uploadRouter.post(
 
             req.checkAborted()
 
-            const {id, segmentsCount} = await uploadServiceUploadAudio(
+            const {id, segmentsCount, bitrates} = await uploadServiceUploadAudio(
                 musicFile,
                 title,
                 genreId,
@@ -108,11 +108,12 @@ uploadRouter.post(
                     id
                 },
                 data: {
-                    url: createUrl(path.join(MUSIC_DIRECTORY, 'music', String(id), 'playlist.m3u8')),
+                    url: createUrl(path.join(MUSIC_DIRECTORY, 'music', String(id), 'master.m3u8')),
                     previewUrl: previewPath ? previewPath : targetPreviewPath ? createUrl(targetPreviewPath) : '',
                     videoClipUrl: targetVideoPath ? createUrl(targetVideoPath) : '',
                     status: 'READY',
                     segmentsCount,
+                    bitrates,
                 }
             })
 

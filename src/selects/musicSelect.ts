@@ -12,7 +12,6 @@ export const musicBaseWithArtistsSelect = {
     artists: {
         select: artistBaseSelect
     },
-    segmentsCount: true,
 }
 
 export const musicAdminSelect = {
