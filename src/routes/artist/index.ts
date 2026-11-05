@@ -39,11 +39,13 @@ artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     ])
 
     res.json({
-        artists,
-        page,
-        limit,
-        total,
-        hasMore: getHasMore(skip, limit, total),
+        data: artists,
+        meta: {
+            page,
+            limit,
+            total,
+            hasMore: getHasMore(skip, limit, total),
+        },
     })
 }))
 

@@ -63,11 +63,13 @@ adminUserRouter.get('/list', getAdmin(), asyncHandler(async (req: Request, res: 
     ])
 
     res.json({
-        users,
-        page,
-        limit,
-        total,
-        hasMore: getHasMore(skip, limit, total),
+        data: users,
+        meta: {
+            page,
+            limit,
+            total,
+            hasMore: getHasMore(skip, limit, total),
+        },
     })
 }))
 

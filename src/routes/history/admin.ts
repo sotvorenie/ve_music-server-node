@@ -7,7 +7,7 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {idSchema} from "@schemas/idSchema.js";
 import {userIdSchema} from "@schemas/userIdSchema.js";
 
-import {getAllUserMusic} from "@services/getAllUserMusicService.js";
+import {getAllUserMusic} from "@services/getUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 
 import {successResponse} from "@responses/successResponse.js";

@@ -58,10 +58,12 @@ export const getAllUserMusic = async (
     )
 
     res.json({
-        music: formattedMusic,
-        page,
-        limit,
-        total,
-        hasMore: getHasMore(skip, limit, total),
+        data: formattedMusic,
+        meta: {
+            page,
+            limit,
+            total,
+            hasMore: getHasMore(skip, limit, total),
+        },
     })
 }

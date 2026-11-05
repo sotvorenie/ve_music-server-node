@@ -7,7 +7,7 @@ import {likeService} from "@routes/like/services.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
 
-import {getAllUserMusic} from "@services/getAllUserMusicService.js";
+import {getAllUserMusic} from "@services/getUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 import {idSchema} from "@schemas/idSchema.js";
 import {db} from "@/db.js";

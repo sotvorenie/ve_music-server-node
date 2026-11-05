@@ -64,11 +64,13 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     }
 
     res.json({
-        music,
-        page,
-        limit,
-        total,
-        hasMore: (skip + limit) < total,
+        data: music,
+        meta: {
+            page,
+            limit,
+            total,
+            hasMore: (skip + limit) < total,
+        },
     })
 }))
 
@@ -104,10 +106,12 @@ musicRouter.get('/random_list', getUser(false), asyncHandler(async (req: Request
     const ids = hasMore ? formattedRows.slice(0, limit) : formattedRows
 
     res.json({
-        ids,
-        page,
-        limit,
-        hasMore,
+        data: ids,
+        meta: {
+            page,
+            limit,
+            hasMore,
+        },
     })
 }))
 

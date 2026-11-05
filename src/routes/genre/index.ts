@@ -24,7 +24,7 @@ genreRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
     })
 
     res.json({
-        genres,
+        data: genres,
     })
 }))
 

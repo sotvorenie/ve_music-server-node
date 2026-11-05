@@ -11,7 +11,7 @@ import {userIdSchema} from "@schemas/userIdSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
-import {getAllUserMusic} from "@services/getAllUserMusicService.js";
+import {getAllUserMusic} from "@services/getUserMusicService.js";
 import {modelMap} from "@services/modelMap.js";
 
 export const adminLikeRouter = Router();
