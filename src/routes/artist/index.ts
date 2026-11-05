@@ -22,10 +22,12 @@ artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     const skip = getSkip(page, limit)
 
     const where = {
-        name: {
-            contains: name,
-            mode: 'insensitive' as const
-        }
+        ...(name && {
+            name: {
+                contains: name,
+                mode: 'insensitive' as const
+            }
+        }),
     }
 
     const [artists, total] = await Promise.all([

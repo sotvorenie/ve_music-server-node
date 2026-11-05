@@ -4,8 +4,8 @@ import {nameSchema} from "@schemas/nameSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 export const musicSchemaGenreIdAndArtistIdAndName = nameSchema.extend({
-    genre_id: z.string().transform(Number),
-    artist_id: z.string().transform(Number),
+    genre_id: z.string().optional().transform(Number),
+    artist_id: z.string().optional().transform(Number),
 })
 
 export const auditionsCountSchema = z.object({
