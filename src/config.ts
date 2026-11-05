@@ -9,6 +9,6 @@ export const ARTISTS_AVATARS_DIRECTORY = path.join(BASE_STORAGE_DIR, 'artists_av
 export const ALLOWED_MUSIC_SUFFIX = new Set(['.mp3', '.wav'])
 
 export const ALLOWED_VIDEO_SUFFIX = new Set(['.mp4', '.mkv', '.avi', '.mov'])
-export const ALLOWED_PHOTO_SUFFIX = new Set(['.jpg', '.jpeg', '.png', '.webp'])
+export const ALLOWED_PHOTO_SUFFIX = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif'])
 
 export const segmentTime: number = 6
