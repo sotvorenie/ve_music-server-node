@@ -3,7 +3,7 @@ import { Prisma } from "@/generated/prisma/client.js";
 import {db} from "@/db.js";
 
 import {adminMusicRouter} from "@routes/music/admin.js";
-import {getRandomMusicSchema, musicSchemaGenreIdAndArtistIdAndName} from "@routes/music/schemas.js";
+import {getRandomMusicSchema, musicSchemaGenreIdAndArtistIdAndName, setViewSchema} from "@routes/music/schemas.js";
 import {musicServiceGetMusic} from "@routes/music/services.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
@@ -117,11 +117,11 @@ musicRouter.get('/random_list', getUser(false), asyncHandler(async (req: Request
 
 musicRouter.get('/:id', getUser(false), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
-    const {is_admin: isAdmin} = isAdminSchema.parse(req.query)
+    const {is_admin: isAdmin, set_view: setView} = isAdminSchema.extend(setViewSchema.shape).parse(req.query)
 
     const currentUserId = req.user?.id
 
-    await musicServiceGetMusic(res, id, isAdmin, currentUserId)
+    await musicServiceGetMusic(res, id, isAdmin, currentUserId, setView)
 }))
 
 musicRouter.use('/admin', adminMusicRouter)

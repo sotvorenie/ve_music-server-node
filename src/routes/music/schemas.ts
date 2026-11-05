@@ -16,3 +16,7 @@ export const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend(
     seed: z.string().transform(Number),
     exclude_id: z.string().transform(Number),
 })
+
+export const setViewSchema = z.object({
+    set_view: z.string().default("true").transform((v) => v === "true"),
+})

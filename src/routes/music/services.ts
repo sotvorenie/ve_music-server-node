@@ -64,10 +64,13 @@ export const musicServiceGetMusic = async (
     musicId: number,
     isAdmin: boolean = false,
     currentUserId?: number,
+    setView: boolean = true
 ) => {
     if (currentUserId) musicServiceAddMusicToHistory(currentUserId, musicId).catch(err => {
         console.error('Ошибка добавления музыки в историю: ', err)
     })
+
+    console.log(setView)
 
     let [musicFromDB] = await Promise.all([
         db.music.findUnique({
@@ -97,7 +100,7 @@ export const musicServiceGetMusic = async (
                 bitrates: true,
             }
         }),
-        (!isAdmin ? db.music.update({
+        (!isAdmin && setView ? db.music.update({
             where: {
                 id: musicId
             },
