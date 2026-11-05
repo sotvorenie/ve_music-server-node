@@ -5,6 +5,7 @@ export const musicBaseSelect = {
     name: true,
     duration: true,
     previewUrl: true,
+    url: true,
 }
 
 export const musicBaseWithArtistsSelect = {
