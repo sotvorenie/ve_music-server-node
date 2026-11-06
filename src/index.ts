@@ -13,6 +13,7 @@ import {likeRouter} from "@/routes/like/index.js";
 import {musicRouter} from "@/routes/music/index.js";
 import {userRouter} from "@/routes/user/index.js";
 import {uploadRouter} from "@/routes/upload/admin.js";
+import {searchRouter} from "@routes/search/index.js";
 
 import {abortedException} from "@utils/httpExceptions.js";
 
@@ -47,6 +48,7 @@ app.use('/api/like', likeRouter)
 app.use('/api/music', musicRouter)
 app.use('/api/user', userRouter)
 app.use('/api/upload/admin', uploadRouter)
+app.use('/api/search', searchRouter)
 
 app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`Сервер запущен на порту ${PORT}`)

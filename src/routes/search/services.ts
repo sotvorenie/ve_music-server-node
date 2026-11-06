@@ -14,6 +14,7 @@ export const getUserSearchHistory = async (
             userId: currentUserId,
         },
         select: {
+            id: true,
             search: true,
         }
     })
@@ -30,10 +31,14 @@ export const setToUserSearchHistory = async (
 ) => {
     const { search } = searchSchema.parse(req.body)
 
-    await db.search.create({
+    const newSearch = await db.search.create({
         data: {
             search,
             userId: currentUserId,
+        },
+        select: {
+            id: true,
+            search: true,
         }
     })
 
@@ -58,7 +63,7 @@ export const setToUserSearchHistory = async (
         })
     }
 
-    return successResponse(res)
+    res.json(newSearch)
 }
 
 export const deleteFromUserSearchHistory = async (
