@@ -13,15 +13,16 @@ export const createAudio = async (
     segmentTime: number,
     req: Request,
 ): Promise<number[]> => {
-    const baseBitrates: number[] = [64, 128, 192, 256]
+    const baseBitrates: number[] = [128]
 
     const originalBitrate: number = await getMusicBitrate(inputPath)
     if (originalBitrate === 0) throw musicBitrateException
 
-    const targetBitrates = baseBitrates.filter(bitrate => bitrate <= originalBitrate)
+    const targetBitrates = baseBitrates.filter(bitrate => bitrate * 1.1 <= originalBitrate)
 
-    if (originalBitrate > Math.max(...baseBitrates)) {
+    if (!targetBitrates?.includes(originalBitrate)) {
         targetBitrates.push(originalBitrate)
+        targetBitrates.sort((a, b) => a - b)
     }
 
     for (const bitrate of targetBitrates) {
@@ -39,7 +40,8 @@ export const createAudio = async (
 
     let masterContent = '#EXTM3U\n'
     for (const bitrate of targetBitrates) {
-        masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bitrate * 1000},CODECS="mp4a.40.2"\n`
+        const bandwidth = Math.round(bitrate * 1000 * 1.1)
+        masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="mp4a.40.2"\n`
         masterContent += `${bitrate}k/playlist.m3u8\n`
     }
     await fs.writeFile(path.join(outputDir, 'master.m3u8'), masterContent)
