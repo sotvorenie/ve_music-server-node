@@ -30,8 +30,21 @@ model User {
 
   likes   Like[]
   history History[]
+  search  Search[]
 
   @@map("users")
+}
+
+model Search {
+  id     Int    @id @default(autoincrement())
+  search String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  userId Int @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Music {
