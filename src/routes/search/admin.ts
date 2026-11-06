@@ -20,7 +20,7 @@ adminSearchRouter.post('/set_for_user/:id', getAdmin(), asyncHandler(async (req:
     await setToUserSearchHistory(req, res, id)
 }))
 
-adminSearchRouter.delete('/delete_from_user/:user_id/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { user_id: userId } = userIdSchema.parse(req.params)
+adminSearchRouter.delete('/delete_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const { user_id: userId } = userIdSchema.parse(req.query)
     await deleteFromUserSearchHistory(req, res, userId)
 }))

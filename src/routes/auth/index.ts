@@ -4,7 +4,7 @@ import {z} from "zod";
 import {db} from "@/db.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {registrationException, authException} from "@utils/httpExceptions.js";
+import {registrationException, authException, emptyUserDataException} from "@utils/httpExceptions.js";
 import {createJWTToken, getUser} from "@utils/auth.js";
 
 import {nameSchema} from "@schemas/nameSchema.js";
@@ -33,6 +33,8 @@ const authResponse = (
 const registerBodySchema = authBaseSchema.extend(nameSchema.shape)
 authRouter.post('/register', asyncHandler(async (req: Request, res: Response) => {
     const { login, password, name } = registerBodySchema.parse(req.body)
+
+    if (!name) throw emptyUserDataException
 
     const existingUser = await db.user.findUnique({
         where: {login},

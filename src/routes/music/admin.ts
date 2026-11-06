@@ -14,7 +14,7 @@ import {
     musicServiceUpdateUrl
 } from "@routes/music/services.js";
 import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
-import {auditionsCountSchema} from "@routes/music/schemas.js";
+import {auditionsCountSchema, urlSchema} from "@routes/music/schemas.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
@@ -48,12 +48,28 @@ adminMusicRouter.patch('/update/:id', getAdmin(), asyncHandler(async (req: Reque
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update_preview_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { path } = pathSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(path), musicConstantUpdateSelectsTypes.preview)
 }))
 
-adminMusicRouter.patch('/update_video_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {url} = urlSchema.parse(req.body)
+
+    await db.music.update({
+        where: {
+            id
+        },
+        data: {
+            previewUrl: url
+        }
+    })
+
+    successResponse(res)
+}))
+
+adminMusicRouter.patch('/update_video_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { path } = pathSchema.parse(req.body)
     await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(path), musicConstantUpdateSelectsTypes.video)
 }))

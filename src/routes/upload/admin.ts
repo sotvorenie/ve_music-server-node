@@ -26,9 +26,6 @@ import {
 
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
-import {idSchema} from "@schemas/idSchema.js";
-
-import {successResponse} from "@responses/successResponse.js";
 
 export const uploadRouter = Router();
 
@@ -154,22 +151,6 @@ uploadRouter.post(
         await uploadServiceUploadFile(req, res, uploadConstantTypes.preview)
     })
 )
-
-uploadRouter.post('/preview_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
-    const {path} = pathSchema.parse(req.body)
-
-    await db.music.update({
-        where: {
-            id
-        },
-        data: {
-            previewUrl: path
-        }
-    })
-
-    successResponse(res)
-}))
 
 const uploadVideo = multer({storage: uploadStorage})
 uploadRouter.post(

@@ -10,7 +10,7 @@ import {deletePath} from "@composables/useDeletePath.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {artistException,} from "@utils/httpExceptions.js";
+import {artistException, emptyUserDataException,} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
@@ -52,6 +52,8 @@ adminArtistRouter.post(
     ]),
     asyncHandler(async (req: Request, res: Response) => {
         const {name} = nameSchema.parse(req.body)
+
+        if (!name) throw emptyUserDataException
 
         const {id} = await db.artist.create({
             data: {
@@ -98,7 +100,7 @@ adminArtistRouter.post(
     })
 )
 
-adminArtistRouter.patch('/update_avatar_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/update_avatar_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {path} = pathSchema.parse(req.body)
 
