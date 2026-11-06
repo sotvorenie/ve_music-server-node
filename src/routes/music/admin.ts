@@ -131,7 +131,7 @@ adminMusicRouter.get('/get_posters', getAdmin(), asyncHandler(async (_: Request,
             }).map(photo => createUrl(path.join(previewsDirectory, photo.name)))
 
         res.json({
-            posters
+            data: posters
         })
     } catch (err) {
         throw err
