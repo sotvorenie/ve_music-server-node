@@ -17,6 +17,11 @@ enum MusicStatus {
   READY
 }
 
+enum SearchType {
+  MUSIC
+  ARTISTS
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(20)
@@ -36,8 +41,9 @@ model User {
 }
 
 model Search {
-  id     Int    @id @default(autoincrement())
+  id     Int        @id @default(autoincrement())
   search String
+  type   SearchType @default(MUSIC)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

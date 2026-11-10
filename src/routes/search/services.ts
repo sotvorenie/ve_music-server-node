@@ -1,9 +1,11 @@
 import type {Request, Response} from "express";
 import {db} from "@/db.js";
 
-import {searchSchema} from "@routes/search/schemas.js";
-import {successResponse} from "@responses/successResponse.js";
+import {searchSchema, typeSchema} from "@routes/search/schemas.js";
+
 import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const getUserSearchHistory = async (
     res: Response,
@@ -16,6 +18,7 @@ export const getUserSearchHistory = async (
         select: {
             id: true,
             search: true,
+            type: true,
         }
     })
 
@@ -29,22 +32,25 @@ export const setToUserSearchHistory = async (
     res: Response,
     currentUserId: number,
 ) => {
-    const { search } = searchSchema.parse(req.body)
+    const { search, type } = searchSchema.extend(typeSchema.shape).parse(req.body)
 
     const newSearch = await db.search.create({
         data: {
             search,
             userId: currentUserId,
+            type,
         },
         select: {
             id: true,
             search: true,
+            type: true,
         }
     })
 
     const searchList = await db.search.findMany({
         where: {
             userId: currentUserId,
+            type,
         },
         orderBy: {
             createdAt: 'asc'
