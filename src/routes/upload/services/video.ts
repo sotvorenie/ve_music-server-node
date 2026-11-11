@@ -15,7 +15,6 @@ export const uploadVideo = async (
             id,
         },
         select: {
-            id: true,
             duration: true,
         }
     })
@@ -25,7 +24,7 @@ export const uploadVideo = async (
     const targetPath = await addVideo(
         file,
         {
-            id: musicInfo.id,
+            id,
             duration: musicInfo.duration,
         },
     )

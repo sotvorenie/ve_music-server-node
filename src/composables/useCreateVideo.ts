@@ -5,6 +5,7 @@ import {TRACKS_DIRECTORY} from "@/config.js";
 
 import {runFfmpeg} from "@composables/useRunFfmpeg.js";
 import {getVideoInfo} from "@composables/useGetVideoInfo.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 const codecStringFor = (height: number): string =>
     height >= 2160 ? 'avc1.4d4033' :
@@ -57,7 +58,7 @@ const createAudioWithClipMaster = async (
     videoMaster: string,
 ) => {
     const withClipMasterPath = path.join(TRACKS_DIRECTORY, String(audioId), 'master_with_clip.m3u8')
-    await fs.rm(withClipMasterPath, {force: true})
+    await deletePath(withClipMasterPath)
 
     const audioMaster = path.join(TRACKS_DIRECTORY, String(audioId), 'master.m3u8')
     let masterContent = await fs.readFile(audioMaster, 'utf-8')

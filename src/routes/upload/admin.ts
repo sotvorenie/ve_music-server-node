@@ -10,6 +10,8 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
 import {emptyMusicDataException} from "@utils/httpExceptions.js";
 
+import {deleteTrackVideo} from "@services/deleteTrackVideo.js";
+
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
@@ -67,7 +69,10 @@ uploadRouter.post(
 
         if (!file) throw emptyMusicDataException
 
-        const url = await uploadAudio(id, file)
+        const [url, _] = await Promise.all([
+            uploadAudio(id, file),
+            deleteTrackVideo(id)
+        ])
 
         res.status(201).json({
             url,
@@ -112,6 +117,8 @@ uploadRouter.post(
         const file = files?.video?.[0]
 
         if (!file) throw emptyMusicDataException
+
+        await deleteTrackVideo(id)
 
         const url = await uploadVideo(id, file)
 
