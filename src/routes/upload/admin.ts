@@ -64,7 +64,7 @@ uploadRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const file = files?.music?.[0]
 
         if (!file) throw emptyMusicDataException
@@ -90,7 +90,7 @@ uploadRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const file = files?.preview?.[0]
 
         if (!file) throw emptyMusicDataException
@@ -113,7 +113,7 @@ uploadRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const file = files?.video?.[0]
 
         if (!file) throw emptyMusicDataException
