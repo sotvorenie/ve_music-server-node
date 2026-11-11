@@ -6,7 +6,6 @@ import {ALLOWED_MUSIC_SUFFIX, segmentTime, TRACKS_DIRECTORY} from "@/config.js";
 
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {createAudio} from "@composables/useCreateAudio.js";
-import {safeReaddir} from "@composables/useSafeReaddir.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 
 import {audioFormatException} from "@utils/httpExceptions.js";
@@ -24,10 +23,7 @@ export const uploadAudio = async (
 
     const duration = await getAudioInfo(file.path, 'duration')
 
-    const bitrates = await createAudio(file.path, targetPath, segmentTime)
-
-    const files = await safeReaddir(targetPath)
-    const segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+    const {bitrates, segmentsCount} = await createAudio(file.path, targetPath, segmentTime)
 
     const url = createUrl(targetPath)
 

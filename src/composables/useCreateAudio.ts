@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {runFfmpeg} from "@composables/useRunFfmpeg.js";
 import {deletePath} from "@composables/useDeletePath.js";
+import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
 
@@ -30,11 +31,26 @@ const segmentAudio = async (
     await runFfmpeg(args, outputDir)
 }
 
+const getSegmentsCount = async (
+    musicPath: string,
+) => {
+    let segmentsCount: number = 0
+    const entries = await safeReaddir(musicPath)
+    const firstFolder = entries.find(entry => entry.isDirectory())
+    if (firstFolder) {
+        const folderPath = path.join(musicPath, firstFolder.name)
+        const files = await safeReaddir(folderPath)
+        segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+    }
+
+    return segmentsCount
+}
+
 export const createAudio = async (
     inputPath: string,
     outputDir: string,
     segmentTime: number,
-): Promise<number[]> => {
+) => {
     const baseBitrates: number[] = [128]
 
     const originalBitrate: number = await getAudioInfo(inputPath, 'bitrate')
@@ -70,7 +86,12 @@ export const createAudio = async (
         }
         await fs.writeFile(path.join(outputDir, 'master.m3u8'), masterContent)
 
-        return targetBitrates
+        const segmentsCount = await getSegmentsCount(outputDir)
+
+        return {
+            bitrates: targetBitrates,
+            segmentsCount,
+        }
     } catch (err) {
         await deletePath(outputDir)
         throw err
