@@ -118,8 +118,6 @@ export const uploadMusic = async (
     )
     const {id, duration, segmentsCount, bitrates} = result
 
-    await deletePath(files.music.path)
-
     if (!!files.video) {
         targetVideoPath = await addVideo(
             files.video,
@@ -128,12 +126,11 @@ export const uploadMusic = async (
                 duration,
             },
         )
-        await deletePath(files.video.path)
     }
 
     return db.music.update({
         where: {
-            id
+            id,
         },
         data: {
             url: createUrl(path.join(TRACKS_DIRECTORY, String(id), 'master.m3u8')),
@@ -142,6 +139,6 @@ export const uploadMusic = async (
             status: 'READY',
             segmentsCount,
             bitrates,
-        }
+        },
     })
 }
