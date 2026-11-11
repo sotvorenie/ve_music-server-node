@@ -15,7 +15,7 @@ export const uploadAvatar = async (
 ) => {
     const artist = await db.artist.findUnique({
         where: {
-            id
+            id,
         },
         select: {
             avatarUrl: true,
@@ -48,10 +48,7 @@ export const uploadAvatar = async (
 
         return newAvatarUrl
     } catch (err) {
-        if (targetAvatarPath) await fs.unlink(targetAvatarPath).catch()
-
-        await fs.rm(avatarFile.path).catch()
-
+        if (targetAvatarPath) await fs.rm(targetAvatarPath, {force: true}).catch()
         throw err
     }
 }

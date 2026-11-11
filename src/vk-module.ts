@@ -6,7 +6,7 @@ const vk = new VK({
     token: process.env.VK_TOKEN as string
 })
 
-const downloadPreview = async (url, outputPath) => {
+const downloadPreview = async (url: string, outputPath: string) => {
     const response = await fetch(url)
     if (!response.ok) throw new Error(`Ошибка скачивания обложки: ${response.statusText}`)
     const buffer = Buffer.from(await response.arrayBuffer())
@@ -30,8 +30,8 @@ export const vkLoad = async () => {
             const fileName = `${safeArtist} - ${safeTitle}`;
 
             if (track.url) {
-                const mp3Path = path.join('downloads', 'audio', `${fileName}.mp3`);
-                await downloadAudio(track.url, mp3Path);
+                const mp3Path = path.join('downloads', 'audio', `${fileName}.mp3`)
+                await downloadAudio(track.url, mp3Path)
             }
 
             const previewUrl = track.album?.thumb?.photo_1200 || track.album?.thumb?.photo_600
@@ -40,7 +40,12 @@ export const vkLoad = async () => {
                 await downloadPreview(previewUrl, previewPath)
             }
         }
-    } catch (error: any) {
-        console.error('Ошибка в основной программе:', error.message)
-    }
+    } catch {}
+}
+
+const downloadAudio = async (
+    url: string,
+    path: string,
+) => {
+
 }

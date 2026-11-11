@@ -1,22 +1,16 @@
-import { type Request, type Response } from 'express';
-
 import {getSkip} from "@composables/useGetSkip.js";
-import {getHasMore} from "@composables/useGetHasMore.js";
 import {getBackupPreview} from "@composables/useGetBackupPreview.js";
-
-import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {nameSchema} from "@schemas/nameSchema.js";
 
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
-export const getAllUserMusic = async (
-    req: Request,
-    res: Response,
-    model: any,
+export const getUserMusic = async (
     currentUserId: number,
+    page: number,
+    limit: number,
+    name: string | undefined,
+    model: any,
     isAdmin: boolean = false,
 ) => {
-    const {page, limit, name} = pageLimitSchema.extend(nameSchema.shape).parse(req.query)
 
     const skip = getSkip(page, limit)
 
@@ -50,20 +44,16 @@ export const getAllUserMusic = async (
         model.count({where})
     ])
 
-    const formattedMusic = await Promise.all(
+   const formattedMusic =  Promise.all(
         music.map(async (m: any) => {
             m.music.previewUrl = m.music.previewUrl || await getBackupPreview()
             return m.music
         })
-    )
+   )
 
-    res.json({
-        data: formattedMusic,
-        meta: {
-            page,
-            limit,
-            total,
-            hasMore: getHasMore(skip, limit, total),
-        },
-    })
+    return {
+        music: formattedMusic,
+        total,
+        skip,
+    }
 }

@@ -1,12 +1,18 @@
-import {Router} from 'express';
+import {Router, type Request, type Response} from 'express';
 import multer from 'multer';
 
 import {uploadAudio, uploadMusic, uploadPreview, uploadVideo} from "@routes/upload/services/index.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
+import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
+import {emptyMusicDataException} from "@utils/httpExceptions.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
+import {pathSchema} from "@schemas/pathSchema.js";
 
 export const uploadRouter = Router();
 
@@ -20,7 +26,31 @@ uploadRouter.post(
         {name: 'preview', maxCount: 1},
         {name: 'video', maxCount: 1},
     ]),
-    asyncHandler(uploadMusic)
+    cleanupTempFiles,
+    asyncHandler(async (req: Request, res: Response) => {
+        const { name, genre_id: genreId, artists, path: previewPath } = musicInfoSchema.extend(pathSchema.shape).parse(req.body)
+
+        const files = req.files as Record<string, Express.Multer.File[]> | undefined
+        const musicFile = files?.music?.[0]
+        const previewFile = files?.preview?.[0]
+        const videoFile = files?.video?.[0]
+
+        if (!musicFile) throw emptyMusicDataException
+
+        const newMusic = await uploadMusic(
+            genreId,
+            artists,
+            name,
+            previewPath,
+            {
+                music: musicFile,
+                preview: previewFile,
+                video: videoFile,
+            }
+        )
+
+        res.status(201).json(newMusic)
+    })
 )
 
 uploadRouter.post(
@@ -29,7 +59,20 @@ uploadRouter.post(
     upload.fields([
         {name: 'music', maxCount: 1},
     ]),
-    asyncHandler(uploadAudio)
+    asyncHandler(async (req: Request, res: Response) => {
+        const {id} = idSchema.parse(req.params)
+
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const file = files?.music?.[0]
+
+        if (!file) throw emptyMusicDataException
+
+        const url = await uploadAudio(id, file)
+
+        res.status(201).json({
+            url,
+        })
+    })
 )
 
 uploadRouter.post(
@@ -38,7 +81,21 @@ uploadRouter.post(
     upload.fields([
         {name: 'preview', maxCount: 1},
     ]),
-    asyncHandler(uploadPreview)
+    cleanupTempFiles,
+    asyncHandler(async (req: Request, res: Response) => {
+        const {id} = idSchema.parse(req.params)
+
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const file = files?.preview?.[0]
+
+        if (!file) throw emptyMusicDataException
+
+        const url = await uploadPreview(id, file)
+
+        res.status(201).json({
+            url,
+        })
+    })
 )
 
 uploadRouter.post(
@@ -47,5 +104,19 @@ uploadRouter.post(
     upload.fields([
         {name: 'video', maxCount: 1},
     ]),
-    asyncHandler(uploadVideo)
+    cleanupTempFiles,
+    asyncHandler(async (req: Request, res: Response) => {
+        const {id} = idSchema.parse(req.params)
+
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const file = files?.video?.[0]
+
+        if (!file) throw emptyMusicDataException
+
+        const url = await uploadVideo(id, file)
+
+        res.status(201).json({
+            url,
+        })
+    })
 )

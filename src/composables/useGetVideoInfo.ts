@@ -10,7 +10,6 @@ export const getVideoInfo = async (
     return new Promise((resolve) => {
         ffmpeg.ffprobe(videoPath, (err, metadata) => {
             if (err) {
-                console.error(`Не удалось прочитать метаданные ${videoPath}:`, err.message)
                 resolve(0)
                 return
             }
@@ -30,7 +29,8 @@ export const getVideoInfo = async (
             }
 
             const value = videoStream[infoType]
-            resolve(typeof value === 'number' ? value : Number(value) || 0)
+            const num = typeof value === 'number' ? value : Number(value)
+            resolve(Number.isFinite(num) ? num : 0)
         })
     })
 }

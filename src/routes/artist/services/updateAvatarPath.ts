@@ -10,10 +10,10 @@ export const updateAvatarPath = async (
 
    return db.artist.update({
         where: {
-            id
+            id,
         },
         data: {
-            avatarUrl: url
+            avatarUrl: url,
         },
         select: {
             avatarUrl: true,

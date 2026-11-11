@@ -7,8 +7,8 @@ export const getArtist = (
 ) => {
     return db.artist.findUnique({
         where: {
-            id
+            id,
         },
-        select: artistAdminSelect
+        select: artistAdminSelect,
     })
 }

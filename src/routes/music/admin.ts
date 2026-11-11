@@ -1,70 +1,54 @@
 import {type Request, type Response, Router} from "express";
-import path from 'node:path';
-import fs from 'node:fs/promises'
-import {db} from "@/db.js";
-
-import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
-
-import {deletePath} from "@composables/useDeletePath.js";
-import {createUrl} from "@composables/useCreateUrl.js";
-import {safeReaddir} from "@composables/useSafeReaddir.js";
 
 import {
-    musicServiceDeleteFromDBAndFile,
-    musicServiceUpdateUrl
-} from "@routes/music/services.js";
-import {musicConstantUpdateSelectsTypes, musicConstantUpdateTypes} from "@routes/music/constants.js";
+    deletePreviewForTrack,
+    deleteTrack, deleteVideoForTrack, getPosters,
+    updateAuditionsForTrack,
+    updatePreviewPathForTrack,
+    updatePreviewUrlForTrack,
+    updateTrack
+} from "@routes/music/services/index.js";
 import {auditionsCountSchema, urlSchema} from "@routes/music/schemas.js";
+
+import {getHasMore} from "@composables/useGetHasMore.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {musicException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 export const adminMusicRouter = Router();
 
 adminMusicRouter.patch('/update/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
-    const { title, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
+    const { name, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
-    await db.music.update({
-        where: {
-            id
-        },
-        data: {
-            name: title,
-            genreId,
-            artists: {
-                set: artists.map(artistId => ({ id: artistId }))
-            },
-        }
-    })
+    await updateTrack(id, genreId, name, artists)
 
     successResponse(res)
 }))
 
 adminMusicRouter.patch('/update_preview_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { path } = pathSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.preview(path), musicConstantUpdateSelectsTypes.preview)
+    const {id} = idSchema.parse(req.params)
+    const {path} = pathSchema.parse(req.body)
+
+    const url = await updatePreviewPathForTrack(id, path)
+
+    res.json({
+        url,
+    })
 }))
 
 adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {url} = urlSchema.parse(req.body)
 
-    await db.music.update({
-        where: {
-            id
-        },
-        data: {
-            previewUrl: url
-        }
-    })
+    await updatePreviewUrlForTrack(id, url)
 
     successResponse(res)
 }))
@@ -73,14 +57,7 @@ adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)
 
-    await db.music.update({
-        where: {
-            id
-        },
-        data: {
-            auditionsCount,
-        }
-    })
+    await updateAuditionsForTrack(id, auditionsCount)
 
     successResponse(res)
 }))
@@ -88,63 +65,39 @@ adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (
 adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    const music = await db.music.findUnique({
-        where: {
-            id
-        }
-    })
-    if (!music) throw musicException
-
-    await db.music.delete({
-        where: {
-            id
-        }
-    })
-
-    req.checkAborted()
-
-    await Promise.all([
-        deletePath(music.url),
-        deletePath(music?.videoClipUrl || ''),
-    ])
+    await deleteTrack(id)
 
     successResponse(res)
 }))
 
 adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const data = {
-        previewUrl: '',
-    }
-    await musicServiceDeleteFromDBAndFile(req, res, data, false)
+    const {id} = idSchema.parse(req.params)
+
+    await deletePreviewForTrack(id)
+
+    successResponse(res)
 }))
 
 adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const data = {
-        videoClipUrl: '',
-    }
-    await musicServiceDeleteFromDBAndFile(req, res, data)
+    const {id} = idSchema.parse(req.params)
+
+    await deleteVideoForTrack(id)
+
+    successResponse(res)
 }))
 
-adminMusicRouter.get('/get_posters', getAdmin(), asyncHandler(async (_: Request, res: Response) => {
-    try {
-        const previewsDirectory = path.join(MUSIC_DIRECTORY, 'previews')
+adminMusicRouter.get('/get_posters', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {page, limit} = pageLimitSchema.parse(req.query)
 
-        await fs.mkdir(previewsDirectory, {recursive: true})
+    const {posters, skip, total} = await getPosters(page, limit)
 
-        let posters: string[]
-
-        const entries = await safeReaddir(previewsDirectory)
-        posters = entries
-            .filter(entry => entry.isFile())
-            .filter(file => {
-                const suffix = file.name.split('.')[1]?.toLowerCase() || '.not_photo'
-                return ALLOWED_PHOTO_SUFFIX.has(`.${suffix}`)
-            }).map(photo => createUrl(path.join(previewsDirectory, photo.name)))
-
-        res.json({
-            data: posters
-        })
-    } catch (err) {
-        throw err
-    }
+    res.json({
+        data: posters,
+        meta: {
+            page,
+            limit,
+            total,
+            hasMore: getHasMore(skip, limit, total),
+        },
+    })
 }))

@@ -7,21 +7,21 @@ export const deleteAvatar = async (
 ) => {
     const item = await model.findUnique({
         where: {
-            id
+            id,
         },
         select: {
-            avatarUrl: true
-        }
+            avatarUrl: true,
+        },
     })
     if (!item?.avatarUrl) throw emptyException
 
     await model.update({
         where: {
-            id
+            id,
         },
         data: {
             avatarUrl: '',
-        }
+        },
     })
 
     await deletePath(item.avatarUrl)

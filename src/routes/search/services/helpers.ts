@@ -1,17 +1,10 @@
-import type {Request, Response} from "express";
 import {db} from "@/db.js";
-
-import {searchSchema, typeSchema} from "@routes/search/schemas.js";
-
-import {idSchema} from "@schemas/idSchema.js";
-
-import {successResponse} from "@responses/successResponse.js";
+import type {SearchType} from "@/generated/prisma/enums.js";
 
 export const getUserSearchHistory = async (
-    res: Response,
     currentUserId: number,
 ) => {
-    const search = await db.search.findMany({
+   return db.search.findMany({
         where: {
             userId: currentUserId,
         },
@@ -19,21 +12,15 @@ export const getUserSearchHistory = async (
             id: true,
             search: true,
             type: true,
-        }
-    })
-
-    res.json({
-        data: search,
+        },
     })
 }
 
 export const setToUserSearchHistory = async (
-    req: Request,
-    res: Response,
     currentUserId: number,
+    search: string,
+    type: SearchType,
 ) => {
-    const { search, type } = searchSchema.extend(typeSchema.shape).parse(req.body)
-
     const newSearch = await db.search.create({
         data: {
             search,
@@ -44,7 +31,7 @@ export const setToUserSearchHistory = async (
             id: true,
             search: true,
             type: true,
-        }
+        },
     })
 
     const searchList = await db.search.findMany({
@@ -69,22 +56,17 @@ export const setToUserSearchHistory = async (
         })
     }
 
-    res.json(newSearch)
+    return newSearch
 }
 
 export const deleteFromUserSearchHistory = async (
-    req: Request,
-    res: Response,
+    id: number,
     currentUserId: number,
 ) => {
-    const { id } = idSchema.parse(req.params)
-
-    await db.search.delete({
+    return db.search.delete({
         where: {
             id,
             userId: currentUserId,
         }
     })
-
-    return successResponse(res)
 }

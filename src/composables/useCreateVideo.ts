@@ -1,10 +1,10 @@
-import type {Request} from "express";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+import {TRACKS_DIRECTORY} from "@/config.js";
+
 import {runFfmpeg} from "@composables/useRunFfmpeg.js";
 import {getVideoInfo} from "@composables/useGetVideoInfo.js";
-import {MUSIC_DIRECTORY} from "@/config.js";
 
 const codecStringFor = (height: number): string =>
     height >= 2160 ? 'avc1.4d4033' :
@@ -17,7 +17,6 @@ const segmentVideo = async (
     segmentTime: number,
     height: number,
     audioDuration: number,
-    req: Request,
 ): Promise<void> => {
     const gop = segmentTime * 2
 
@@ -50,17 +49,17 @@ const segmentVideo = async (
         'playlist.m3u8'
     ]
 
-    await runFfmpeg(args, outputDir, req)
+    await runFfmpeg(args, outputDir)
 }
 
 const createAudioWithClipMaster = async (
     audioId: number,
     videoMaster: string,
 ) => {
-    const withClipMasterPath = path.join(MUSIC_DIRECTORY, 'music', String(audioId), 'master_with_clip.m3u8')
+    const withClipMasterPath = path.join(TRACKS_DIRECTORY, String(audioId), 'master_with_clip.m3u8')
     await fs.rm(withClipMasterPath, {force: true})
 
-    const audioMaster = path.join(MUSIC_DIRECTORY, 'music', String(audioId), 'master.m3u8')
+    const audioMaster = path.join(TRACKS_DIRECTORY, String(audioId), 'master.m3u8')
     let masterContent = await fs.readFile(audioMaster, 'utf-8')
 
     if (!masterContent.endsWith('\n')) masterContent += '\n'
@@ -78,7 +77,6 @@ export const createVideo = async (
         id: number,
         duration: number,
     },
-    req: Request,
 ): Promise<void> => {
     const height = await getVideoInfo(inputPath, 'height')
     const fps = await getVideoInfo(inputPath, 'nb_frames')
@@ -92,7 +90,6 @@ export const createVideo = async (
             segmentTime,
             height,
             audio.duration,
-            req,
         )
 
         const width = Math.round(height * 16 / 9)

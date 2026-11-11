@@ -1,4 +1,3 @@
-import type {Request} from "express";
 import path from "node:path";
 import fs from "node:fs/promises";
 
@@ -7,13 +6,11 @@ import {runFfmpeg} from "@composables/useRunFfmpeg.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
 
-
 const segmentAudio = async (
     inputPath: string,
     outputDir: string,
     segmentTime: number,
     bitrate: number,
-    req: Request,
 ): Promise<void> => {
     const args = [
         '-i', inputPath,
@@ -29,14 +26,13 @@ const segmentAudio = async (
         'playlist.m3u8'
     ]
 
-    await runFfmpeg(args, outputDir, req)
+    await runFfmpeg(args, outputDir)
 }
 
 export const createAudio = async (
     inputPath: string,
     outputDir: string,
     segmentTime: number,
-    req: Request,
 ): Promise<number[]> => {
     const baseBitrates: number[] = [128]
 
@@ -62,7 +58,6 @@ export const createAudio = async (
                 bitrateDir,
                 segmentTime,
                 bitrate,
-                req,
             )
         }
 

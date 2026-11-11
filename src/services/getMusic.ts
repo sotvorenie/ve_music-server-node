@@ -3,9 +3,10 @@ import {db} from "@/db.js";
 import {getSkip} from "@composables/useGetSkip.js";
 
 import {modelMap} from "@services/modelMap.js";
+
 import {musicAdminSelect} from "@selects/musicSelect.js";
 
-export const getAllMusic = async (
+export const getMusic = async (
     id: number,
     page: number,
     limit: number,
@@ -18,13 +19,13 @@ export const getAllMusic = async (
         where = {
             artists: {
                 some: {
-                    id
-                }
-            }
+                    id,
+                },
+            },
         }
     } else if (model === modelMap.genre) {
         where = {
-            genreId: id
+            genreId: id,
         }
     } else {
         throw new Error('Нет необходимой модели..')

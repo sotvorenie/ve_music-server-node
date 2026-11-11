@@ -4,7 +4,7 @@ export const deleteFromDB = async (
 ) => {
     await model.delete({
         where: {
-            id
-        }
+            id,
+        },
     })
 }

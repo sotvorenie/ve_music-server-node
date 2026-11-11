@@ -8,13 +8,13 @@ import {getHasMore} from "@composables/useGetHasMore.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {nameSchema} from "@schemas/nameSchema.js";
+import {nameOptionalSchema} from "@schemas/nameSchema.js";
 import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
 export const artistRouter = Router();
 
 artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, name, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).extend(nameSchema.shape).parse(req.query)
+    const {page, limit, name, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).extend(nameOptionalSchema.shape).parse(req.query)
 
     const {artists, total, skip} = await getArtists(page, limit, name, isAdmin)
 

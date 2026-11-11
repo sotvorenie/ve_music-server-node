@@ -1,9 +1,9 @@
 import {z} from "zod";
 
-import {nameSchema} from "@schemas/nameSchema.js";
+import {nameOptionalSchema} from "@schemas/nameSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
-export const musicSchemaGenreIdAndArtistIdAndName = nameSchema.extend({
+export const musicSchemaGenreIdAndArtistIdAndName = nameOptionalSchema.extend({
     genre_id: z.string().optional().transform(Number),
     artist_id: z.string().optional().transform(Number),
 })

@@ -2,26 +2,42 @@ import { Router, type Request, type Response } from 'express';
 import multer from 'multer';
 
 import {adminUserRouter} from "@routes/user/admin.js";
-import {userServiceUpdateName, userServiceUpdatePassword, userServiceUploadAvatar} from "@routes/user/services.js";
+import {updateUserName, updateUserPassword, uploadUserAvatar} from "@routes/user/services/helpers.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
+import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
-import {deleteAvatar} from "@services/deleteAvatar.js";
+import {emptyUserDataException, userException} from "@utils/httpExceptions.js";
+
 import {modelMap} from "@services/modelMap.js";
-import {userException} from "@utils/httpExceptions.js";
+import {deleteAvatar} from "@services/deleteAvatar.js";
+
+import {nameSchema} from "@schemas/nameSchema.js";
+import {passwordSchema} from "@schemas/passwordSchema.js";
+import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const userRouter = Router();
 
 userRouter.patch('/update_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    const currentUser = req.user!
-    await userServiceUpdateName(req, res, currentUser)
+    const {name} = nameSchema.parse(req.body)
+    const currentUserId = req.user!.id
+
+    await updateUserName(currentUserId, name)
+
+    return successResponse(res)
 }))
 
 userRouter.patch('/update_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const {password} = passwordSchema.parse(req.body)
     const currentUser = req.user!
-    await userServiceUpdatePassword(req, res, currentUser)
+
+    await updateUserPassword(currentUser, password)
+
+    return successResponse(res)
 }))
 
 const upload = multer({storage: uploadStorage})
@@ -31,14 +47,30 @@ userRouter.post(
     upload.fields([
         {name: 'avatar', maxCount: 1},
     ]),
+    cleanupTempFiles,
     asyncHandler(async (req: Request, res: Response) => {
         const currentUser = req.user!
-        await userServiceUploadAvatar(req, res, currentUser)
+
+        const files = req.files as Record<string, Express.Multer.File[]> | undefined
+        const avatarFile = files?.avatar?.[0]
+
+        if (!avatarFile) throw emptyUserDataException
+
+
+        const newAvatarUrl = await uploadUserAvatar(currentUser, avatarFile)
+
+        res.status(201).json({
+            url: newAvatarUrl,
+        })
     })
 )
 
 userRouter.patch('/delete_avatar', getUser(), asyncHandler(async (req: Request, res: Response) => {
-    await deleteAvatar(req, res, modelMap.user, userException, true)
+    const {id} = idSchema.parse(req.params)
+
+    await deleteAvatar(id, modelMap.user, userException)
+
+    successResponse(res)
 }))
 
 userRouter.use('/admin', adminUserRouter)

@@ -16,8 +16,8 @@ export const getArtists = async (
         ...(name && {
             name: {
                 contains: name,
-                mode: 'insensitive' as const
-            }
+                mode: 'insensitive' as const,
+            },
         }),
     }
 

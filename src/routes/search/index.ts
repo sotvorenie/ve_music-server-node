@@ -1,26 +1,48 @@
 import { Router, type Request, type Response } from 'express';
 
 import {adminSearchRouter} from "@routes/search/admin.js";
-import {deleteFromUserSearchHistory, getUserSearchHistory, setToUserSearchHistory} from "@routes/search/services.js";
+import {
+    deleteFromUserSearchHistory,
+    getUserSearchHistory,
+    setToUserSearchHistory
+} from "@routes/search/services/helpers.js";
+import {searchSchema, typeSchema} from "@routes/search/schemas.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
+
+import {idSchema} from "@schemas/idSchema.js";
+
+import {successResponse} from "@responses/successResponse.js";
 
 export const searchRouter = Router();
 
 searchRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUserId = req.user!.id
-    await getUserSearchHistory(res, currentUserId)
+
+    const search = await getUserSearchHistory(currentUserId)
+
+    res.json({
+        data: search,
+    })
 }))
 
 searchRouter.post('/set', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const { search, type } = searchSchema.extend(typeSchema.shape).parse(req.body)
     const currentUserId = req.user!.id
-    await setToUserSearchHistory(req, res, currentUserId)
+
+    const newSearch = await setToUserSearchHistory(currentUserId, search, type)
+
+    res.json(newSearch)
 }))
 
 searchRouter.delete('/delete/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
+    const { id } = idSchema.parse(req.params)
     const currentUserId = req.user!.id
-    await deleteFromUserSearchHistory(req, res, currentUserId)
+
+    await deleteFromUserSearchHistory(id, currentUserId)
+
+    return successResponse(res)
 }))
 
 searchRouter.use('/admin', adminSearchRouter)

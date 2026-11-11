@@ -1,42 +1,39 @@
-import {type Request, type Response} from "express";
 import {db} from "@/db.js";
 
-import {deletePath} from "@composables/useDeletePath.js";
 import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
-import {idSchema} from "@schemas/idSchema.js";
-
 import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
 
-import {successResponse} from "@responses/successResponse.js";
-
-const musicServiceAddMusicToHistory = async (userId: number, musicId: number) => {
+const addMusicToHistory = async (
+    userId: number,
+    musicId: number,
+) => {
     const historyEntry = await db.history.findUnique({
         where: {
             userId_musicId: {
                 userId,
-                musicId
-            }
+                musicId,
+            },
         }
     })
 
     if (historyEntry) {
         await db.history.update({
             where: {
-                id: historyEntry.id
+                id: historyEntry.id,
             },
             data: {
-                date: new Date()
-            }
+                date: new Date(),
+            },
         })
     } else {
         await db.history.create({
             data: {
                 userId,
-                musicId
-            }
+                musicId,
+            },
         })
 
         const total = await db.history.count({
@@ -46,31 +43,26 @@ const musicServiceAddMusicToHistory = async (userId: number, musicId: number) =>
             const oldest = await db.history.findFirst({
                 where: {userId},
                 orderBy: {date: 'asc'},
-                select: {id: true}
+                select: {id: true},
             })
             if (oldest) {
                 await db.history.delete({
                     where: {
-                        id: oldest.id
-                    }
+                        id: oldest.id,
+                    },
                 })
             }
         }
     }
 }
 
-export const musicServiceGetMusic = async (
-    res: Response,
+export const getTrack = async (
     musicId: number,
     isAdmin: boolean = false,
     currentUserId?: number,
     setView: boolean = true
 ) => {
-    if (currentUserId) musicServiceAddMusicToHistory(currentUserId, musicId).catch(err => {
-        console.error('Ошибка добавления музыки в историю: ', err)
-    })
-
-    console.log(setView)
+    if (currentUserId) addMusicToHistory(currentUserId, musicId).catch()
 
     let [musicFromDB] = await Promise.all([
         db.music.findUnique({
@@ -82,19 +74,19 @@ export const musicServiceGetMusic = async (
                 ...musicBaseWithArtistsSelect,
                 url: true,
                 previewUrl: true,
-                videoClipUrl: true,
+                urlWithClip: true,
                 likesCount: true,
                 auditionsCount: true,
                 genre: {
                     select: {
                         id: true,
                         name: true,
-                    }
+                    },
                 },
                 likes: {
                     where: {
-                        userId: currentUserId ?? -1
-                    }
+                        userId: currentUserId ?? -1,
+                    },
                 },
                 segmentsCount: true,
                 bitrates: true,
@@ -102,11 +94,11 @@ export const musicServiceGetMusic = async (
         }),
         (!isAdmin && setView ? db.music.update({
             where: {
-                id: musicId
+                id: musicId,
             },
             data: {
-                auditionsCount: {increment: 1}
-            }
+                auditionsCount: {increment: 1},
+            },
         }) : Promise.resolve(0))
     ])
 
@@ -116,65 +108,9 @@ export const musicServiceGetMusic = async (
         musicFromDB.previewUrl = await getBackupPreview()
     }
 
-    const music = {
+    return {
         ...musicFromDB,
         isLiked: !!musicFromDB?.likes?.length,
         likes: undefined,
     }
-
-    res.json(music)
-}
-
-export const musicServiceUpdateUrl = async (
-    req: Request,
-    res: Response,
-    data: any,
-    select: any,
-) => {
-    const {id} = idSchema.parse(req.params)
-
-    const url = await db.music.update({
-        where: {
-            id
-        },
-        data,
-        select
-    })
-
-    res.json({
-        url: url[Object.keys(select)[0] as string]
-    })
-}
-
-export const musicServiceDeleteFromDBAndFile = async (
-    req: Request,
-    res: Response,
-    data: any,
-    isDeleteFile = true
-) => {
-    const {id} = idSchema.parse(req.params)
-
-    const urlKey = Object.keys(data)[0] ?? 'url'
-
-    const url = await db.music.findUnique({
-        where: {
-            id
-        },
-        select: {
-            [urlKey]: true
-        }
-    }) as Record<string, string | null> | null
-
-    req.checkAborted()
-    await Promise.all([
-        db.music.update({
-            where: {
-                id
-            },
-            data,
-        }),
-        (isDeleteFile ? deletePath(url?.[urlKey] || '') : Promise.resolve(0))
-    ])
-
-    successResponse(res)
 }

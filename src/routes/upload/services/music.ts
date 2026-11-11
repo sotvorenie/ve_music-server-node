@@ -1,108 +1,156 @@
-import type {Request, Response} from "express";
 import path from "node:path";
 import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
-import {ALLOWED_PHOTO_SUFFIX, MUSIC_DIRECTORY} from "@/config.js";
+import {
+    ALLOWED_MUSIC_SUFFIX,
+    ALLOWED_PHOTO_SUFFIX,
+    PREVIEWS_DIRECTORY,
+    segmentTime,
+    TRACKS_DIRECTORY
+} from "@/config.js";
 
-import {addMusic, addVideo} from "@routes/upload/services/helpers.js";
+import {addVideo} from "@routes/upload/services/helpers.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 
-import {emptyMusicDataException, photoFormatException} from "@utils/httpExceptions.js";
+import {audioFormatException, photoFormatException} from "@utils/httpExceptions.js";
+import {getAudioInfo} from "@composables/useGetAudioInfo.js";
+import {createAudio} from "@composables/useCreateAudio.js";
+import {safeReaddir} from "@composables/useSafeReaddir.js";
 
-import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {pathSchema} from "@schemas/pathSchema.js";
+const addMusic = async (
+    audioFile: Express.Multer.File,
+    title: string,
+    genreId: number,
+    artistsIds: number[],
+    codec: string,
+) => {
+    let id: number = -1
+
+    const musicSuffix = path.extname(audioFile.originalname).toLowerCase()
+    if (!ALLOWED_MUSIC_SUFFIX.has(musicSuffix)) throw audioFormatException
+
+    try {
+        const duration = await getAudioInfo(audioFile.path, 'duration')
+
+        await fs.mkdir(TRACKS_DIRECTORY, {recursive: true})
+
+        const music = await db.music.create({
+            data: {
+                name: title,
+                url: `pending-${crypto.randomUUID()}`,
+                duration,
+                previewUrl: '',
+                urlWithClip: null,
+                genreId,
+                artists: {
+                    connect: artistsIds.map(artistId => ({id: artistId}))
+                },
+                codec,
+                segmentTime,
+                status: 'PROCESSING',
+            },
+            select: {
+                id: true,
+            }
+        })
+        id = music.id
+
+        const targetMusicPath = path.join(TRACKS_DIRECTORY, String(id))
+        await fs.mkdir(targetMusicPath, {recursive: true})
+
+        const bitrates = await createAudio(
+            audioFile.path,
+            targetMusicPath,
+            segmentTime,
+        )
+
+        let segmentsCount: number = 0
+        const entries = await safeReaddir(targetMusicPath)
+        const firstFolder = entries.find(entry => entry.isDirectory())
+        if (firstFolder) {
+            const folderPath = path.join(targetMusicPath, firstFolder.name)
+            const files = await safeReaddir(folderPath)
+            segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+        }
+
+        return {
+            id,
+            duration,
+            segmentsCount,
+            bitrates,
+            targetMusicPath,
+        }
+    } catch (err) {
+        if (id !== -1) {
+            await fs.rm(path.join(TRACKS_DIRECTORY, String(id)), { recursive: true, force: true }).catch()
+            await db.music.delete({ where: { id } }).catch()
+        }
+        throw err
+    }
+}
 
 export const uploadMusic = async (
-    req: Request,
-    res: Response,
-): Promise<void> => {
-    const { title, genre_id: genreId, artists, path: previewPath } = musicInfoSchema.extend(pathSchema.shape).parse(req.body)
-
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-    const musicFile = files?.music?.[0]
-    const previewFile = files?.preview?.[0]
-    const videoFile = files?.video?.[0]
-
-    if (!musicFile) throw emptyMusicDataException
-
+    genreId: number,
+    artists: number[],
+    name: string,
+    previewPath: string,
+    files: {
+        music: Express.Multer.File,
+        preview: Express.Multer.File | undefined,
+        video: Express.Multer.File | undefined,
+    }
+) => {
     let previewSuffix: string = ''
-    if (previewFile) {
-        previewSuffix = path.extname(previewFile.originalname).toLowerCase()
+    if (files.preview) {
+        previewSuffix = path.extname(files.preview.originalname).toLowerCase()
         if (!ALLOWED_PHOTO_SUFFIX.has(previewSuffix)) throw photoFormatException
     }
 
-    let targetMusicPath: string | null = null
     let targetPreviewPath: string | null = null
     let targetVideoPath: string | null = null
 
-    try {
-        const previewsDirectory = path.join(MUSIC_DIRECTORY, 'previews')
+    await fs.mkdir(PREVIEWS_DIRECTORY, {recursive: true})
 
-        req.checkAborted()
-
-        await fs.mkdir(previewsDirectory, {recursive: true})
-
-        req.checkAborted()
-
-        req.checkAborted()
-        if (previewFile) {
-            targetPreviewPath = path.join(previewsDirectory, `${Date.now()}${previewSuffix}`)
-            await fs.rename(previewFile.path, targetPreviewPath)
-        }
-
-        req.checkAborted()
-
-        const result = await addMusic(
-            musicFile,
-            title,
-            genreId,
-            artists,
-            'aac',
-            req,
-        )
-        targetMusicPath = result.targetMusicPath
-        const {id, duration, segmentsCount, bitrates} = result
-
-        await fs.rm(musicFile.path, {force: true}).catch()
-
-        if (!!videoFile) {
-            targetVideoPath = await addVideo(
-                videoFile,
-                {
-                    id,
-                    duration,
-                },
-                req,
-            )
-            await fs.rm(videoFile.path, {force: true}).catch()
-        }
-
-        const newMusic = await db.music.update({
-            where: {
-                id
-            },
-            data: {
-                url: createUrl(path.join(MUSIC_DIRECTORY, 'music', String(id), 'master.m3u8')),
-                previewUrl: targetPreviewPath ? createUrl(targetPreviewPath) : (previewPath || ''),
-                videoClipUrl: targetVideoPath ? createUrl(targetVideoPath) : '',
-                status: 'READY',
-                segmentsCount,
-                bitrates,
-            }
-        })
-
-        res.status(201).json(newMusic)
-    } catch (err) {
-        if (targetMusicPath) await fs.rm(targetMusicPath, {recursive: true, force: true}).catch()
-        if (targetPreviewPath) await fs.rm(targetPreviewPath, {force: true}).catch()
-        if (targetVideoPath) await fs.rm(targetVideoPath, {recursive: true, force: true}).catch()
-
-        await fs.rm(musicFile.path, {force: true}).catch()
-        if (previewFile?.path) await fs.rm(previewFile.path, {force: true}).catch()
-        if (videoFile?.path) await fs.rm(videoFile.path, {force: true}).catch()
-
-        throw err
+    if (files.preview) {
+        targetPreviewPath = path.join(PREVIEWS_DIRECTORY, `${Date.now()}${previewSuffix}`)
+        await fs.rename(files.preview.path, targetPreviewPath)
     }
+
+    const result = await addMusic(
+        files.music,
+        name,
+        genreId,
+        artists,
+        'aac',
+    )
+    const {id, duration, segmentsCount, bitrates} = result
+
+    await fs.rm(files.music.path, {force: true}).catch()
+
+    if (!!files.video) {
+        targetVideoPath = await addVideo(
+            files.video,
+            {
+                id,
+                duration,
+            },
+        )
+        await fs.rm(files.video.path, {force: true}).catch()
+    }
+
+    return db.music.update({
+        where: {
+            id
+        },
+        data: {
+            url: createUrl(path.join(TRACKS_DIRECTORY, String(id), 'master.m3u8')),
+            previewUrl: targetPreviewPath ? createUrl(targetPreviewPath) : (previewPath || ''),
+            urlWithClip: targetVideoPath ? createUrl(targetVideoPath) : '',
+            status: 'READY',
+            segmentsCount,
+            bitrates,
+        }
+    })
 }

@@ -1,7 +1,7 @@
 import {z} from "zod";
 
 export const musicInfoSchema = z.object({
-    title: z.string().min(1),
+    name: z.string(),
     genre_id: z.string().transform(Number),
     artists: z.string().optional().transform(val => {
         if (!val) return []

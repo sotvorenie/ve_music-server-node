@@ -1,22 +1,15 @@
 import {Router, type Request, type Response} from "express";
-import {z} from "zod";
 import multer from "multer";
-import {db} from "@/db.js";
 
-import {
-    userServiceGetUserAndUpdate,
-    userServiceGetUserFromDB,
-    userServiceUpdateName,
-    userServiceUpdatePassword, userServiceUploadAvatar
-} from "@routes/user/services.js";
 import {roleSchema} from "@routes/user/schemas.js";
+import {deleteUser, getUsers, updateUserLogin, updateUserRole} from "@routes/user/services/index.js";
+import {getUser, updateUserName, updateUserPassword, uploadUserAvatar} from "@routes/user/services/helpers.js";
 
-import {getSkip} from "@composables/useGetSkip.js";
 import {getHasMore} from "@composables/useGetHasMore.js";
 import {uploadStorage} from "@composables/useUploadStorage.js";
-import {deletePath} from "@composables/useDeletePath.js";
+import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
 
-import {duplicationLoginException, emptyUserDataException, userException} from "@utils/httpExceptions.js";
+import {emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
 
@@ -25,42 +18,18 @@ import {modelMap} from "@services/modelMap.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {nameSchema} from "@schemas/nameSchema.js";
+import {nameOptionalSchema, nameSchema} from "@schemas/nameSchema.js";
+import {loginSchema} from "@schemas/loginSchema.js";
+import {passwordSchema} from "@schemas/passwordSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
 export const adminUserRouter = Router();
 
 adminUserRouter.get('/list', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {page, limit, name} = pageLimitSchema.extend(nameSchema.shape).parse(req.query)
+    const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
 
-    const skip = getSkip(page, limit)
-
-    const where = {
-        ...(name && {
-            name: {
-                contains: name,
-                mode: 'insensitive' as const
-            }
-        })
-    }
-
-    let [users, total] = await Promise.all([
-        db.user.findMany({
-            where,
-            select: {
-                id: true,
-                name: true,
-                login: true,
-                avatarUrl: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-            skip,
-            take: limit,
-        }),
-        db.user.count({where})
-    ])
+    const {users, total, skip} = await getUsers(name, page, limit)
 
     res.json({
         data: users,
@@ -76,68 +45,42 @@ adminUserRouter.get('/list', getAdmin(), asyncHandler(async (req: Request, res: 
 adminUserRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    const user = await userServiceGetUserFromDB(id)
+    const user = await getUser(id)
     if (!user) throw userException
 
     res.json(user)
 }))
 
-adminUserRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await userServiceGetUserAndUpdate(req, res, userServiceUpdateName)
+adminUserRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
+    const {id: userId} = idSchema.parse(req.params)
+    const {name} = nameSchema.parse(req.body)
+
+    await updateUserName(userId, name)
 }))
 
-const loginSchema = z.object({
-    login: z.string(),
-})
 adminUserRouter.patch('/update_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {login} = loginSchema.parse(req.body)
-    const {id} = idSchema.parse(req.params)
+    const {id: userId} = idSchema.parse(req.params)
 
-    const formattedLogin = login?.trim()
-    if (!formattedLogin) throw emptyUserDataException
-
-    const userWithLogin = await db.user.findUnique({
-        where: {
-            login
-        },
-        select: {
-            id: true,
-        }
-    })
-
-    if (userWithLogin) throw duplicationLoginException
-
-    await db.user.update({
-        where: {
-            id
-        },
-        data: {
-            login: formattedLogin,
-        }
-    })
+    await updateUserLogin(userId, login)
 
     return successResponse(res)
 }))
 
-adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await userServiceGetUserAndUpdate(req, res, userServiceUpdatePassword)
+adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
+    const {id: userId} = idSchema.parse(req.params)
+    const {password} = passwordSchema.parse(req.body)
+
+    const user = await getUser(userId)
+    if (!user) throw userException
+
+    await updateUserPassword(user, password)
 }))
 
 adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    const data = await db.user.findUnique({
-        where: {id},
-        select: {avatarUrl: true}
-    })
-
-    if (data?.avatarUrl) await deletePath(data.avatarUrl)
-
-    await db.user.delete({
-        where: {
-            id
-        }
-    })
+    await deleteUser(id)
 
     successResponse(res)
 }))
@@ -149,31 +92,36 @@ adminUserRouter.post(
     upload.fields([
         {name: 'avatar', maxCount: 1},
     ]),
+    cleanupTempFiles,
     asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
+    const {id: userId} = idSchema.parse(req.params)
 
-    const user = await userServiceGetUserFromDB(id)
+    const files = req.files as Record<string, Express.Multer.File[]> | undefined
+    const avatarFile = files?.avatar?.[0]
+
+    if (!avatarFile) throw emptyUserDataException
+
+    const user = await getUser(userId)
     if (!user) throw userException
 
-    await userServiceUploadAvatar(req, res, user)
+    await uploadUserAvatar(user, avatarFile)
+
+    successResponse(res)
 }))
 
 adminUserRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await deleteAvatar(req, res, modelMap.user, userException)
+    const {id: userId} = idSchema.parse(req.params)
+
+    await deleteAvatar(userId, modelMap.user, userException)
+
+    successResponse(res)
 }))
 
 adminUserRouter.patch('/update_role/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {role} = roleSchema.parse(req.body)
 
-    await db.user.update({
-        where: {
-            id
-        },
-        data: {
-            role
-        }
-    })
+    await updateUserRole(id, role)
 
     successResponse(res)
 }))
