@@ -57,10 +57,12 @@ const createAudioWithClipMaster = async (
     audioId: number,
     videoMaster: string,
 ) => {
-    const withClipMasterPath = path.join(TRACKS_DIRECTORY, String(audioId), 'master_with_clip.m3u8')
+    const trackDir = path.join(TRACKS_DIRECTORY, String(audioId))
+
+    const withClipMasterPath = path.join(trackDir, 'master_with_clip.m3u8')
     await deletePath(withClipMasterPath)
 
-    const audioMaster = path.join(TRACKS_DIRECTORY, String(audioId), 'master.m3u8')
+    const audioMaster = path.join(trackDir, 'master.m3u8')
     let masterContent = await fs.readFile(audioMaster, 'utf-8')
 
     if (!masterContent.endsWith('\n')) masterContent += '\n'
