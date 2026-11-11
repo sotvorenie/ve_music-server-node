@@ -37,18 +37,18 @@ export const uploadAvatar = async (
         const newAvatarUrl = createUrl(targetAvatarPath)
         await db.artist.update({
             where: {
-                id
+                id,
             },
             data: {
                 avatarUrl: newAvatarUrl,
-            }
+            },
         })
 
         if (artist.avatarUrl) await deletePath(artist.avatarUrl)
 
         return newAvatarUrl
     } catch (err) {
-        if (targetAvatarPath) await fs.rm(targetAvatarPath, {force: true}).catch()
+        if (targetAvatarPath) await deletePath(targetAvatarPath)
         throw err
     }
 }

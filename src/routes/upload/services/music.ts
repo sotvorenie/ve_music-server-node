@@ -16,6 +16,7 @@ import {createUrl} from "@composables/useCreateUrl.js";
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {createAudio} from "@composables/useCreateAudio.js";
 import {safeReaddir} from "@composables/useSafeReaddir.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {audioFormatException, photoFormatException} from "@utils/httpExceptions.js";
 
@@ -84,7 +85,7 @@ const addMusic = async (
         }
     } catch (err) {
         if (id !== -1) {
-            await fs.rm(path.join(TRACKS_DIRECTORY, String(id)), { recursive: true, force: true }).catch()
+            await deletePath(path.join(TRACKS_DIRECTORY, String(id)))
             await db.music.delete({ where: { id } }).catch()
         }
         throw err
@@ -127,7 +128,7 @@ export const uploadMusic = async (
     )
     const {id, duration, segmentsCount, bitrates} = result
 
-    await fs.rm(files.music.path, {force: true}).catch()
+    await deletePath(files.music.path)
 
     if (!!files.video) {
         targetVideoPath = await addVideo(
@@ -137,7 +138,7 @@ export const uploadMusic = async (
                 duration,
             },
         )
-        await fs.rm(files.video.path, {force: true}).catch()
+        await deletePath(files.video.path)
     }
 
     return db.music.update({

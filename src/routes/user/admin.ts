@@ -6,8 +6,8 @@ import {deleteUser, getUsers, updateUserLogin, updateUserRole} from "@routes/use
 import {getUser, updateUserName, updateUserPassword, uploadUserAvatar} from "@routes/user/services/helpers.js";
 
 import {getHasMore} from "@composables/useGetHasMore.js";
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
+import {uploadStorage} from "@utils/uploadStorage.js";
+import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
 
 import {emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";

@@ -1,5 +1,6 @@
-import type { Request, Response, NextFunction } from 'express'
-import fs from 'node:fs/promises'
+import type { Request, Response, NextFunction } from 'express';
+
+import {deletePath} from "@composables/useDeletePath.js";
 
 const collectTempPaths = (req: Request): string[] => {
     const paths: string[] = []
@@ -21,7 +22,7 @@ const collectTempPaths = (req: Request): string[] => {
 export const cleanupTempFiles = (req: Request, res: Response, next: NextFunction) => {
     res.on('close', () => {
         const paths = collectTempPaths(req)
-        void Promise.allSettled(paths.map(p => fs.rm(p, { force: true })))
+        void Promise.allSettled(paths.map(p => deletePath(p)))
     })
     next()
 }

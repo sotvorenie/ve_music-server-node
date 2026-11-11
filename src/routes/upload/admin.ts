@@ -3,8 +3,8 @@ import multer from 'multer';
 
 import {uploadAudio, uploadMusic, uploadPreview, uploadVideo} from "@routes/upload/services/index.js";
 
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
+import {uploadStorage} from "@utils/uploadStorage.js";
+import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";

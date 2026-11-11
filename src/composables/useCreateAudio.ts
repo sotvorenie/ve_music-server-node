@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {runFfmpeg} from "@composables/useRunFfmpeg.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
 
@@ -71,7 +72,7 @@ export const createAudio = async (
 
         return targetBitrates
     } catch (err) {
-        await fs.rm(outputDir, { recursive: true, force: true })
+        await deletePath(outputDir)
         throw err
     }
 }

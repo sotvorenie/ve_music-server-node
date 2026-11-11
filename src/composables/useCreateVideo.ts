@@ -106,7 +106,7 @@ export const createVideo = async (
 
         await createAudioWithClipMaster(audio.id, masterContent)
     } catch (err) {
-        await fs.rm(outputDir, {recursive: true, force: true})
+        await deletePath(outputDir)
         throw err
     }
 }

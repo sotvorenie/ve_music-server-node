@@ -14,9 +14,5 @@ export const deletePath = async (
         fullPath = path.join(BASE_STORAGE_DIR, formattedUrl)
     }
 
-    try {
-        await fs.rm(fullPath, { recursive: true, force: true })
-    } catch (err: any) {
-        throw err
-    }
+    await fs.rm(fullPath, { recursive: true, force: true })
 }

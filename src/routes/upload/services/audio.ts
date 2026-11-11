@@ -18,37 +18,30 @@ export const uploadAudio = async (
     const suffix = path.extname(file.originalname).toLowerCase()
     if (!ALLOWED_MUSIC_SUFFIX.has(suffix)) throw audioFormatException
 
-    let targetPath: string | null = null
+    await fs.mkdir(TRACKS_DIRECTORY, {recursive: true})
 
-    try {
-        await fs.mkdir(TRACKS_DIRECTORY, {recursive: true})
+    const targetPath = path.join(TRACKS_DIRECTORY, String(id))
 
-        targetPath = path.join(TRACKS_DIRECTORY, String(id))
+    const duration = await getAudioInfo(file.path, 'duration')
 
-        const duration = await getAudioInfo(file.path, 'duration')
+    const bitrates = await createAudio(file.path, targetPath, segmentTime)
 
-        const bitrates = await createAudio(file.path, targetPath, segmentTime)
+    const files = await safeReaddir(targetPath)
+    const segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
 
-        const files = await safeReaddir(targetPath)
-        const segmentsCount = files.filter(file => file.name.endsWith('.m4s')).length
+    const url = createUrl(targetPath)
 
-        const url = createUrl(targetPath)
+    await db.music.update({
+        where: {
+            id
+        },
+        data: {
+            url,
+            duration,
+            segmentsCount,
+            bitrates,
+        }
+    })
 
-        await db.music.update({
-            where: {
-                id
-            },
-            data: {
-                url,
-                duration,
-                segmentsCount,
-                bitrates,
-            }
-        })
-
-        return url
-    } catch (err) {
-        if (targetPath) await fs.rm(targetPath, {recursive: true, force: true}).catch()
-        throw err
-    }
+    return url
 }

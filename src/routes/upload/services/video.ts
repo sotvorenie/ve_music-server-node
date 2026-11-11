@@ -1,8 +1,9 @@
-import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
 import {addVideo} from "@routes/upload/services/helpers.js";
+
 import {createUrl} from "@composables/useCreateUrl.js";
+import {deletePath} from "@composables/useDeletePath.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
@@ -29,7 +30,7 @@ export const uploadVideo = async (
         },
     )
 
-    await fs.rm(file.path, {force: true}).catch()
+    await deletePath(file.path)
 
     return createUrl(targetPath)
 }

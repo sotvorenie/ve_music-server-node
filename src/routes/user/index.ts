@@ -4,8 +4,8 @@ import multer from 'multer';
 import {adminUserRouter} from "@routes/user/admin.js";
 import {updateUserName, updateUserPassword, uploadUserAvatar} from "@routes/user/services/helpers.js";
 
-import {uploadStorage} from "@composables/useUploadStorage.js";
-import {cleanupTempFiles} from "@composables/useCleanupTempFiles.js";
+import {uploadStorage} from "@utils/uploadStorage.js";
+import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
 
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getUser} from "@utils/auth.js";
