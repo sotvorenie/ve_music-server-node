@@ -33,6 +33,7 @@ export const uploadAudio = async (
         },
         data: {
             url,
+            urlWithClip: null,
             duration,
             segmentsCount,
             bitrates,
