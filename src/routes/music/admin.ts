@@ -69,11 +69,6 @@ adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/update_video_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const { path } = pathSchema.parse(req.body)
-    await musicServiceUpdateUrl(req, res, musicConstantUpdateTypes.video(path), musicConstantUpdateSelectsTypes.video)
-}))
-
 adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)

@@ -1,21 +1,16 @@
-import { type Request, type Response } from 'express';
 import {db} from "@/db.js";
 
 import {getSkip} from "@composables/useGetSkip.js";
-
-import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
-import {idSchema} from "@schemas/idSchema.js";
 
 import {modelMap} from "@services/modelMap.js";
 import {musicAdminSelect} from "@selects/musicSelect.js";
 
 export const getAllMusic = async (
-    req: Request,
-    res: Response,
+    id: number,
+    page: number,
+    limit: number,
     model: any,
 ) => {
-    const {id, page, limit} = idSchema.extend(pageLimitSchema.shape).parse(req.params)
-
     const skip = getSkip(page, limit)
 
     let where
@@ -27,24 +22,18 @@ export const getAllMusic = async (
                 }
             }
         }
-    }
-    if (model === modelMap.genre) {
+    } else if (model === modelMap.genre) {
         where = {
             genreId: id
         }
+    } else {
+        throw new Error('Нет необходимой модели..')
     }
-    if (!where) return
 
-    const music = await db.music.findMany({
+    return db.music.findMany({
         where,
         select: musicAdminSelect,
         skip,
         take: limit,
-    })
-
-    res.json({
-        music,
-        page,
-        limit,
     })
 }

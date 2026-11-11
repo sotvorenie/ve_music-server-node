@@ -1,92 +1,94 @@
 import {type Request, type Response, Router} from 'express';
 import multer from "multer";
-import {db} from "@/db.js";
 
-import {artistUploadAvatarService} from "@routes/artist/services.js";
+import {uploadAvatar} from "@routes/artist/services/helpers.js";
+import {getArtist, createArtist, deleteArtist, updateAvatarPath} from "@routes/artist/services/index.js";
 
 import {uploadStorage} from "@composables/useUploadStorage.js";
-import {createUrl} from "@composables/useCreateUrl.js";
-import {deletePath} from "@composables/useDeletePath.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {artistException, emptyUserDataException,} from "@utils/httpExceptions.js";
+import {artistException, emptyUserDataException, musicException,} from "@utils/httpExceptions.js";
+
+import {getAllMusic} from "@services/getMusicService.js";
+import {modelMap} from "@services/modelMap.js";
+import {updateNameInDB} from "@services/updateNameService.js";
+import {deleteAvatar} from "@services/deleteAvatar.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
-import {getAllMusic} from "@services/getMusicService.js";
-import {modelMap} from "@services/modelMap.js";
-import {deleteFromDB} from "@services/deleteService.js";
-import {updateNameInDB} from "@services/updateNameService.js";
-import {deleteAvatar} from "@services/deleteAvatar.js";
-
-import {artistAdminSelect} from "@selects/artistSelect.js";
+import {successResponse} from "@responses/successResponse.js";
 
 export const adminArtistRouter = Router();
+
+const upload = multer({storage: uploadStorage})
 
 adminArtistRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    const artist = await db.artist.findUnique({
-        where: {
-            id
-        },
-        select: artistAdminSelect
-    })
+    const artist = await getArtist(id)
+
+    if (!artist) throw artistException
 
     res.json(artist)
 }))
 
 adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await getAllMusic(req, res, modelMap.artist)
+    const {id, page, limit} = idSchema.extend(pageLimitSchema.shape).parse(req.params)
+
+    const music = await getAllMusic(id, page, limit, modelMap.artist)
+
+    if (!music?.length) throw musicException
+
+    res.json({
+        music,
+        page,
+        limit,
+    })
 }))
 
-const create = multer({storage: uploadStorage})
 adminArtistRouter.post(
     '/create',
     getAdmin(),
-    create.fields([
+    upload.fields([
         {name: 'avatar', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
         const {name} = nameSchema.parse(req.body)
 
-        if (!name) throw emptyUserDataException
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const avatarFile = files?.avatar?.[0]
 
-        const {id} = await db.artist.create({
-            data: {
-                name,
-            },
-            select: {
-                id: true,
-            }
+        if (!avatarFile || !name) throw emptyUserDataException
+
+        const newAvatarUrl = await createArtist(name, avatarFile)
+
+        res.status(201).json({
+            url: newAvatarUrl
         })
-
-    await artistUploadAvatarService(req, res, id)
-}))
+    })
+)
 
 adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    const data = await db.artist.findUnique({
-        where: {id},
-        select: {
-            avatarUrl: true
-        }
-    })
+    await deleteArtist(id)
 
-    if (data?.avatarUrl) await deletePath(data.avatarUrl)
-
-    await deleteFromDB(req, res, modelMap.artist)
+    successResponse(res)
 }))
 
 adminArtistRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await updateNameInDB(req, res, modelMap.artist)
+    const {id} = idSchema.parse(req.params)
+    const {name} = nameSchema.parse(req.body)
+
+    await updateNameInDB(id, name, modelMap.artist)
+
+    successResponse(res)
 }))
 
-const upload = multer({storage: uploadStorage})
 adminArtistRouter.post(
     '/upload_avatar/:id',
     getAdmin(),
@@ -96,7 +98,16 @@ adminArtistRouter.post(
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
-        await artistUploadAvatarService(req, res, id)
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] }
+        const avatarFile = files?.avatar?.[0]
+
+        if (!avatarFile) throw emptyUserDataException
+
+        const newAvatarUrl = await uploadAvatar(id, avatarFile)
+
+        res.json({
+            url: newAvatarUrl,
+        })
     })
 )
 
@@ -104,19 +115,7 @@ adminArtistRouter.patch('/update_avatar_path/:id', getAdmin(), asyncHandler(asyn
     const {id} = idSchema.parse(req.params)
     const {path} = pathSchema.parse(req.body)
 
-    const url = createUrl(path)
-
-    const newUrl = await db.artist.update({
-        where: {
-            id
-        },
-        data: {
-            avatarUrl: url
-        },
-        select: {
-            avatarUrl: true,
-        }
-    })
+    const newUrl = await updateAvatarPath(id, path)
 
     res.json({
         url: newUrl.avatarUrl
@@ -124,5 +123,9 @@ adminArtistRouter.patch('/update_avatar_path/:id', getAdmin(), asyncHandler(asyn
 }))
 
 adminArtistRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    await deleteAvatar(req, res, modelMap.artist, artistException)
+    const {id} = idSchema.parse(req.params)
+
+    await deleteAvatar(id, modelMap.artist, artistException)
+
+    successResponse(res)
 }))

@@ -1,18 +1,8 @@
-import { type Request, type Response } from 'express';
-
-import {idSchema} from "@schemas/idSchema.js";
-import {nameSchema} from "@schemas/nameSchema.js";
-
-import {successResponse} from "@responses/successResponse.js";
-
 export const updateNameInDB = async (
-    req: Request,
-    res: Response,
+    id: number,
+    name: string | undefined,
     model: any,
 ) => {
-    const {id} = idSchema.parse(req.params)
-    const {name} = nameSchema.parse(req.body)
-
     await model.update({
         where: {
             id
@@ -21,6 +11,4 @@ export const updateNameInDB = async (
             name,
         }
     })
-
-    successResponse(res)
 }

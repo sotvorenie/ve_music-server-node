@@ -1,6 +1,5 @@
-import {type Request, type Response} from "express";
-import fs from "node:fs/promises";
 import path from "node:path";
+import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
 import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
@@ -8,18 +7,12 @@ import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY} from "@/config.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
 
-import {artistException, emptyUserDataException, photoFormatException} from "@utils/httpExceptions.js";
+import {artistException, photoFormatException} from "@utils/httpExceptions.js";
 
-export const artistUploadAvatarService = async (
-    req: Request,
-    res: Response,
-    id: number
+export const uploadAvatar = async (
+    id: number,
+    avatarFile: Express.Multer.File,
 ) => {
-    const files = req.files as { [fieldname: string]: Express.Multer.File[] }
-    const avatarFile = files?.avatar?.[0]
-
-    if (!avatarFile) throw emptyUserDataException
-
     const artist = await db.artist.findUnique({
         where: {
             id
@@ -53,13 +46,11 @@ export const artistUploadAvatarService = async (
 
         if (artist.avatarUrl) await deletePath(artist.avatarUrl)
 
-        res.status(201).json({
-            url: newAvatarUrl
-        })
+        return newAvatarUrl
     } catch (err) {
         if (targetAvatarPath) await fs.unlink(targetAvatarPath).catch()
 
-        await fs.unlink(files?.avatar?.[0]?.path ?? '').catch()
+        await fs.rm(avatarFile.path).catch()
 
         throw err
     }
