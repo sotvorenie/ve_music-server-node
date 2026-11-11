@@ -1,7 +1,7 @@
 import path from "node:path";
 import {db} from "@/db.js";
 
-import {VIDEOS_DIRECTORY} from "@/config.js";
+import {TRACKS_DIRECTORY, VIDEOS_DIRECTORY} from "@/config.js";
 
 import {deletePath} from "@composables/useDeletePath.js";
 
@@ -12,21 +12,20 @@ export const deleteTrack = async (
 ) => {
     const music = await db.music.findUnique({
         where: {
-            id
-        }
+            id,
+        },
+        select: {
+            id: true,
+        },
     })
     if (!music) throw musicException
 
-    await db.music.delete({
-        where: {
-            id
-        }
-    })
-
-    const videoClipPath = path.join(VIDEOS_DIRECTORY, String(id))
+    const trackDirectory = path.join(TRACKS_DIRECTORY, String(id))
+    const videoClipDirectory = path.join(VIDEOS_DIRECTORY, String(id))
 
     await Promise.all([
-        deletePath(music.url),
-        deletePath(videoClipPath),
+        db.music.delete({where: {id}}),
+        deletePath(trackDirectory),
+        deletePath(videoClipDirectory),
     ])
 }
