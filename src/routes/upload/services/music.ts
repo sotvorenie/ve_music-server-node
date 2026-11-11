@@ -19,7 +19,7 @@ import {deletePath} from "@composables/useDeletePath.js";
 
 import {audioFormatException, photoFormatException} from "@utils/httpExceptions.js";
 
-const addMusic = async (
+const createMusic = async (
     audioFile: Express.Multer.File,
     title: string,
     genreId: number,
@@ -109,7 +109,7 @@ export const uploadMusic = async (
         await fs.rename(files.preview.path, targetPreviewPath)
     }
 
-    const result = await addMusic(
+    const result = await createMusic(
         files.music,
         name,
         genreId,
