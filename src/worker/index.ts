@@ -24,6 +24,6 @@ const main = async () => {
 
         await processingMusic(music)
     }
-    }
+}
 
 main().then()
