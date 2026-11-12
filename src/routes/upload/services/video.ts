@@ -4,13 +4,16 @@ export const uploadVideo = async (
     id: number,
     file: Express.Multer.File,
 ) => {
-    return db.music.update({
-        where: {
-            id,
-        },
-        data: {
-            urlWithClip: file.path,
-            status: 'PENDING',
-        },
-    })
+    await Promise.all([
+        db.music.update({
+            where: {
+                id,
+            },
+            data: {
+                urlWithClip: file.path,
+                status: 'PENDING',
+            },
+        }),
+        db.$executeRaw`NOTIFY music_pending;`
+    ])
 }

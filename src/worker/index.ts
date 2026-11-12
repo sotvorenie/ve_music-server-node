@@ -1,6 +1,6 @@
+import {Client} from "pg";
 import {db} from "@/db.js";
 
-import {sleep} from "@worker/core/sleep.js";
 import {processingMusic} from "@worker/core/processingMusic.js";
 import {takeNextPending} from "@worker/core/takeNextPending.js";
 
@@ -14,16 +14,24 @@ const main = async () => {
         },
     })
 
-    while (true) {
-        const music = await takeNextPending()
+    const listener = new Client({connectionString: process.env.DATABASE_URL})
+    await listener.connect()
+    await listener.query('LISTEN music_pending')
 
-        if (!music) {
-            await sleep(2000)
-            continue
+    const work = async () => {
+        while (true) {
+            const music = await takeNextPending()
+            if (!music) break
+            await processingMusic(music)
         }
-
-        await processingMusic(music)
     }
+
+    listener.on('notification', () => work().catch(err => console.error(err)))
+
+    await work()
 }
 
-main().then()
+main().catch(err => {
+    console.error('Worker fatal:', err)
+    process.exit(1)
+})
