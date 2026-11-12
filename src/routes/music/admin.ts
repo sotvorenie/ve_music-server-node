@@ -18,9 +18,9 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
+import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
-import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 export const adminMusicRouter = Router();
 
