@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { BASE_STORAGE_DIR } from "@/config.js";
 
 export const deletePath = async (
-    url: string | undefined,
+    url: string | undefined | null,
 ) => {
     if (!url) return
     let fullPath = url

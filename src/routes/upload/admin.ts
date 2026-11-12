@@ -10,25 +10,24 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
 import {emptyMusicDataException} from "@utils/httpExceptions.js";
 
-import {deleteTrackVideo} from "@services/deleteTrackVideo.js";
-
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 
+import {pendingResponse} from "@responses/pendingResponse.js";
+
 export const uploadRouter = Router();
+uploadRouter.use(getAdmin())
 
 const upload = multer({storage: uploadStorage})
 
 uploadRouter.post(
     '/music',
-    getAdmin(),
     upload.fields([
         {name: 'music', maxCount: 1},
         {name: 'preview', maxCount: 1},
         {name: 'video', maxCount: 1},
     ]),
-    cleanupTempFiles,
     asyncHandler(async (req: Request, res: Response) => {
         const { name, genre_id: genreId, artists, path: previewPath } = musicInfoSchema.extend(pathSchema.shape).parse(req.body)
 
@@ -39,7 +38,7 @@ uploadRouter.post(
 
         if (!musicFile) throw emptyMusicDataException
 
-        const newMusic = await uploadMusic(
+        await uploadMusic(
             genreId,
             artists,
             name,
@@ -51,13 +50,12 @@ uploadRouter.post(
             }
         )
 
-        res.status(201).json(newMusic)
+        pendingResponse(res)
     })
 )
 
 uploadRouter.post(
     '/audio/:id',
-    getAdmin(),
     upload.fields([
         {name: 'music', maxCount: 1},
     ]),
@@ -69,20 +67,14 @@ uploadRouter.post(
 
         if (!file) throw emptyMusicDataException
 
-        const [url, _] = await Promise.all([
-            uploadAudio(id, file),
-            deleteTrackVideo(id)
-        ])
+        await uploadAudio(id, file)
 
-        res.status(201).json({
-            url,
-        })
+        pendingResponse(res)
     })
 )
 
 uploadRouter.post(
     '/preview/:id',
-    getAdmin(),
     upload.fields([
         {name: 'preview', maxCount: 1},
     ]),
@@ -105,11 +97,9 @@ uploadRouter.post(
 
 uploadRouter.post(
     '/video/:id',
-    getAdmin(),
     upload.fields([
         {name: 'video', maxCount: 1},
     ]),
-    cleanupTempFiles,
     asyncHandler(async (req: Request, res: Response) => {
         const {id} = idSchema.parse(req.params)
 
@@ -118,12 +108,8 @@ uploadRouter.post(
 
         if (!file) throw emptyMusicDataException
 
-        await deleteTrackVideo(id)
+        await uploadVideo(id, file)
 
-        const url = await uploadVideo(id, file)
-
-        res.status(201).json({
-            url,
-        })
+        pendingResponse(res)
     })
 )

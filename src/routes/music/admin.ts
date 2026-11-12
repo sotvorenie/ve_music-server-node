@@ -2,7 +2,7 @@ import {type Request, type Response, Router} from "express";
 
 import {
     deletePreviewForTrack,
-    deleteTrack, getPosters,
+    deleteTrack, deleteVideo, getPosters,
     updateAuditionsForTrack,
     updatePreviewPathForTrack,
     updatePreviewUrlForTrack,
@@ -14,8 +14,6 @@ import {getHasMore} from "@composables/useGetHasMore.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-
-import {deleteTrackVideo} from "@services/deleteTrackVideo.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
@@ -83,7 +81,7 @@ adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (re
 adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
-    await deleteTrackVideo(id)
+    await deleteVideo(id)
 
     successResponse(res)
 }))

@@ -13,8 +13,10 @@ enum UserRole {
 }
 
 enum MusicStatus {
+  PENDING
   PROCESSING
   READY
+  FAILED
 }
 
 enum SearchType {
@@ -67,7 +69,7 @@ model Music {
   segmentsCount Int         @default(0) @map("segments_count")
   codec         String      @default("mp3")
   bitrates      Int[]       @default([])
-  status        MusicStatus @default(PROCESSING)
+  status        MusicStatus @default(PENDING)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

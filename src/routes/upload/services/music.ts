@@ -3,84 +3,14 @@ import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
 import {
-    ALLOWED_MUSIC_SUFFIX,
     ALLOWED_PHOTO_SUFFIX,
     PREVIEWS_DIRECTORY,
     segmentTime,
-    TRACKS_DIRECTORY
 } from "@/config.js";
 
-import {addVideo} from "@routes/upload/services/helpers.js";
-
 import {createUrl} from "@composables/useCreateUrl.js";
-import {getAudioInfo} from "@composables/useGetAudioInfo.js";
-import {createAudio} from "@composables/useCreateAudio.js";
-import {deletePath} from "@composables/useDeletePath.js";
 
-import {audioFormatException, photoFormatException} from "@utils/httpExceptions.js";
-
-const createMusic = async (
-    audioFile: Express.Multer.File,
-    title: string,
-    genreId: number,
-    artistsIds: number[],
-    codec: string,
-) => {
-    let id: number = -1
-
-    const musicSuffix = path.extname(audioFile.originalname).toLowerCase()
-    if (!ALLOWED_MUSIC_SUFFIX.has(musicSuffix)) throw audioFormatException
-
-    try {
-        const duration = await getAudioInfo(audioFile.path, 'duration')
-
-        await fs.mkdir(TRACKS_DIRECTORY, {recursive: true})
-
-        const music = await db.music.create({
-            data: {
-                name: title,
-                url: `pending-${crypto.randomUUID()}`,
-                duration,
-                previewUrl: '',
-                urlWithClip: null,
-                genreId,
-                artists: {
-                    connect: artistsIds.map(artistId => ({id: artistId}))
-                },
-                codec,
-                segmentTime,
-                status: 'PROCESSING',
-            },
-            select: {
-                id: true,
-            }
-        })
-        id = music.id
-
-        const targetMusicPath = path.join(TRACKS_DIRECTORY, String(id))
-        await fs.mkdir(targetMusicPath, {recursive: true})
-
-        const {bitrates, segmentsCount} = await createAudio(
-            audioFile.path,
-            targetMusicPath,
-            segmentTime,
-        )
-
-        return {
-            id,
-            duration,
-            segmentsCount,
-            bitrates,
-            targetMusicPath,
-        }
-    } catch (err) {
-        if (id !== -1) {
-            await deletePath(path.join(TRACKS_DIRECTORY, String(id)))
-            await db.music.delete({ where: { id } }).catch()
-        }
-        throw err
-    }
-}
+import {photoFormatException} from "@utils/httpExceptions.js";
 
 export const uploadMusic = async (
     genreId: number,
@@ -100,7 +30,6 @@ export const uploadMusic = async (
     }
 
     let targetPreviewPath: string | null = null
-    let targetVideoPath: string | null = null
 
     await fs.mkdir(PREVIEWS_DIRECTORY, {recursive: true})
 
@@ -109,36 +38,20 @@ export const uploadMusic = async (
         await fs.rename(files.preview.path, targetPreviewPath)
     }
 
-    const result = await createMusic(
-        files.music,
-        name,
-        genreId,
-        artists,
-        'aac',
-    )
-    const {id, duration, segmentsCount, bitrates} = result
-
-    if (!!files.video) {
-        targetVideoPath = await addVideo(
-            files.video,
-            {
-                id,
-                duration,
-            },
-        )
-    }
-
-    return db.music.update({
-        where: {
-            id,
-        },
+    return db.music.create({
         data: {
-            url: createUrl(path.join(TRACKS_DIRECTORY, String(id), 'master.m3u8')),
+            name,
+            url: files.music.path,
+            duration: 0,
             previewUrl: targetPreviewPath ? createUrl(targetPreviewPath) : (previewPath || ''),
-            urlWithClip: targetVideoPath ? createUrl(targetVideoPath) : '',
-            status: 'READY',
-            segmentsCount,
-            bitrates,
+            urlWithClip: files.video?.path ?? null,
+            genreId,
+            artists: {
+                connect: artists.map(artistId => ({id: artistId}))
+            },
+            codec: 'aac',
+            segmentTime,
+            status: 'PENDING',
         },
     })
 }

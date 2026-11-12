@@ -1,10 +1,11 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 
+import {runFfmpeg} from "@worker/tasks/useRunFfmpeg.js";
+
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
-import {runFfmpeg} from "@composables/useRunFfmpeg.js";
-import {deletePath} from "@composables/useDeletePath.js";
 import {safeReaddir} from "@composables/useSafeReaddir.js";
+import {createMasterPath} from "@composables/useCreateMasterPath.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
 
@@ -47,6 +48,7 @@ const getSegmentsCount = async (
 }
 
 export const createAudio = async (
+    audioId: number,
     inputPath: string,
     outputDir: string,
     segmentTime: number,
@@ -65,35 +67,30 @@ export const createAudio = async (
 
     await fs.mkdir(outputDir, { recursive: true })
 
-    try {
-        for (const bitrate of targetBitrates) {
-            const bitrateDir = path.join(outputDir, `${bitrate}k`)
-            await fs.mkdir(bitrateDir, {recursive: true})
+    for (const bitrate of targetBitrates) {
+        const bitrateDir = path.join(outputDir, `${bitrate}k`)
+        await fs.mkdir(bitrateDir, {recursive: true})
 
-            await segmentAudio(
-                inputPath,
-                bitrateDir,
-                segmentTime,
-                bitrate,
-            )
-        }
+        await segmentAudio(
+            inputPath,
+            bitrateDir,
+            segmentTime,
+            bitrate,
+        )
+    }
 
-        let masterContent = '#EXTM3U\n'
-        for (const bitrate of targetBitrates) {
-            const bandwidth = Math.round(bitrate * 1000 * 1.1)
-            masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="mp4a.40.2"\n`
-            masterContent += `${bitrate}k/playlist.m3u8\n`
-        }
-        await fs.writeFile(path.join(outputDir, 'master.m3u8'), masterContent)
+    let masterContent = '#EXTM3U\n'
+    for (const bitrate of targetBitrates) {
+        const bandwidth = Math.round(bitrate * 1000 * 1.1)
+        masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="mp4a.40.2"\n`
+        masterContent += `${bitrate}k/playlist.m3u8\n`
+    }
+    await fs.writeFile(createMasterPath(audioId, 'audio'), masterContent)
 
-        const segmentsCount = await getSegmentsCount(outputDir)
+    const segmentsCount = await getSegmentsCount(outputDir)
 
-        return {
-            bitrates: targetBitrates,
-            segmentsCount,
-        }
-    } catch (err) {
-        await deletePath(outputDir)
-        throw err
+    return {
+        bitrates: targetBitrates,
+        segmentsCount,
     }
 }

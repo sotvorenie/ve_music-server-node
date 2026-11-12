@@ -52,6 +52,7 @@
       "@selects/*": ["src/selects/*"],
       "@services/*": ["src/services/*"],
       "@utils/*": ["src/utils/*"],
+      "@worker/*": ["src/worker/*"],
     }
   }
 }
