@@ -16,30 +16,13 @@ const segmentVideo = async (
     inputPath: string,
     outputDir: string,
     segmentTime: number,
-    height: number,
     audioDuration: number,
 ): Promise<void> => {
-    const gop = segmentTime * 2
-
-    const level =
-        height >= 2160 ? '5.1' :
-            height >= 1440 ? '5.0' :
-                height >= 1080 ? '4.1' : '3.1'
-
     const args = [
         '-i', inputPath,
         '-t', String(audioDuration),
         '-map', '0:v:0',
-        '-vf', `scale=-2:${height}:flags=lanczos`,
-        '-c:v', 'libx264',
-        '-profile:v', 'main',
-        '-level', level,
-        '-preset', 'veryfast',
-        '-crf', '21',
-        '-pix_fmt', 'yuv420p',
-        '-g', String(gop),
-        '-keyint_min', String(gop),
-        '-sc_threshold', '0',
+        '-c:v', 'copy',
         '-an',
         '-f', 'hls',
         '-hls_time', String(segmentTime),
@@ -82,16 +65,15 @@ export const createVideo = async (
     },
 ): Promise<void> => {
     const height = await getVideoInfo(inputPath, 'height')
-    const fps = await getVideoInfo(inputPath, 'nb_frames')
+    const fps = await getVideoInfo(inputPath, 'fps')
 
-    await fs.mkdir(inputPath, {recursive: true})
+    await fs.mkdir(outputDir, {recursive: true})
 
     try {
         await segmentVideo(
             inputPath,
             outputDir,
             segmentTime,
-            height,
             audio.duration,
         )
 
