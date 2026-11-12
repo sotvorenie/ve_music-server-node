@@ -33,6 +33,8 @@ export const processingMusic = async (
         let segmentsCount: number = 0
         let bitrates: number[] = []
 
+        let isVideoErr = false
+
         if (!isLink(music.url)) {
             await Promise.all([
                 deletePath(targetMusicPath),
@@ -76,6 +78,17 @@ export const processingMusic = async (
                         duration,
                     },
                 )
+            } else if (isLink(music.url)) {
+                return await db.music.update({
+                    where: {
+                        id,
+                    },
+                    data: {
+                        urlWithClip: null,
+                    },
+                })
+            } else {
+                isVideoErr = true
             }
         }
 
@@ -86,7 +99,7 @@ export const processingMusic = async (
                 },
                 data: {
                     url: isLink(music.url) ? music.url : createUrl(createMasterPath(id, 'audio')),
-                    urlWithClip: (!isLink(music.url) && isLink(music.urlWithClip)) ? null : createUrl(createMasterPath(id, 'video')),
+                    urlWithClip: isVideoErr ? null : (!isLink(music.url) && isLink(music.urlWithClip)) ? null : createUrl(createMasterPath(id, 'video')),
                     status: 'READY',
                     segmentsCount,
                     bitrates,
