@@ -5,7 +5,7 @@ import type {User} from "@/types/express.js";
 import {deletePath} from "@composables/useDeletePath.js";
 import {createAvatar} from "@composables/useCreateAvatar.js";
 
-import {duplicationPasswordException, userException} from "@utils/httpExceptions.js";
+import {duplicationPasswordException, invalidOldPasswordException, userException} from "@utils/httpExceptions.js";
 
 export const updateUserName = async (
     userId: number,
@@ -26,6 +26,7 @@ export const updateUserName = async (
 export const updateUserPassword = async (
     id: number,
     password: string,
+    oldPassword: string,
 ) => {
     const user = await db.user.findUnique({
         where: {
@@ -37,8 +38,11 @@ export const updateUserPassword = async (
     })
     if (!user) throw userException
 
-    const check: boolean = await bcrypt.compare(password, user.password)
-    if (check) throw duplicationPasswordException
+    const isOldValid = await bcrypt.compare(oldPassword, user.password)
+    if (!isOldValid) throw invalidOldPasswordException
+
+    const isSame: boolean = await bcrypt.compare(password, user.password)
+    if (isSame) throw duplicationPasswordException
 
     const newPassword = await bcrypt.hash(password, 10)
 
@@ -48,6 +52,7 @@ export const updateUserPassword = async (
         },
         data: {
             password: newPassword,
+            tokenVersion: {increment: 1},
         },
     })
 }

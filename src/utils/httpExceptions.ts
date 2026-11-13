@@ -28,6 +28,7 @@ export const authException = HttpError(401, "Неверное имя или па
 
 // редактирование данных пользователя
 export const emptyUserDataException = HttpError(400, "Неверные данные пользователя");
+export const invalidOldPasswordException = HttpError(401, "Неверный текущий пароль", 'INVALID_OLD_PASSWORD');
 export const duplicationPasswordException = HttpError(400, "Новый пароль должен отличаться от текущего");
 export const duplicationLoginException = HttpError(400, "Данный логин уже занят!!");
 

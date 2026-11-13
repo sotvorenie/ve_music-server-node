@@ -1,14 +1,13 @@
 import {Router, type Request, type Response} from "express";
 import multer from "multer";
 
-import {roleSchema} from "@routes/user/schemas.js";
-import {deleteUser, getUsers, updateUserLogin, updateUserRole} from "@routes/user/services/index.js";
+import {oldPasswordSchema, roleSchema} from "@routes/user/schemas.js";
+import {deleteUser, getUsers, logoutAll, updateUserLogin, updateUserRole} from "@routes/user/services/index.js";
 import {getUser, updateUserName, updateUserPassword, uploadUserAvatar} from "@routes/user/services/helpers.js";
 
 import {getHasMore} from "@composables/useGetHasMore.js";
 import {uploadStorage} from "@utils/uploadStorage.js";
 import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
-
 import {emptyUserDataException, userException} from "@utils/httpExceptions.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 import {getAdmin} from "@utils/auth.js";
@@ -64,17 +63,17 @@ adminUserRouter.patch('/update_login/:id', getAdmin(), asyncHandler(async (req: 
 
     await updateUserLogin(userId, login)
 
-    return successResponse(res)
+    successResponse(res)
 }))
 
 adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
     const {id: userId} = idSchema.parse(req.params)
-    const {password} = passwordSchema.parse(req.body)
+    const {password, old_password: oldPassword} = passwordSchema.extend(oldPasswordSchema.shape).parse(req.body)
 
     const user = await getUser(userId)
     if (!user) throw userException
 
-    await updateUserPassword(user.id, password)
+    await updateUserPassword(user.id, password, oldPassword)
 }))
 
 adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -122,6 +121,14 @@ adminUserRouter.patch('/update_role/:id', getAdmin(), asyncHandler(async (req: R
     const {role} = roleSchema.parse(req.body)
 
     await updateUserRole(id, role)
+
+    successResponse(res)
+}))
+
+adminUserRouter.post('/logout-all-for-user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+
+    await logoutAll(id)
 
     successResponse(res)
 }))

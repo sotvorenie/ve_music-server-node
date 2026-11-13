@@ -42,7 +42,7 @@ searchRouter.delete('/delete/:id', getUser(), asyncHandler(async (req: Request, 
 
     await deleteFromUserSearchHistory(id, currentUserId)
 
-    return successResponse(res)
+    successResponse(res)
 }))
 
 searchRouter.use('/admin', adminSearchRouter)
