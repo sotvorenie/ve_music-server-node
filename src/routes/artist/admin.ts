@@ -2,7 +2,7 @@ import {type Request, type Response, Router} from 'express';
 import multer from "multer";
 
 import {uploadAvatar} from "@routes/artist/services/helpers.js";
-import {getArtist, createArtist, deleteArtist, updateAvatarPath} from "@routes/artist/services/index.js";
+import {getArtist, createArtist, deleteArtist} from "@routes/artist/services/index.js";
 
 import {uploadStorage} from "@utils/uploadStorage.js";
 import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
@@ -17,7 +17,6 @@ import {updateNameInDB} from "@services/updateNameInDB.js";
 import {deleteAvatar} from "@services/deleteAvatar.js";
 
 import {idSchema} from "@schemas/idSchema.js";
-import {pathSchema} from "@schemas/pathSchema.js";
 import {nameSchema} from "@schemas/nameSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
@@ -115,17 +114,6 @@ adminArtistRouter.post(
         })
     })
 )
-
-adminArtistRouter.patch('/update_avatar_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id} = idSchema.parse(req.params)
-    const {path} = pathSchema.parse(req.body)
-
-    const newUrl = await updateAvatarPath(id, path)
-
-    res.json({
-        url: newUrl.avatarUrl,
-    })
-}))
 
 adminArtistRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
