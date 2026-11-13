@@ -12,7 +12,7 @@ import {emptyMusicDataException} from "@utils/httpExceptions.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {pathSchema} from "@schemas/pathSchema.js";
+import {urlSchema} from "@schemas/urlSchema.js";
 
 import {pendingResponse} from "@responses/pendingResponse.js";
 
@@ -29,7 +29,7 @@ uploadRouter.post(
         {name: 'video', maxCount: 1},
     ]),
     asyncHandler(async (req: Request, res: Response) => {
-        const { name, genre_id: genreId, artists, path: previewPath } = musicInfoSchema.extend(pathSchema.shape).parse(req.body)
+        const { name, genre_id: genreId, artists, url: posterUrl } = musicInfoSchema.extend(urlSchema.shape).parse(req.body)
 
         const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const musicFile = files?.music?.[0]
@@ -42,7 +42,7 @@ uploadRouter.post(
             genreId,
             artists,
             name,
-            previewPath,
+            posterUrl,
             {
                 music: musicFile,
                 preview: previewFile,

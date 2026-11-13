@@ -1,41 +1,27 @@
-import path from "node:path";
-import fs from "node:fs/promises";
 import {db} from "@/db.js";
 
-import {
-    ALLOWED_PHOTO_SUFFIX,
-    PREVIEWS_DIRECTORY,
-    segmentTime,
-} from "@/config.js";
+import {segmentTime,} from "@/config.js";
 
-import {createUrl} from "@composables/useCreateUrl.js";
+import {createPosters} from "@routes/upload/services/helpers.js";
 
-import {photoFormatException} from "@utils/httpExceptions.js";
+import {findMobilePosterByUrl} from "@services/findMobilePosterByUrl.js";
 
 export const uploadMusic = async (
     genreId: number,
     artists: number[],
     name: string,
-    previewPath: string,
+    posterUrl: string | undefined,
     files: {
         music: Express.Multer.File,
         preview: Express.Multer.File | undefined,
         video: Express.Multer.File | undefined,
     }
 ) => {
-    let previewSuffix: string = ''
-    if (files.preview) {
-        previewSuffix = path.extname(files.preview.originalname).toLowerCase()
-        if (!ALLOWED_PHOTO_SUFFIX.has(previewSuffix)) throw photoFormatException
-    }
-
-    let targetPreviewPath: string | null = null
-
-    await fs.mkdir(PREVIEWS_DIRECTORY, {recursive: true})
+    let url = posterUrl ?? null
+    let mobileUrl = findMobilePosterByUrl(posterUrl) ?? null
 
     if (files.preview) {
-        targetPreviewPath = path.join(PREVIEWS_DIRECTORY, `${Date.now()}${previewSuffix}`)
-        await fs.rename(files.preview.path, targetPreviewPath)
+        ({url, mobileUrl} = await createPosters(files.preview))
     }
 
     await Promise.all([
@@ -44,7 +30,8 @@ export const uploadMusic = async (
                 name,
                 url: files.music.path,
                 duration: 0,
-                previewUrl: targetPreviewPath ? createUrl(targetPreviewPath) : (previewPath || ''),
+                previewUrl: url,
+                previewMobileUrl: mobileUrl,
                 urlWithClip: files.video?.path ?? null,
                 genreId,
                 artists: {

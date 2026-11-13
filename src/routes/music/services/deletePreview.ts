@@ -9,6 +9,7 @@ export const deletePreviewForTrack = async (
         },
         data: {
             previewUrl: null,
+            previewMobileUrl: null,
         },
     })
 }

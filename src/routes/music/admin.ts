@@ -8,7 +8,7 @@ import {
     updatePreviewUrlForTrack,
     updateTrack
 } from "@routes/music/services/index.js";
-import {auditionsCountSchema, urlSchema} from "@routes/music/schemas.js";
+import {auditionsCountSchema} from "@routes/music/schemas.js";
 
 import {getHasMore} from "@composables/useGetHasMore.js";
 
@@ -19,6 +19,7 @@ import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
 import {pathSchema} from "@schemas/pathSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
+import {urlSchema} from "@schemas/urlSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
@@ -86,7 +87,7 @@ adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req:
     successResponse(res)
 }))
 
-adminMusicRouter.get('/get_posters', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.get('/posters', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {page, limit} = pageLimitSchema.parse(req.query)
 
     const {posters, skip, total} = await getPosters(page, limit)

@@ -20,7 +20,3 @@ export const getRandomMusicSchema = musicSchemaGenreIdAndArtistIdAndName.extend(
 export const setViewSchema = z.object({
     set_view: z.string().default("true").transform((v) => v === "true"),
 })
-
-export const urlSchema = z.object({
-    url: z.string()
-})

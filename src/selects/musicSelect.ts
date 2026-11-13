@@ -5,6 +5,7 @@ export const musicBaseSelect = {
     name: true,
     duration: true,
     previewUrl: true,
+    previewMobileUrl: true,
     url: true,
 }
 
