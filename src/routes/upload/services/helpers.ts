@@ -41,7 +41,7 @@ export const createPosters = async (
 
         return {
             url: createUrl(targetPath),
-            mobileUrl: createUrl(targetMobilePath),
+            urlSmall: createUrl(targetMobilePath),
         }
     } catch (err) {
         if (targetPath) await deletePath(targetPath)

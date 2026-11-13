@@ -5,7 +5,7 @@ import {PREVIEWS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 
-const findMobilePosterByPath = (
+const findSmallPosterByPath = (
     posterPath: string,
 ) => {
     const {name} = path.parse(posterPath)
@@ -17,7 +17,7 @@ export const updatePreviewPathForTrack = async (
     id: number,
     path: string,
 ) => {
-    const mobilePosterUrl = findMobilePosterByPath(path)
+    const smallPosterUrl = findSmallPosterByPath(path)
 
     const data = await db.music.update({
         where: {
@@ -25,7 +25,7 @@ export const updatePreviewPathForTrack = async (
         },
         data: {
             previewUrl: createUrl(path),
-            previewMobileUrl: mobilePosterUrl,
+            previewX480Url: smallPosterUrl,
         },
         select: {
             previewUrl: true,

@@ -1,12 +1,12 @@
 import {db} from "@/db.js";
 
-import {findMobilePosterByUrl} from "@services/findMobilePosterByUrl.js";
+import {findSmallPosterByUrl} from "@services/findSmallPosterByUrl.js";
 
 export const updatePreviewUrlForTrack = async (
     id: number,
     url: string,
 ) => {
-    const mobilePosterUrl = findMobilePosterByUrl(url)
+    const smallPosterUrl = findSmallPosterByUrl(url)
 
     return db.music.update({
         where: {
@@ -14,7 +14,7 @@ export const updatePreviewUrlForTrack = async (
         },
         data: {
             previewUrl: url,
-            previewMobileUrl: mobilePosterUrl,
+            previewX480Url: smallPosterUrl,
         },
     })
 }

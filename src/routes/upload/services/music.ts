@@ -4,7 +4,7 @@ import {segmentTime,} from "@/config.js";
 
 import {createPosters} from "@routes/upload/services/helpers.js";
 
-import {findMobilePosterByUrl} from "@services/findMobilePosterByUrl.js";
+import {findSmallPosterByUrl} from "@services/findSmallPosterByUrl.js";
 
 export const uploadMusic = async (
     genreId: number,
@@ -18,10 +18,10 @@ export const uploadMusic = async (
     }
 ) => {
     let url = posterUrl ?? null
-    let mobileUrl = findMobilePosterByUrl(posterUrl) ?? null
+    let urlSmall = findSmallPosterByUrl(posterUrl) ?? null
 
     if (files.preview) {
-        ({url, mobileUrl} = await createPosters(files.preview))
+        ({url, urlSmall} = await createPosters(files.preview))
     }
 
     await Promise.all([
@@ -31,7 +31,7 @@ export const uploadMusic = async (
                 url: files.music.path,
                 duration: 0,
                 previewUrl: url,
-                previewMobileUrl: mobileUrl,
+                previewX480Url: urlSmall,
                 urlWithClip: files.video?.path ?? null,
                 genreId,
                 artists: {
