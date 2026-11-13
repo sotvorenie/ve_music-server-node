@@ -1,18 +1,11 @@
 import bcrypt from "bcryptjs";
-import path from "node:path";
-import fs from "node:fs/promises";
 import {db} from "@/db.js";
-
 import type {User} from "@/types/express.js";
-import {ALLOWED_PHOTO_SUFFIX, AVATARS_DIRECTORY} from "@/config.js";
 
-import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
+import {createAvatar} from "@composables/useCreateAvatar.js";
 
-import {
-    duplicationPasswordException,
-    photoFormatException,
-} from "@utils/httpExceptions.js";
+import {duplicationPasswordException} from "@utils/httpExceptions.js";
 
 export const updateUserName = async (
     userId: number,
@@ -41,11 +34,11 @@ export const updateUserPassword = async (
 
     await db.user.update({
         where: {
-            id: currentUser.id
+            id: currentUser.id,
         },
         data: {
             password: newPassword,
-        }
+        },
     })
 }
 
@@ -53,27 +46,22 @@ export const uploadUserAvatar = async (
     currentUser: User,
     avatarFile: Express.Multer.File,
 ) => {
-    const avatarSuffix = path.extname(avatarFile.originalname).toLowerCase()
-    if (!ALLOWED_PHOTO_SUFFIX.has(avatarSuffix)) throw photoFormatException
+    const url = await createAvatar(avatarFile, currentUser.id, 'user')
 
-    await fs.mkdir(AVATARS_DIRECTORY, {recursive: true})
-
-    const targetAvatarPath = path.join(AVATARS_DIRECTORY, `${currentUser.id}_${Date.now()}${avatarSuffix}`)
-    await fs.rename(avatarFile.path, targetAvatarPath)
-
-    const newAvatarUrl = createUrl(targetAvatarPath)
     await db.user.update({
         where: {
-            id: currentUser.id
+            id: currentUser.id,
         },
         data: {
-            avatarUrl: newAvatarUrl,
-        }
+            avatarUrl: url,
+        },
     })
 
-    if (currentUser.avatarUrl) await deletePath(currentUser.avatarUrl)
+    try {
+        if (currentUser.avatarUrl) await deletePath(currentUser.avatarUrl)
+    } catch {}
 
-    return newAvatarUrl
+    return url
 }
 
 export const getUser = async (id: number) => {

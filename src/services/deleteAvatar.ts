@@ -13,7 +13,7 @@ export const deleteAvatar = async (
             avatarUrl: true,
         },
     })
-    if (!item?.avatarUrl) throw emptyException
+    if (!item.avatarUrl) throw emptyException
 
     await model.update({
         where: {
