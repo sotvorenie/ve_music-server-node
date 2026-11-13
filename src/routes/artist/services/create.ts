@@ -12,8 +12,10 @@ export const createArtist = async (
         },
         select: {
             id: true,
-        }
+        },
     })
 
-    return await uploadAvatar(id, avatarFile)
+    try {
+        await uploadAvatar(id, avatarFile)
+    } catch {}
 }

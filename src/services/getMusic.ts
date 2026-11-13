@@ -10,7 +10,7 @@ export const getMusic = async (
     id: number,
     page: number,
     limit: number,
-    model: any,
+    model: (typeof modelMap)[keyof typeof modelMap],
 ) => {
     const skip = getSkip(page, limit)
 

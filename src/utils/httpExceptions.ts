@@ -37,12 +37,11 @@ export const musicBitrateException = HttpError(400, "Неизвестный би
 
 // загрузка файлов
 export const photoFormatException = HttpError(400, "Неподдерживаемый формат фото");
-export const videoFormatException = HttpError(400, "Неподдерживаемый формат видео");
-export const audioFormatException = HttpError(400, "Неподдерживаемый формат аудио");
 export const emptyMusicDataException = HttpError(400, "Неверные данные музыки");
 
 // исполнитель
 export const artistException = HttpError(404, "Исполнитель не найден");
+export const emptyArtistDataException = HttpError(400, "Неверные данные исполнителя");
 
 // пользователь
 export const userException = HttpError(404, "Пользователь не найден");

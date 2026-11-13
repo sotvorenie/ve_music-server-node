@@ -6,10 +6,9 @@ import {getArtist, createArtist, deleteArtist} from "@routes/artist/services/ind
 
 import {uploadStorage} from "@utils/uploadStorage.js";
 import {cleanupTempFiles} from "@utils/cleanupTempFiles.js";
-
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
-import {artistException, emptyUserDataException, musicException,} from "@utils/httpExceptions.js";
+import {artistException, emptyArtistDataException} from "@utils/httpExceptions.js";
 
 import {getMusic} from "@services/getMusic.js";
 import {modelMap} from "@services/modelMap.js";
@@ -21,6 +20,7 @@ import {nameSchema} from "@schemas/nameSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
+import {createdResponse} from "@responses/createdResponse.js";
 
 export const adminArtistRouter = Router();
 
@@ -40,8 +40,6 @@ adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request
     const {id, page, limit} = idSchema.extend(pageLimitSchema.shape).parse(req.params)
 
     const music = await getMusic(id, page, limit, modelMap.artist)
-
-    if (!music?.length) throw musicException
 
     res.json({
         data: music,
@@ -65,13 +63,11 @@ adminArtistRouter.post(
         const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const avatarFile = files?.avatar?.[0]
 
-        if (!avatarFile) throw emptyUserDataException
+        if (!avatarFile) throw emptyArtistDataException
 
-        const newAvatarUrl = await createArtist(name, avatarFile)
+        await createArtist(name, avatarFile)
 
-        res.status(201).json({
-            url: newAvatarUrl,
-        })
+        createdResponse(res)
     })
 )
 
@@ -105,7 +101,7 @@ adminArtistRouter.post(
         const files = req.files as Record<string, Express.Multer.File[]> | undefined
         const avatarFile = files?.avatar?.[0]
 
-        if (!avatarFile) throw emptyUserDataException
+        if (!avatarFile) throw emptyArtistDataException
 
         const newAvatarUrl = await uploadAvatar(id, avatarFile)
 
