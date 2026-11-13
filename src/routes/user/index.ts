@@ -22,7 +22,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const userRouter = Router();
 
-userRouter.patch('/update_name', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.patch('/name', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {name} = nameSchema.parse(req.body)
     const currentUserId = req.user!.id
 
@@ -31,7 +31,7 @@ userRouter.patch('/update_name', getUser(), asyncHandler(async (req: Request, re
     successResponse(res)
 }))
 
-userRouter.patch('/update_password', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.patch('/password', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {password, old_password: oldPassword} = passwordSchema.extend(oldPasswordSchema.shape).parse(req.body)
     const currentUser = req.user!
 
@@ -42,7 +42,7 @@ userRouter.patch('/update_password', getUser(), asyncHandler(async (req: Request
 
 const upload = multer({storage: uploadStorage})
 userRouter.post(
-    '/upload_avatar',
+    '/avatar',
     getUser(),
     upload.fields([
         {name: 'avatar', maxCount: 1},
@@ -65,7 +65,7 @@ userRouter.post(
     })
 )
 
-userRouter.patch('/delete_avatar', getUser(), asyncHandler(async (req: Request, res: Response) => {
+userRouter.delete('/avatar', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUser = req.user!
 
     await deleteAvatar(currentUser.id, modelMap.user, userException)

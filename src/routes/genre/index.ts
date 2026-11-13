@@ -9,7 +9,7 @@ import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
 export const genreRouter = Router();
 
-genreRouter.get('/all', asyncHandler(async (req: Request, res: Response) => {
+genreRouter.get('/', asyncHandler(async (req: Request, res: Response) => {
     const {is_admin: isAdmin} = isAdminSchema.parse(req.query)
 
     const genres = await getGenres(isAdmin)

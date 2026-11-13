@@ -13,7 +13,7 @@ import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
 export const artistRouter = Router();
 
-artistRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
+artistRouter.get('/', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name, is_admin: isAdmin} = pageLimitSchema.extend(isAdminSchema.shape).extend(nameOptionalSchema.shape).parse(req.query)
 
     const {artists, total, skip} = await getArtists(page, limit, name, isAdmin)

@@ -20,7 +20,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const adminHistoryRouter = Router();
 
-adminHistoryRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminHistoryRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
 
@@ -37,7 +37,7 @@ adminHistoryRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req
     })
 }))
 
-adminHistoryRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminHistoryRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: musicId} = idSchema.parse(req.params)
     const {user_id: userId} = userIdSchema.parse(req.query)
 

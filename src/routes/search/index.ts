@@ -17,7 +17,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const searchRouter = Router();
 
-searchRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
+searchRouter.get('/', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const currentUserId = req.user!.id
 
     const search = await getUserSearchHistory(currentUserId)
@@ -27,7 +27,7 @@ searchRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Resp
     })
 }))
 
-searchRouter.post('/set', getUser(), asyncHandler(async (req: Request, res: Response) => {
+searchRouter.post('/', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const { search, type } = searchSchema.extend(typeSchema.shape).parse(req.body)
     const currentUserId = req.user!.id
 
@@ -36,7 +36,7 @@ searchRouter.post('/set', getUser(), asyncHandler(async (req: Request, res: Resp
     res.json(newSearch)
 }))
 
-searchRouter.delete('/delete/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
+searchRouter.delete('/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const currentUserId = req.user!.id
 

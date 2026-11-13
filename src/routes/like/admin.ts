@@ -18,7 +18,7 @@ import {nameOptionalSchema} from "@schemas/nameSchema.js";
 
 export const adminLikeRouter = Router();
 
-adminLikeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminLikeRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: userId} = idSchema.parse(req.params)
     const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
 
@@ -35,7 +35,7 @@ adminLikeRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: R
     })
 }))
 
-adminLikeRouter.post('/add/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminLikeRouter.post('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {user_id: userId} = userIdSchema.parse(req.query)
 

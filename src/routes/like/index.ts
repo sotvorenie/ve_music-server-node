@@ -18,7 +18,7 @@ import {nameOptionalSchema} from "@schemas/nameSchema.js";
 
 export const likeRouter = Router();
 
-likeRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
+likeRouter.get('/', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
     const currentUserId = req.user!.id
 
@@ -46,7 +46,7 @@ likeRouter.post('/:id', getUser(), asyncHandler(async (req: Request, res: Respon
     })
 }))
 
-likeRouter.get('/check/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
+likeRouter.get('/:id', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const currentUserId = req.user!.id
 

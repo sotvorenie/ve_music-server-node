@@ -25,7 +25,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const adminMusicRouter = Router();
 
-adminMusicRouter.patch('/update/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const { name, genre_id: genreId, artists } = musicInfoSchema.parse(req.body)
 
@@ -34,7 +34,7 @@ adminMusicRouter.patch('/update/:id', getAdmin(), asyncHandler(async (req: Reque
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/update_preview_path/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/:id/preview/path', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {path} = pathSchema.parse(req.body)
 
@@ -45,7 +45,7 @@ adminMusicRouter.patch('/update_preview_path/:id', getAdmin(), asyncHandler(asyn
     })
 }))
 
-adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/:id/preview/url', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {url} = urlSchema.parse(req.body)
 
@@ -54,7 +54,7 @@ adminMusicRouter.patch('/update_preview_url/:id', getAdmin(), asyncHandler(async
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.patch('/:id/auditions', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const {auditions_count: auditionsCount} = auditionsCountSchema.parse(req.body)
 
@@ -63,7 +63,7 @@ adminMusicRouter.patch('/update_auditions/:id', getAdmin(), asyncHandler(async (
     successResponse(res)
 }))
 
-adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteTrack(id)
@@ -71,7 +71,7 @@ adminMusicRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Requ
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.delete('/:id/preview', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deletePreviewForTrack(id)
@@ -79,7 +79,7 @@ adminMusicRouter.patch('/delete_preview/:id', getAdmin(), asyncHandler(async (re
     successResponse(res)
 }))
 
-adminMusicRouter.patch('/delete_video/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminMusicRouter.delete('/:id/video', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteVideo(id)

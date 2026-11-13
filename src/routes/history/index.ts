@@ -15,7 +15,7 @@ import {nameOptionalSchema} from "@schemas/nameSchema.js";
 
 export const historyRouter = Router();
 
-historyRouter.get('/list', getUser(), asyncHandler(async (req: Request, res: Response) => {
+historyRouter.get('/', getUser(), asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
     const currentUserId = req.user!.id
 

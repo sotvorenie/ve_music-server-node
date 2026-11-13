@@ -36,8 +36,9 @@ adminArtistRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res:
     res.json(artist)
 }))
 
-adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id, page, limit} = idSchema.extend(pageLimitSchema.shape).parse(req.params)
+adminArtistRouter.get('/:id/music', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {page, limit} = pageLimitSchema.parse(req.params)
 
     const music = await getMusic(id, page, limit, modelMap.artist)
 
@@ -51,7 +52,7 @@ adminArtistRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request
 }))
 
 adminArtistRouter.post(
-    '/create',
+    '/',
     getAdmin(),
     upload.fields([
         {name: 'avatar', maxCount: 1},
@@ -71,7 +72,7 @@ adminArtistRouter.post(
     })
 )
 
-adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteArtist(id)
@@ -79,7 +80,7 @@ adminArtistRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Req
     successResponse(res)
 }))
 
-adminArtistRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {name} = nameSchema.parse(req.body)
 
@@ -88,8 +89,8 @@ adminArtistRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req:
     successResponse(res)
 }))
 
-adminArtistRouter.post(
-    '/upload_avatar/:id',
+adminArtistRouter.patch(
+    '/:id/avatar',
     getAdmin(),
     upload.fields([
         {name: 'avatar', maxCount: 1},
@@ -111,7 +112,7 @@ adminArtistRouter.post(
     })
 )
 
-adminArtistRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.delete('/:id/avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteAvatar(id, modelMap.artist, artistException)

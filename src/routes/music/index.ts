@@ -13,7 +13,7 @@ import {isAdminSchema} from "@schemas/isAdminSchema.js";
 
 export const musicRouter = Router();
 
-musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
+musicRouter.get('/', asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name, genre_id: genreId, artist_id: artistId, is_admin: isAdmin} =
         musicSchemaGenreIdAndArtistIdAndName.extend(pageLimitSchema.shape).extend(isAdminSchema.shape).parse(req.query)
 
@@ -37,7 +37,7 @@ musicRouter.get('/list', asyncHandler(async (req: Request, res: Response) => {
     })
 }))
 
-musicRouter.get('/random_list', getUser(false), asyncHandler(async (req: Request, res: Response) => {
+musicRouter.get('/random', getUser(false), asyncHandler(async (req: Request, res: Response) => {
     const {
         name,
         seed,

@@ -25,7 +25,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const adminUserRouter = Router();
 
-adminUserRouter.get('/list', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.get('/', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {page, limit, name} = pageLimitSchema.extend(nameOptionalSchema.shape).parse(req.query)
 
     const {users, total, skip} = await getUsers(name, page, limit)
@@ -50,14 +50,14 @@ adminUserRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: R
     res.json(user)
 }))
 
-adminUserRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
+adminUserRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
     const {id: userId} = idSchema.parse(req.params)
     const {name} = nameSchema.parse(req.body)
 
     await updateUserName(userId, name)
 }))
 
-adminUserRouter.patch('/update_login/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/:id/login', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {login} = loginSchema.parse(req.body)
     const {id: userId} = idSchema.parse(req.params)
 
@@ -66,7 +66,7 @@ adminUserRouter.patch('/update_login/:id', getAdmin(), asyncHandler(async (req: 
     successResponse(res)
 }))
 
-adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
+adminUserRouter.patch('/:id/password', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
     const {id: userId} = idSchema.parse(req.params)
     const {password, old_password: oldPassword} = passwordSchema.extend(oldPasswordSchema.shape).parse(req.body)
 
@@ -76,7 +76,7 @@ adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (re
     await updateUserPassword(user.id, password, oldPassword)
 }))
 
-adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteUser(id)
@@ -86,7 +86,7 @@ adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Reque
 
 const upload = multer({storage: uploadStorage})
 adminUserRouter.post(
-    '/upload_avatar/:id',
+    '/:id/avatar',
     getAdmin(),
     upload.fields([
         {name: 'avatar', maxCount: 1},
@@ -108,7 +108,7 @@ adminUserRouter.post(
     successResponse(res)
 }))
 
-adminUserRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.delete('/:id/avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: userId} = idSchema.parse(req.params)
 
     await deleteAvatar(userId, modelMap.user, userException)
@@ -116,7 +116,7 @@ adminUserRouter.patch('/delete_avatar/:id', getAdmin(), asyncHandler(async (req:
     successResponse(res)
 }))
 
-adminUserRouter.patch('/update_role/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.patch('/:id/role', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {role} = roleSchema.parse(req.body)
 
@@ -125,7 +125,7 @@ adminUserRouter.patch('/update_role/:id', getAdmin(), asyncHandler(async (req: R
     successResponse(res)
 }))
 
-adminUserRouter.post('/logout-all-for-user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminUserRouter.post('/:id/logout-for-all', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await logoutAll(id)

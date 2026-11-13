@@ -26,8 +26,9 @@ adminGenreRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: 
     res.json(genre)
 }))
 
-adminGenreRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
-    const {id, page, limit} = idSchema.extend(pageLimitSchema.shape).parse(req.params)
+adminGenreRouter.get('/:id/music', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {page, limit} = pageLimitSchema.parse(req.params)
 
     const music = await getMusic(id, page, limit, modelMap.genre)
 
@@ -40,7 +41,7 @@ adminGenreRouter.get('/music/:id', getAdmin(), asyncHandler(async (req: Request,
     })
 }))
 
-adminGenreRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminGenreRouter.post('/', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {name} = nameSchema.parse(req.body)
 
     const newItem = await createGenre(name, modelMap.genre)
@@ -48,7 +49,7 @@ adminGenreRouter.post('/create', getAdmin(), asyncHandler(async (req: Request, r
     res.status(201).json(newItem)
 }))
 
-adminGenreRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminGenreRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
 
     await deleteFromDB(id, modelMap.genre)
@@ -56,7 +57,7 @@ adminGenreRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Requ
     successResponse(res)
 }))
 
-adminGenreRouter.patch('/update_name/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminGenreRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {name} = nameSchema.parse(req.body)
 

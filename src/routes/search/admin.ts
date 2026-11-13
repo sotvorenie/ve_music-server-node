@@ -17,7 +17,7 @@ import {successResponse} from "@responses/successResponse.js";
 
 export const adminSearchRouter = Router();
 
-adminSearchRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminSearchRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: userId} = idSchema.parse(req.params)
 
     const search = await getUserSearchHistory(userId)
@@ -27,7 +27,7 @@ adminSearchRouter.get('/all_from_user/:id', getAdmin(), asyncHandler(async (req:
     })
 }))
 
-adminSearchRouter.post('/set_for_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminSearchRouter.post('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { search, type } = searchSchema.extend(typeSchema.shape).parse(req.body)
     const {id: userId} = idSchema.parse(req.params)
 
@@ -36,7 +36,7 @@ adminSearchRouter.post('/set_for_user/:id', getAdmin(), asyncHandler(async (req:
     res.json(newSearch)
 }))
 
-adminSearchRouter.delete('/delete_from_user/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminSearchRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
     const { user_id: userId } = userIdSchema.parse(req.query)
 

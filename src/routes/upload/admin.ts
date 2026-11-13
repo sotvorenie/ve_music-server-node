@@ -55,7 +55,7 @@ uploadRouter.post(
 )
 
 uploadRouter.post(
-    '/audio/:id',
+    '/music/:id/audio',
     upload.fields([
         {name: 'music', maxCount: 1},
     ]),
@@ -74,7 +74,7 @@ uploadRouter.post(
 )
 
 uploadRouter.post(
-    '/preview/:id',
+    '/music/:id/preview',
     upload.fields([
         {name: 'preview', maxCount: 1},
     ]),
@@ -96,7 +96,7 @@ uploadRouter.post(
 )
 
 uploadRouter.post(
-    '/video/:id',
+    '/music/:id/video',
     upload.fields([
         {name: 'video', maxCount: 1},
     ]),
