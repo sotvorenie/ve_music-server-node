@@ -24,7 +24,7 @@ export const createAvatar = async (
     try {
         await fs.mkdir(currentDirectory, {recursive: true})
 
-        targetAvatarPath = path.join(currentDirectory, `${id}_${Date.now()}${avatarSuffix}`)
+        targetAvatarPath = path.join(currentDirectory, `${id}_${Date.now()}.webp`)
 
         await sharp(file.path)
             .resize(320, 320, {
@@ -33,8 +33,6 @@ export const createAvatar = async (
             })
             .webp({quality: 80})
             .toFile(targetAvatarPath)
-
-        await fs.rename(file.path, targetAvatarPath)
 
         return createUrl(targetAvatarPath)
     } catch (err) {
