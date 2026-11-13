@@ -74,7 +74,7 @@ adminUserRouter.patch('/update_password/:id', getAdmin(), asyncHandler(async (re
     const user = await getUser(userId)
     if (!user) throw userException
 
-    await updateUserPassword(user, password)
+    await updateUserPassword(user.id, password)
 }))
 
 adminUserRouter.delete('/delete/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {

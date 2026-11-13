@@ -5,7 +5,7 @@ import type {User} from "@/types/express.js";
 import {deletePath} from "@composables/useDeletePath.js";
 import {createAvatar} from "@composables/useCreateAvatar.js";
 
-import {duplicationPasswordException} from "@utils/httpExceptions.js";
+import {duplicationPasswordException, userException} from "@utils/httpExceptions.js";
 
 export const updateUserName = async (
     userId: number,
@@ -24,17 +24,27 @@ export const updateUserName = async (
 }
 
 export const updateUserPassword = async (
-    currentUser: User,
+    id: number,
     password: string,
 ) => {
-    const check: boolean = await bcrypt.compare(password, currentUser.password)
+    const user = await db.user.findUnique({
+        where: {
+            id,
+        },
+        select: {
+            password: true,
+        },
+    })
+    if (!user) throw userException
+
+    const check: boolean = await bcrypt.compare(password, user.password)
     if (check) throw duplicationPasswordException
 
     const newPassword = await bcrypt.hash(password, 10)
 
     await db.user.update({
         where: {
-            id: currentUser.id,
+            id,
         },
         data: {
             password: newPassword,
@@ -64,18 +74,12 @@ export const uploadUserAvatar = async (
     return url
 }
 
-export const getUser = async (id: number) => {
+export const getUser = async (
+    id: number,
+) => {
     return db.user.findUnique({
         where: {
-            id
+            id,
         },
-        select: {
-            id: true,
-            name: true,
-            login: true,
-            password: true,
-            avatarUrl: true,
-            role: true,
-        }
     })
 }

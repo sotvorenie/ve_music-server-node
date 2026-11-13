@@ -1,15 +1,17 @@
 import type {Response} from "express";
+import type {User} from "@/types/express.js";
 
 import {createJWTToken} from "@utils/auth.js";
 
 export const authResponse = (
     res: Response,
-    user: { id: number; password?: string; [key: string]: any },
+    user: User,
+    isRegister: boolean = false,
 ) => {
-    const {password, ...userWithoutPassword} = user
+    const {tokenVersion, ...userForApp} = user
 
-    return res.status(201).jsonp({
-        user: userWithoutPassword,
-        token: createJWTToken(user.id),
+    return res.status(isRegister ? 201 : 200).json({
+        user: userForApp,
+        token: createJWTToken(user.id, user.tokenVersion),
     })
 }

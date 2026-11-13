@@ -35,7 +35,7 @@ userRouter.patch('/update_password', getUser(), asyncHandler(async (req: Request
     const {password} = passwordSchema.parse(req.body)
     const currentUser = req.user!
 
-    await updateUserPassword(currentUser, password)
+    await updateUserPassword(currentUser.id, password)
 
     return successResponse(res)
 }))

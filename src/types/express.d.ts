@@ -1,12 +1,9 @@
-interface BasePeople {
+export interface User {
     id: number
     name: string
     login: string
-    password: string
-}
-
-export interface User extends BasePeople{
-    avatarUrl?: string | null
+    avatarUrl: string | null
+    tokenVersion: number
 }
 
 declare global {

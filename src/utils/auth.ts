@@ -4,72 +4,86 @@ import {db} from "@/db.js";
 
 import {jwtException} from "@utils/httpExceptions.js";
 
+import {userSelect} from "@selects/userSelect.js";
+
 const SECRET_KEY: string = process.env.SECRET_KEY as string
 
-export const createJWTToken = (userId: number | string) => {
+interface Payload {
+    sub?: string
+    tokenVersion?: number
+}
+
+export const createJWTToken = (
+    userId: number,
+    tokenVersion: number,
+) => {
     const expiresIn = 60 * 60 * 24 * 7
-    const payload = {sub: String(userId)}
+    const payload = {
+        sub: String(userId),
+        tokenVersion,
+    }
     return jwt.sign(payload, SECRET_KEY, {expiresIn})
 }
 
-export const getUser = (required: boolean = true) => {
+export const getUser = (
+    required: boolean = true,
+) => {
     return async (req: Request, res: Response, next: NextFunction) => {
+        const deny = () => res.status(jwtException.status).json({ detail: jwtException.detail })
+        const pass = () => next()
+
         try {
             const authHeader = req.headers.authorization
-            if (!authHeader?.startsWith('Bearer ') && required) {
-                if (required) return res.status(jwtException.status).json({ detail: jwtException.detail })
-                return next()
+            if (!authHeader?.startsWith('Bearer ')) {
+                return required ? deny() : pass()
             }
-            const token = authHeader?.split(' ')[1] as string
-            let payload: { sub: string }
+
+            const token = authHeader.slice('Bearer '.length)
+            let payload: Payload
             try {
-                payload = jwt.verify(token, SECRET_KEY) as { sub: string }
+                payload = jwt.verify(token, SECRET_KEY) as Payload
             } catch {
-                if (!required) return next()
-                return res.status(jwtException.status).json({ detail: jwtException.detail })
+                return required ? deny() : pass()
             }
+
             const user = await db.user.findUnique({
-                where: { id: Number(payload.sub) },
-                select: {
-                    id: true,
-                    name: true,
-                    login: true,
-                    password: true,
-                    avatarUrl: true,
-                    role: true,
-                }
+                where: {
+                    id: Number(payload.sub),
+                },
+                select: userSelect,
             })
-            if (!user && required) return res.status(jwtException.status).json({ detail: jwtException.detail })
-            if (user) req.user = user
+            if (!user) {
+                return required ? deny() : pass()
+            }
+            if ((payload.tokenVersion ?? 0) !== user.tokenVersion) {
+                return required ? deny() : pass()
+            }
+            req.user = user
+
             next()
         } catch (err) {
-            return res.status(jwtException.status).json({ detail: jwtException.detail })
+            return next(err)
         }
     }
 }
 
 export const getAdmin = () => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const authHeader = req.headers.authorization
-            if (!authHeader?.startsWith('Bearer ')) {
-                return res.status(jwtException.status).json({ detail: jwtException.detail })
-            }
+        const deny = () => res.status(jwtException.status).json({ detail: jwtException.detail })
 
-            const response = await fetch(`${process.env.VE_ADMIN_URL}/api/check`, {
+        const authHeader = req.headers.authorization
+        if (!authHeader?.startsWith('Bearer ')) return deny()
+
+        let response
+        try {
+            response = await fetch(`${process.env.VE_ADMIN_URL}/api/check`, {
                 method: 'GET',
-                headers: {
-                    'Authorization': authHeader,
-                    'Content-Type': 'application/json'
-                }
+                headers: {'Authorization': authHeader}
             })
-            if (response.ok) {
-                next()
-            } else {
-                return res.status(jwtException.status).json({ detail: jwtException.detail })
-            }
         } catch (err) {
-            return res.status(jwtException.status).json({ detail: jwtException.detail })
+            return next(err)
         }
+
+        return response.ok ? next() : deny()
     }
 }
