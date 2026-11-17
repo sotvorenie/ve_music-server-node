@@ -60,7 +60,7 @@ export const getUser = (
             }
             req.user = user
 
-            next()
+            pass()
         } catch (err) {
             return next(err)
         }
