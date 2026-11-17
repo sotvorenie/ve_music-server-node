@@ -41,7 +41,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/api', testRouter)
 app.use('/api/auth', authRouter)
-app.use('/api/artist', artistRouter)
+app.use('/api/artists', artistRouter)
 app.use('/api/genres', genreRouter)
 app.use('/api/history', historyRouter)
 app.use('/api/likes', likeRouter)
