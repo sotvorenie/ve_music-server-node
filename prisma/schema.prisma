@@ -65,8 +65,8 @@ model Music {
   auditionsCount Int     @default(0)
   likesCount     Int     @default(0)
 
-  previewUrl       String? @map("preview_url") @db.Text
-  previewMobileUrl String? @map("preview_mobile_url") @db.Text
+  previewUrl     String? @map("preview_url") @db.Text
+  previewX480Url String? @map("preview_x480_url") @db.Text
 
   segmentTime   Int         @default(0) @map("segment_map")
   segmentsCount Int         @default(0) @map("segments_count")

@@ -5,7 +5,7 @@ import {PREVIEWS_DIRECTORY} from "@/config.js";
 import {formatPath} from "@composables/useFormatPath.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 
-export const findMobilePosterByUrl = (
+export const findSmallPosterByUrl = (
     posterUrl: string | undefined,
 ) => {
     if (!posterUrl) return null

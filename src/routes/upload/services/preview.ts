@@ -6,7 +6,7 @@ export const uploadPreview = async (
     id: number,
     file: Express.Multer.File,
 ) => {
-    const {url, mobileUrl} = await createPosters(file)
+    const {url, urlSmall} = await createPosters(file)
 
     await db.music.update({
         where: {
@@ -14,7 +14,7 @@ export const uploadPreview = async (
         },
         data: {
             previewUrl: url,
-            previewMobileUrl: mobileUrl,
+            previewX480Url: urlSmall,
         },
     })
 
