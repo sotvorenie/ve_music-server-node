@@ -56,7 +56,6 @@ userRouter.post(
 
         if (!avatarFile) throw emptyUserDataException
 
-
         const newAvatarUrl = await uploadUserAvatar(currentUser, avatarFile)
 
         res.status(201).json({
