@@ -68,7 +68,7 @@ adminArtistRouter.post(
 
         await createArtist(name, avatarFile)
 
-        createdResponse(res)
+        return createdResponse(res)
     })
 )
 
@@ -77,7 +77,7 @@ adminArtistRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, r
 
     await deleteArtist(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminArtistRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -86,7 +86,7 @@ adminArtistRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Reques
 
     await updateNameInDB(id, name, modelMap.artist)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminArtistRouter.patch(
@@ -117,5 +117,5 @@ adminArtistRouter.delete('/:id/avatar', getAdmin(), asyncHandler(async (req: Req
 
     await deleteAvatar(id, modelMap.artist, artistException)
 
-    successResponse(res)
+    return successResponse(res)
 }))

@@ -81,7 +81,7 @@ adminUserRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res
 
     await deleteUser(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 const upload = multer({storage: uploadStorage})
@@ -105,7 +105,7 @@ adminUserRouter.post(
 
     await uploadUserAvatar(user, avatarFile)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminUserRouter.delete('/:id/avatar', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -113,7 +113,7 @@ adminUserRouter.delete('/:id/avatar', getAdmin(), asyncHandler(async (req: Reque
 
     await deleteAvatar(userId, modelMap.user, userException)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminUserRouter.patch('/:id/role', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -122,7 +122,7 @@ adminUserRouter.patch('/:id/role', getAdmin(), asyncHandler(async (req: Request,
 
     await updateUserRole(id, role)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminUserRouter.post('/:id/logout-for-all', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -130,5 +130,5 @@ adminUserRouter.post('/:id/logout-for-all', getAdmin(), asyncHandler(async (req:
 
     await logoutAll(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))

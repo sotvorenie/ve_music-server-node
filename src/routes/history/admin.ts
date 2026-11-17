@@ -43,5 +43,5 @@ adminHistoryRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, 
 
     await deleteHistory(userId, musicId)
 
-    successResponse(res)
+    return successResponse(res)
 }))

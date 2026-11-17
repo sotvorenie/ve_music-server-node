@@ -3,6 +3,8 @@ import {db} from "@/db.js";
 
 import {registrationException} from "@utils/httpExceptions.js";
 
+import {userSelect} from "@selects/userSelect.js";
+
 export const register = async (
     login: string,
     password: string,
@@ -26,5 +28,6 @@ export const register = async (
             name: name.trim(),
             password: hashedPassword,
         },
+        select: userSelect
     })
 }

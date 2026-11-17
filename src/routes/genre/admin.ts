@@ -54,7 +54,7 @@ adminGenreRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, re
 
     await deleteFromDB(id, modelMap.genre)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminGenreRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -63,5 +63,5 @@ adminGenreRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request
 
     await updateNameInDB(id, name, modelMap.genre)
 
-    successResponse(res)
+    return successResponse(res)
 }))

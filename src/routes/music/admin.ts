@@ -31,7 +31,7 @@ adminMusicRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res
 
     await updateTrack(id, genreId, name, artists)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.patch('/:id/preview/path', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -51,7 +51,7 @@ adminMusicRouter.patch('/:id/preview/url', getAdmin(), asyncHandler(async (req: 
 
     await updatePreviewUrlForTrack(id, url)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.patch('/:id/auditions', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ adminMusicRouter.patch('/:id/auditions', getAdmin(), asyncHandler(async (req: Re
 
     await updateAuditionsForTrack(id, auditionsCount)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -68,7 +68,7 @@ adminMusicRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, re
 
     await deleteTrack(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.delete('/:id/preview', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -76,7 +76,7 @@ adminMusicRouter.delete('/:id/preview', getAdmin(), asyncHandler(async (req: Req
 
     await deletePreviewForTrack(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.delete('/:id/video', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
@@ -84,7 +84,7 @@ adminMusicRouter.delete('/:id/video', getAdmin(), asyncHandler(async (req: Reque
 
     await deleteVideo(id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 adminMusicRouter.get('/posters', getAdmin(), asyncHandler(async (req: Request, res: Response) => {

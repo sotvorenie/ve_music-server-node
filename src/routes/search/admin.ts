@@ -42,5 +42,5 @@ adminSearchRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, r
 
     await deleteFromUserSearchHistory(id, userId)
 
-    successResponse(res)
+    return successResponse(res)
 }))

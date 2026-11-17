@@ -28,7 +28,7 @@ userRouter.patch('/name', getUser(), asyncHandler(async (req: Request, res: Resp
 
     await updateUserName(currentUserId, name)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 userRouter.patch('/password', getUser(), asyncHandler(async (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ userRouter.patch('/password', getUser(), asyncHandler(async (req: Request, res: 
 
     await updateUserPassword(currentUser.id, password, oldPassword)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 const upload = multer({storage: uploadStorage})
@@ -69,7 +69,7 @@ userRouter.delete('/avatar', getUser(), asyncHandler(async (req: Request, res: R
 
     await deleteAvatar(currentUser.id, modelMap.user, userException)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 userRouter.post('/logout-all', getUser(), asyncHandler(async (req: Request, res: Response) => {
@@ -77,7 +77,7 @@ userRouter.post('/logout-all', getUser(), asyncHandler(async (req: Request, res:
 
     await logoutAll(currentUser.id)
 
-    successResponse(res)
+    return successResponse(res)
 }))
 
 userRouter.use('/admin', adminUserRouter)

@@ -50,7 +50,7 @@ uploadRouter.post(
             }
         )
 
-        pendingResponse(res)
+        return pendingResponse(res)
     })
 )
 
@@ -69,7 +69,7 @@ uploadRouter.post(
 
         await uploadAudio(id, file)
 
-        pendingResponse(res)
+        return pendingResponse(res)
     })
 )
 
@@ -110,6 +110,6 @@ uploadRouter.post(
 
         await uploadVideo(id, file)
 
-        pendingResponse(res)
+        return pendingResponse(res)
     })
 )
