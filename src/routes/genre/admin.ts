@@ -57,7 +57,7 @@ adminGenreRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, re
     successResponse(res)
 }))
 
-adminGenreRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminGenreRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {name} = nameSchema.parse(req.body)
 
