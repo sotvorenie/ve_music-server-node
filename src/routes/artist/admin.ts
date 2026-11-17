@@ -80,7 +80,7 @@ adminArtistRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, r
     successResponse(res)
 }))
 
-adminArtistRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+adminArtistRouter.patch('/:id/name', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id} = idSchema.parse(req.params)
     const {name} = nameSchema.parse(req.body)
 
