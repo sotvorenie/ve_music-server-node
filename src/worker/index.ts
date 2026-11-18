@@ -6,14 +6,16 @@ import {processingMusic} from "@worker/core/processingMusic.js";
 import {takeNextPending} from "@worker/core/takeNextPending.js";
 
 const main = async () => {
-    await db.music.updateMany({
-        where: {
-            status: 'PROCESSING',
-        },
-        data: {
-            status: 'PENDING',
-        },
-    })
+    try {
+        await db.music.updateMany({
+            where: {
+                status: 'PROCESSING',
+            },
+            data: {
+                status: 'PENDING',
+            },
+        })
+    } catch {}
 
     const listener = new Client({connectionString: process.env.DATABASE_URL})
     await listener.connect()
