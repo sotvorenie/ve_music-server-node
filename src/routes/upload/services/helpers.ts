@@ -6,6 +6,7 @@ import {ALLOWED_PHOTO_SUFFIX, PREVIEWS_DIRECTORY} from "@/config.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
+import {getImageSize} from "@composables/useGetImageSize.js";
 
 import {photoFormatException} from "@utils/httpExceptions.js";
 
@@ -26,22 +27,33 @@ export const createPosters = async (
         targetPath = path.join(PREVIEWS_DIRECTORY, `${dateNow}.webp`)
         targetMobilePath = path.join(PREVIEWS_DIRECTORY, `${dateNow}_mobile.webp`)
 
-        await Promise.all([
+        const {width, height} = await getImageSize(file.path)
+
+        const promises: Promise<unknown>[] = [
             sharp(file.path)
                 .webp({quality: 80})
-                .toFile(targetPath),
-            sharp(file.path)
-                .resize(480, 480, {
-                    fit: "cover",
-                    withoutEnlargement: true,
-                })
-                .webp({quality: 80})
-                .toFile(targetMobilePath)
-        ])
+                .toFile(targetPath)
+        ]
+
+        const isSmall = width <= 480 && height <= 480
+
+        if (!isSmall) {
+            promises.push(
+                sharp(file.path)
+                    .resize(480, 480, {
+                        fit: "cover",
+                        withoutEnlargement: true,
+                    })
+                    .webp({quality: 80})
+                    .toFile(targetMobilePath)
+            )
+        }
+
+        await Promise.all(promises)
 
         return {
             url: createUrl(targetPath),
-            urlSmall: createUrl(targetMobilePath),
+            urlSmall: isSmall ? null : createUrl(targetMobilePath),
         }
     } catch (err) {
         if (targetPath) await deletePath(targetPath)
