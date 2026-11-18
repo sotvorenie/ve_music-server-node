@@ -20,18 +20,18 @@ export const getTracks = async (
         ...(name && {
             name: {
                 contains: name,
-                mode: 'insensitive' as const
-            }
+                mode: 'insensitive' as const,
+            },
         }),
         ...(genreId >= 0 && { genreId }),
         ...(artistId >= 0 && {
             artists: {
                 some: {
-                    id: artistId
-                }
-            }
+                    id: artistId,
+                },
+            },
         }),
-        ...(!isAdmin && { status: 'READY' }),
+        status: isAdmin ? {notIn: ['FAILED']} : 'READY',
     } satisfies Prisma.MusicWhereInput
 
     let [music, total] = await Promise.all([
@@ -39,7 +39,7 @@ export const getTracks = async (
             where,
             skip,
             take: limit,
-            select: isAdmin ? musicAdminSelect : musicBaseWithArtistsSelect
+            select: isAdmin ? musicAdminSelect : musicBaseWithArtistsSelect,
         }),
         db.music.count({where})
     ])
