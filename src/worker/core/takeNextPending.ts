@@ -12,7 +12,11 @@ export const takeNextPending = async () => {
             LIMIT 1
             FOR UPDATE SKIP LOCKED
         )
-        RETURNING *
+        RETURNING
+            *,
+            url_with_clip AS "urlWithClip",
+            preview_url AS "previewUrl",
+            preview_x480_url AS "previewX480Url"
     `
 
     return rows[0] ?? null

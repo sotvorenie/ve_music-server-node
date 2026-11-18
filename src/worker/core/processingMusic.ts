@@ -60,34 +60,44 @@ export const processingMusic = async (
         }
 
         if (music.urlWithClip && !isLink(music.urlWithClip)) {
-            await Promise.all([
-                deletePath(targetVideoPath),
-                deletePath(createMasterPath(id, 'video')),
-            ])
+            try {
+                await Promise.all([
+                    deletePath(targetVideoPath),
+                    deletePath(createMasterPath(id, 'video')),
+                ])
 
-            const videoSuffix = path.extname(music.urlWithClip).toLowerCase()
-            if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
-                await fs.mkdir(targetVideoPath, {recursive: true})
+                const videoSuffix = path.extname(music.urlWithClip).toLowerCase()
+                if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
+                    await fs.mkdir(targetVideoPath, {recursive: true})
 
-                await createVideo(
-                    music.urlWithClip,
-                    targetVideoPath,
-                    segmentTime,
-                    {
-                        id,
-                        duration: duration > 0 ? duration : music.duration,
-                    },
-                )
-            } else if (isLink(music.url)) {
-                return await db.music.update({
-                    where: {
-                        id,
-                    },
-                    data: {
-                        urlWithClip: null,
-                    },
-                })
-            } else {
+                    await createVideo(
+                        music.urlWithClip,
+                        targetVideoPath,
+                        segmentTime,
+                        {
+                            id,
+                            duration: duration > 0 ? duration : music.duration,
+                        },
+                    )
+                } else if (isLink(music.url)) {
+                    return await db.music.update({
+                        where: {
+                            id,
+                        },
+                        data: {
+                            urlWithClip: null,
+                        },
+                    })
+                } else {
+                    isVideoErr = true
+                }
+            } catch {
+                const promises: Promise<unknown>[] = []
+                if (!isLink(music.urlWithClip)) {
+                    promises.push(deletePath(music.urlWithClip))
+                    promises.push(deletePath(targetVideoPath))
+                }
+                await Promise.allSettled(promises)
                 isVideoErr = true
             }
         }

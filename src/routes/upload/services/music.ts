@@ -30,24 +30,23 @@ export const uploadMusic = async (
         } catch {}
     }
 
-    await Promise.all([
-        db.music.create({
-            data: {
-                name,
-                url: files.music.path,
-                duration: 0,
-                previewUrl: url,
-                previewX480Url: urlSmall,
-                urlWithClip: files.video?.path ?? null,
-                genreId,
-                artists: {
-                    connect: artists.map(artistId => ({id: artistId}))
-                },
-                codec: 'aac',
-                segmentTime,
-                status: 'PENDING',
+    await db.music.create({
+        data: {
+            name,
+            url: files.music.path,
+            duration: 0,
+            previewUrl: url,
+            previewX480Url: urlSmall,
+            urlWithClip: files.video?.path ?? null,
+            genreId,
+            artists: {
+                connect: artists.map(artistId => ({id: artistId}))
             },
-        }),
-        db.$executeRaw`NOTIFY music_pending;`,
-    ])
+            codec: 'aac',
+            segmentTime,
+            status: 'PENDING',
+        },
+    })
+
+    await db.$executeRaw`NOTIFY music_pending;`
 }

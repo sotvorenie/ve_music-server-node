@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 
 import {runFfmpeg} from "@worker/tasks/useRunFfmpeg.js";
 
@@ -74,12 +75,18 @@ export const createVideo = async (
     const width = Math.round(height * 16 / 9)
     const bandwidth = Math.round(height * width * 0.08 * fps * 1.3)
 
+    const audioMaster = createMasterPath(audio.id, 'audio')
+    const playlistPath = path.relative(
+        path.dirname(audioMaster),
+        path.join(outputDir, 'playlist.m3u8')
+    ).replaceAll(path.sep, '/')
+
     const masterContent: string = [
         '#EXTM3U',
         '#EXT-X-VERSION:7',
         '#EXT-X-INDEPENDENT-SEGMENTS',
         `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${width}x${height},CODECS="${codecStringFor(height)},mp4a.40.2",AUDIO="aud"`,
-        `playlist.m3u8`
+        playlistPath
     ].join('\n') + '\n'
 
     await createAudioWithClipMaster(audio.id, masterContent)
