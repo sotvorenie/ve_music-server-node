@@ -18,6 +18,7 @@ export const musicBaseWithArtistsSelect = {
 
 export const musicAdminSelect = {
     ... musicBaseWithArtistsSelect,
+    status: true,
     createdAt: true,
     updatedAt: true,
 }
