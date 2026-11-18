@@ -19,11 +19,20 @@ const main = async () => {
     await listener.connect()
     await listener.query('LISTEN music_pending')
 
+    let isWorking = false
+
     const work = async () => {
-        while (true) {
-            const music = await takeNextPending()
-            if (!music) break
-            await processingMusic(music)
+        if (isWorking) return
+        isWorking = true
+
+        try {
+            while (true) {
+                const music = await takeNextPending()
+                if (!music) break
+                await processingMusic(music)
+            }
+        } finally {
+            isWorking = false
         }
     }
 
