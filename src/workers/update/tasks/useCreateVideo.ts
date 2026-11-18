@@ -1,10 +1,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import {runFfmpeg} from "@worker/tasks/useRunFfmpeg.js";
+import {runFfmpeg} from "@/workers/update/tasks/useRunFfmpeg.js";
 
 import {getVideoInfo} from "@composables/useGetVideoInfo.js";
-import {createMasterPath} from "@composables/useCreateMasterPath.js";
+import {getMasterPath} from "@composables/useGetMasterPath.js";
 
 const codecStringFor = (height: number): string =>
     height >= 2160 ? 'avc1.4d4033' :
@@ -39,9 +39,9 @@ const createAudioWithClipMaster = async (
     audioId: number,
     videoMaster: string,
 ) => {
-    const withClipMasterPath = createMasterPath(audioId, 'video')
+    const withClipMasterPath = getMasterPath(audioId, 'video')
 
-    const audioMaster = createMasterPath(audioId, 'audio')
+    const audioMaster = getMasterPath(audioId, 'audio')
     let masterContent = await fs.readFile(audioMaster, 'utf-8')
 
     if (!masterContent.endsWith('\n')) masterContent += '\n'
@@ -75,7 +75,7 @@ export const createVideo = async (
     const width = Math.round(height * 16 / 9)
     const bandwidth = Math.round(height * width * 0.08 * fps * 1.3)
 
-    const audioMaster = createMasterPath(audio.id, 'audio')
+    const audioMaster = getMasterPath(audio.id, 'audio')
     const playlistPath = path.relative(
         path.dirname(audioMaster),
         path.join(outputDir, 'playlist.m3u8')

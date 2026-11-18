@@ -3,7 +3,7 @@ import {db} from "@/db.js";
 export const setFailed = async (
     id: number,
 ) => {
-    return db.music.update({
+    await db.music.update({
         where: {
             id,
         },
@@ -11,4 +11,6 @@ export const setFailed = async (
             status: "FAILED",
         },
     })
+
+    await db.$executeRaw`NOTIFY delete_pending;`
 }

@@ -1,11 +1,11 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 
-import {runFfmpeg} from "@worker/tasks/useRunFfmpeg.js";
+import {runFfmpeg} from "@/workers/update/tasks/useRunFfmpeg.js";
 
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {safeReaddir} from "@composables/useSafeReaddir.js";
-import {createMasterPath} from "@composables/useCreateMasterPath.js";
+import {getMasterPath} from "@composables/useGetMasterPath.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
 
@@ -85,7 +85,7 @@ export const createAudio = async (
         masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="mp4a.40.2"\n`
         masterContent += `${bitrate}k/playlist.m3u8\n`
     }
-    await fs.writeFile(createMasterPath(audioId, 'audio'), masterContent)
+    await fs.writeFile(getMasterPath(audioId, 'audio'), masterContent)
 
     const segmentsCount = await getSegmentsCount(outputDir)
 

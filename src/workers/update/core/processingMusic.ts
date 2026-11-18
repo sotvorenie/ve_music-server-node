@@ -5,15 +5,15 @@ import type {Music} from "@/generated/prisma/client.js";
 
 import {ALLOWED_MUSIC_SUFFIX, ALLOWED_VIDEO_SUFFIX, segmentTime, TRACKS_DIRECTORY, VIDEOS_DIRECTORY} from "@/config.js";
 
-import {isLink} from "@worker/core/isLink.js";
-import {setFailed} from "@worker/core/setFailed.js";
-import {createAudio} from "@worker/tasks/useCreateAudio.js";
-import {createVideo} from "@worker/tasks/useCreateVideo.js";
+import {isLink} from "@/workers/update/core/isLink.js";
+import {setFailed} from "@/workers/update/core/setFailed.js";
+import {createAudio} from "@/workers/update/tasks/useCreateAudio.js";
+import {createVideo} from "@/workers/update/tasks/useCreateVideo.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
-import {createMasterPath} from "@composables/useCreateMasterPath.js";
+import {getMasterPath} from "@composables/useGetMasterPath.js";
 
 export const processingMusic = async (
     music: Music,
@@ -63,7 +63,7 @@ export const processingMusic = async (
             try {
                 await Promise.all([
                     deletePath(targetVideoPath),
-                    deletePath(createMasterPath(id, 'video')),
+                    deletePath(getMasterPath(id, 'video')),
                 ])
 
                 const videoSuffix = path.extname(music.urlWithClip).toLowerCase()
@@ -108,8 +108,8 @@ export const processingMusic = async (
                     id,
                 },
                 data: {
-                    url: isLink(music.url) ? music.url : createUrl(createMasterPath(id, 'audio')),
-                    urlWithClip: isVideoErr ? null : (!isLink(music.url) && isLink(music.urlWithClip)) ? null : createUrl(createMasterPath(id, 'video')),
+                    url: isLink(music.url) ? music.url : createUrl(getMasterPath(id, 'audio')),
+                    urlWithClip: isVideoErr ? null : (!isLink(music.url) && isLink(music.urlWithClip)) ? null : createUrl(getMasterPath(id, 'video')),
                     status: 'READY',
                     segmentsCount,
                     bitrates,

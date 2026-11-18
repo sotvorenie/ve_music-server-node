@@ -2,7 +2,7 @@ import path from "node:path";
 
 import {TRACKS_DIRECTORY} from "@/config.js";
 
-export const createMasterPath = (
+export const getMasterPath = (
     id: number,
     masterType: 'audio' | 'video' = 'audio',
 ) => {

@@ -2,8 +2,8 @@ import 'dotenv/config'
 import {Client} from "pg";
 import {db} from "@/db.js";
 
-import {processingMusic} from "@worker/core/processingMusic.js";
-import {takeNextPending} from "@worker/core/takeNextPending.js";
+import {processingMusic} from "@/workers/update/core/processingMusic.js";
+import {takeNextPending} from "@/workers/update/core/takeNextPending.js";
 
 const main = async () => {
     try {
@@ -44,6 +44,6 @@ const main = async () => {
 }
 
 main().catch(err => {
-    console.error('Worker fatal:', err)
+    console.error('update-worker fatal:', err)
     process.exit(1)
 })
