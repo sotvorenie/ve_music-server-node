@@ -55,7 +55,7 @@ export const createAudio = async (
 ) => {
     const baseBitrates: number[] = [128]
 
-    const originalBitrate: number = await getAudioInfo(inputPath, 'bitrate')
+    const originalBitrate: number = await getAudioInfo(inputPath, 'bitrate') / 1000
     if (originalBitrate === 0) throw musicBitrateException
 
     const targetBitrates = baseBitrates.filter(bitrate => bitrate * 1.1 <= originalBitrate)
