@@ -75,7 +75,7 @@ export const processingMusic = async (
                     segmentTime,
                     {
                         id,
-                        duration,
+                        duration: duration > 0 ? duration : music.duration,
                     },
                 )
             } else if (isLink(music.url)) {
@@ -103,6 +103,7 @@ export const processingMusic = async (
                     status: 'READY',
                     segmentsCount,
                     bitrates,
+                    ...(duration > 0 && {duration}),
                 },
             })
         ]

@@ -79,7 +79,7 @@ export const createVideo = async (
         '#EXT-X-VERSION:7',
         '#EXT-X-INDEPENDENT-SEGMENTS',
         `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${width}x${height},CODECS="${codecStringFor(height)},mp4a.40.2",AUDIO="aud"`,
-        `video_${height}p/playlist.m3u8`
+        `playlist.m3u8`
     ].join('\n') + '\n'
 
     await createAudioWithClipMaster(audio.id, masterContent)
