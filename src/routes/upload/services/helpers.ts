@@ -7,6 +7,7 @@ import {ALLOWED_PHOTO_SUFFIX, PREVIEWS_DIRECTORY} from "@/config.js";
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
 import {getImageSize} from "@composables/useGetImageSize.js";
+import {checkIsWebp} from "@composables/useCheckIsWebp.js";
 
 import {photoFormatException} from "@utils/httpExceptions.js";
 
@@ -29,23 +30,35 @@ export const createPosters = async (
 
         const {width, height} = await getImageSize(file.path)
 
+        const isWebp = checkIsWebp(file)
+
         const promises: Promise<unknown>[] = [
-            sharp(file.path)
-                .webp({quality: 80})
-                .toFile(targetPath)
+            isWebp
+                ? sharp(file.path)
+                    .toFile(targetPath)
+                : sharp(file.path)
+                    .webp({quality: 80})
+                    .toFile(targetPath)
         ]
 
         const isSmall = width <= 480 && height <= 480
 
         if (!isSmall) {
             promises.push(
-                sharp(file.path)
-                    .resize(480, 480, {
-                        fit: "cover",
-                        withoutEnlargement: true,
-                    })
-                    .webp({quality: 80})
-                    .toFile(targetMobilePath)
+                isWebp
+                    ? sharp(file.path)
+                        .resize(480, 480, {
+                            fit: "cover",
+                            withoutEnlargement: true,
+                        })
+                        .toFile(targetMobilePath)
+                    : sharp(file.path)
+                        .resize(480, 480, {
+                            fit: "cover",
+                            withoutEnlargement: true,
+                        })
+                        .webp({quality: 80})
+                        .toFile(targetMobilePath)
             )
         }
 

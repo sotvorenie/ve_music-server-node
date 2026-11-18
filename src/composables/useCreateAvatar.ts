@@ -6,6 +6,7 @@ import {ALLOWED_PHOTO_SUFFIX, ARTISTS_AVATARS_DIRECTORY, AVATARS_DIRECTORY} from
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
+import {checkIsWebp} from "@composables/useCheckIsWebp.js";
 
 import {photoFormatException} from "@utils/httpExceptions.js";
 
@@ -26,13 +27,22 @@ export const createAvatar = async (
 
         targetAvatarPath = path.join(currentDirectory, `${id}_${Date.now()}.webp`)
 
-        await sharp(file.path)
-            .resize(320, 320, {
-                fit: "cover",
-                withoutEnlargement: true,
-            })
-            .webp({quality: 80})
-            .toFile(targetAvatarPath)
+        const isWebp = checkIsWebp(file)
+
+        isWebp
+            ? await sharp(file.path)
+                .resize(320, 320, {
+                    fit: "cover",
+                    withoutEnlargement: true,
+                })
+                .toFile(targetAvatarPath)
+            : await sharp(file.path)
+                .resize(320, 320, {
+                    fit: "cover",
+                    withoutEnlargement: true,
+                })
+                .webp({quality: 80})
+                .toFile(targetAvatarPath)
 
         return createUrl(targetAvatarPath)
     } catch (err) {
