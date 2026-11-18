@@ -189,7 +189,7 @@ prisma migrate dev --config ./config/prisma.config.ts
 ```typescript
 import 'dotenv/config'
 import { defineConfig, env } from 'prisma/config'
-import path from 'path'
+import path from 'node:path'
 
 export default defineConfig({
   schema: path.join(__dirname, 'packages/database/prisma/schema.prisma'),

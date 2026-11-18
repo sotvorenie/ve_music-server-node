@@ -1,6 +1,6 @@
 import { VK } from 'vk-io';
 import fs from 'fs';
-import path from 'path';
+import path from 'node:path';
 
 const vk = new VK({
     token: process.env.VK_TOKEN as string

@@ -70,7 +70,7 @@ npm install -D dotenv-cli
 ```typescript
 // prisma.config.ts
 import { config } from 'dotenv'
-import path from 'path'
+import path from 'node:path'
 
 // Load specific .env file
 config({ path: path.join(__dirname, '.env.local') })
