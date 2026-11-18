@@ -84,7 +84,7 @@ model Music {
   likes   Like[]
   history History[]
 
-  @@map("musics")
+  @@map("music")
 }
 
 model Genre {

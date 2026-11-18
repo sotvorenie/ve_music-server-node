@@ -25,7 +25,7 @@ export const getRandomIds = async (
 
     const [_, rows] = await db.$transaction([
         db.$executeRaw`SELECT setseed(${seed})`,
-        db.$queryRaw`SELECT id FROM "musics" ${whereClause} ORDER BY RANDOM() LIMIT ${limit + 1} OFFSET ${skip}`
+        db.$queryRaw`SELECT id FROM "music" ${whereClause} ORDER BY RANDOM() LIMIT ${limit + 1} OFFSET ${skip}`
     ]) as [unknown, {id: number}[]]
 
     const hasMore = rows?.length > limit

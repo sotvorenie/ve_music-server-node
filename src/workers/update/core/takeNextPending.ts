@@ -3,10 +3,10 @@ import type {Music} from "@/generated/prisma/client.js";
 
 export const takeNextPending = async () => {
     const rows = await db.$queryRaw<Music[]>`
-        UPDATE musics
+        UPDATE music
         SET status = 'PROCESSING', updated_at = now()
         WHERE id = (
-            SELECT id FROM musics
+            SELECT id FROM music
             WHERE status = 'PENDING'
             ORDER BY created_at
             LIMIT 1
