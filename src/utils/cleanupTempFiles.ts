@@ -2,7 +2,9 @@ import type { Request, Response, NextFunction } from 'express';
 
 import {deletePath} from "@composables/useDeletePath.js";
 
-const collectTempPaths = (req: Request): string[] => {
+const collectTempPaths = (
+    req: Request,
+): string[] => {
     const paths: string[] = []
 
     if (req.file?.path) paths.push(req.file.path)
@@ -19,7 +21,11 @@ const collectTempPaths = (req: Request): string[] => {
     return paths
 }
 
-export const cleanupTempFiles = (req: Request, res: Response, next: NextFunction) => {
+export const cleanupTempFiles = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     res.on('close', () => {
         const paths = collectTempPaths(req)
         void Promise.allSettled(paths.map(p => deletePath(p)))

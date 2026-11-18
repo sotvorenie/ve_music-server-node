@@ -1,17 +1,15 @@
 import { type Request, type Response, Router } from 'express';
 
-import {deleteHistory} from "@routes/history/services/index.js";
-
 import {getHasMore} from "@composables/useGetHasMore.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 
 import {idSchema} from "@schemas/idSchema.js";
-import {userIdSchema} from "@schemas/userIdSchema.js";
 
 import {getUserMusic} from "@services/getUserMusic.js";
 import {modelMap} from "@services/modelMap.js";
+import {deleteFromDB} from "@services/deleteFromDB.js";
 
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {nameOptionalSchema} from "@schemas/nameSchema.js";
@@ -39,9 +37,8 @@ adminHistoryRouter.get('/:id', getAdmin(), asyncHandler(async (req: Request, res
 
 adminHistoryRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: musicId} = idSchema.parse(req.params)
-    const {user_id: userId} = userIdSchema.parse(req.query)
 
-    await deleteHistory(userId, musicId)
+    await deleteFromDB(musicId, modelMap.history)
 
     return successResponse(res)
 }))

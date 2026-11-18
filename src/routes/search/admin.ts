@@ -1,7 +1,6 @@
 import { type Request, type Response, Router } from 'express';
 
 import {
-    deleteFromUserSearchHistory,
     getUserSearchHistory,
     setToUserSearchHistory
 } from "@routes/search/services/helpers.js";
@@ -10,8 +9,10 @@ import {searchSchema, typeSchema} from "@routes/search/schemas.js";
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
 
+import {modelMap} from "@services/modelMap.js";
+import {deleteFromDB} from "@services/deleteFromDB.js";
+
 import {idSchema} from "@schemas/idSchema.js";
-import {userIdSchema} from "@schemas/userIdSchema.js";
 
 import {successResponse} from "@responses/successResponse.js";
 
@@ -38,9 +39,8 @@ adminSearchRouter.post('/:id', getAdmin(), asyncHandler(async (req: Request, res
 
 adminSearchRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const { id } = idSchema.parse(req.params)
-    const { user_id: userId } = userIdSchema.parse(req.query)
 
-    await deleteFromUserSearchHistory(id, userId)
+    await deleteFromDB(id, modelMap.search)
 
     return successResponse(res)
 }))

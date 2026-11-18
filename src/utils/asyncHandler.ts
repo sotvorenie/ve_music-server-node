@@ -3,7 +3,9 @@ import { ZodError } from 'zod';
 
 import { dbException } from "@utils/httpExceptions.js";
 
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+    fn: Function,
+) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
             await fn(req, res, next)

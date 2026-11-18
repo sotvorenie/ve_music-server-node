@@ -8,7 +8,7 @@ import {
     updatePreviewUrlForTrack,
     updateTrack
 } from "@routes/music/services/index.js";
-import {auditionsCountSchema} from "@routes/music/schemas.js";
+import {auditionsCountSchema, pathSchema} from "@routes/music/schemas.js";
 
 import {getHasMore} from "@composables/useGetHasMore.js";
 
@@ -17,7 +17,6 @@ import {asyncHandler} from "@utils/asyncHandler.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";
-import {pathSchema} from "@schemas/pathSchema.js";
 import {pageLimitSchema} from "@schemas/pageLimitSchema.js";
 import {urlSchema} from "@schemas/urlSchema.js";
 

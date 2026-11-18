@@ -21,8 +21,8 @@ export const getUserMusic = async (
             ...(name?.length && {
                 name: {
                     contains: name,
-                    mode: 'insensitive' as const
-                }
+                    mode: 'insensitive' as const,
+                },
             }),
         },
     }
@@ -38,8 +38,8 @@ export const getUserMusic = async (
             skip,
             take: limit,
             orderBy: {
-                date: isAdmin ? 'desc' : 'asc'
-            }
+                date: isAdmin ? 'desc' : 'asc',
+            },
         }),
         model.count({where})
     ])

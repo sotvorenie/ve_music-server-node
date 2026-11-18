@@ -58,15 +58,3 @@ export const setToUserSearchHistory = async (
 
     return newSearch
 }
-
-export const deleteFromUserSearchHistory = async (
-    id: number,
-    currentUserId: number,
-) => {
-    return db.search.delete({
-        where: {
-            id,
-            userId: currentUserId,
-        }
-    })
-}

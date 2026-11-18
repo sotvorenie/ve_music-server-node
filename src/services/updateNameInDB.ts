@@ -1,14 +1,14 @@
 export const updateNameInDB = async (
     id: number,
-    name: string | undefined,
+    name: string,
     model: any,
 ) => {
     await model.update({
         where: {
-            id
+            id,
         },
         data: {
             name,
-        }
+        },
     })
 }
