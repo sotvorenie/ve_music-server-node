@@ -24,6 +24,10 @@ export const uploadMusic = async (
 
     if (files.preview) {
         ({url, urlSmall} = await createPosters(files.preview))
+
+        try {
+            await deletePath(files.preview.path)
+        } catch {}
     }
 
     await Promise.all([
@@ -46,8 +50,4 @@ export const uploadMusic = async (
         }),
         db.$executeRaw`NOTIFY music_pending;`,
     ])
-
-    try {
-        if (files.preview) await deletePath(files.preview.path)
-    } catch {}
 }
