@@ -4,6 +4,8 @@ import {segmentTime,} from "@/config.js";
 
 import {createPosters} from "@routes/upload/services/helpers.js";
 
+import {deletePath} from "@composables/useDeletePath.js";
+
 import {findSmallPosterByUrl} from "@services/findSmallPosterByUrl.js";
 
 export const uploadMusic = async (
@@ -42,6 +44,10 @@ export const uploadMusic = async (
                 status: 'PENDING',
             },
         }),
-        db.$executeRaw`NOTIFY music_pending;`
+        db.$executeRaw`NOTIFY music_pending;`,
     ])
+
+    try {
+        if (files.preview) await deletePath(files.preview.path)
+    } catch {}
 }

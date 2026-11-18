@@ -2,6 +2,8 @@ import {db} from "@/db.js";
 
 import {createPosters} from "@routes/upload/services/helpers.js";
 
+import {deletePath} from "@composables/useDeletePath.js";
+
 export const uploadPreview = async (
     id: number,
     file: Express.Multer.File,
@@ -17,6 +19,10 @@ export const uploadPreview = async (
             previewX480Url: urlSmall,
         },
     })
+
+    try {
+        await deletePath(file.path)
+    } catch {}
 
     return url
 }
