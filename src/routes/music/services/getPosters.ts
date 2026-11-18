@@ -18,16 +18,14 @@ export const getPosters = async (
     await fs.mkdir(previewsDirectory, {recursive: true})
 
     const entries = await safeReaddir(previewsDirectory)
-    entries
-        .filter(entry => entry.isFile())
+    const posters = entries
         .filter(f => ALLOWED_PHOTO_SUFFIX.has(path.extname(f.name).toLowerCase()))
-        .map(photo => createUrl(path.join(previewsDirectory, photo.name)))
-        .sort()
+        .map(photo => createUrl(path.join(photo.parentPath, photo.name)))
 
     const total = entries.length
 
     return {
-        posters: entries.slice(skip, skip + limit),
+        posters: posters.slice(skip, skip + limit),
         skip,
         total,
     }
