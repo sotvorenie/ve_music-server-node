@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently -n api,worker -c blue,green \"npm:dev:api\" \"npm:dev:worker\"",
+    "dev": "concurrently --raw \"npm:dev:api\" \"npm:dev:worker\"",
     "dev:api": "tsx watch src/index.ts",
     "dev:worker": "tsx watch src/worker/index.ts",
     "db:migrate": "prisma migrate dev",
