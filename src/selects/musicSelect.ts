@@ -7,6 +7,7 @@ export const musicBaseSelect = {
     previewUrl: true,
     previewX480Url: true,
     url: true,
+    urlWithClip: true,
 }
 
 export const musicBaseWithArtistsSelect = {
