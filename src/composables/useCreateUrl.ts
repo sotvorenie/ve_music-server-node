@@ -3,7 +3,7 @@ import path from "node:path";
 import {BASE_STORAGE_DIR} from "@/config.js";
 
 export const createUrl = (
-    filePath: string,
+    filePath: string | null,
 ): string => {
     if (!filePath) return ''
     const clearPath = filePath.replaceAll('"', '')

@@ -25,7 +25,7 @@ export const processingMusic = async (
     ])
 
     const targetMusicPath = path.join(TRACKS_DIRECTORY, String(id))
-    const targetVideoPath = path.join(VIDEOS_DIRECTORY, String(id))
+    let targetVideoPath = music.videoClipUrl
 
     try {
         let duration: number = 0
@@ -60,11 +60,9 @@ export const processingMusic = async (
 
         if (music?.videoClipUrl && !isLink(music.videoClipUrl)) {
             try {
-                await deletePath(targetVideoPath)
-
                 const videoSuffix = path.extname(music.videoClipUrl).toLowerCase()
                 if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
-                    await fs.mkdir(targetVideoPath, {recursive: true})
+                    targetVideoPath = path.join(VIDEOS_DIRECTORY, `${music.id}_${Date.now()}${videoSuffix}`)
                     await fs.rename(music.videoClipUrl, targetVideoPath)
                 } else {
                     isVideoErr = true
