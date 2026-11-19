@@ -11,7 +11,7 @@ export const musicBaseSelect = {
 
 export const musicFullSelect = {
     ...musicBaseSelect,
-    urlWithClip: true,
+    videoClipUrl: true,
     likesCount: true,
     auditionsCount: true,
     segmentsCount: true,

@@ -14,7 +14,7 @@ export const takeNextPending = async () => {
         )
         RETURNING
             *,
-            url_with_clip AS "urlWithClip",
+            video_clip_url AS "videoClipUrl",
             preview_url AS "previewUrl",
             preview_x480_url AS "previewX480Url"
     `

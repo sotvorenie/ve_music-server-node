@@ -9,7 +9,7 @@ export const uploadVideo = async (
             id,
         },
         data: {
-            urlWithClip: file.path,
+            videoClipUrl: file.path,
             status: 'PENDING',
         },
     })

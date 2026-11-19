@@ -4,7 +4,6 @@ import {TRACKS_DIRECTORY} from "@/config.js";
 
 export const getMasterPath = (
     id: number,
-    masterType: 'audio' | 'video' = 'audio',
 ) => {
-    return path.join(TRACKS_DIRECTORY, String(id), masterType === 'audio' ? 'master.m3u8' : 'master_with_clip.m3u8')
+    return path.join(TRACKS_DIRECTORY, String(id), 'master.m3u8')
 }

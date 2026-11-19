@@ -37,7 +37,7 @@ export const uploadMusic = async (
             duration: 0,
             previewUrl: url,
             previewX480Url: urlSmall,
-            urlWithClip: files.video?.path ?? null,
+            videoClipUrl: files.video?.path ?? null,
             genreId,
             artists: {
                 connect: artists.map(artistId => ({id: artistId}))

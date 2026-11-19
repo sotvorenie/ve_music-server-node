@@ -7,8 +7,7 @@ import {ALLOWED_MUSIC_SUFFIX, ALLOWED_VIDEO_SUFFIX, segmentTime, TRACKS_DIRECTOR
 
 import {isLink} from "@/workers/update/core/isLink.js";
 import {setFailed} from "@/workers/update/core/setFailed.js";
-import {createAudio} from "@/workers/update/tasks/useCreateAudio.js";
-import {createVideo} from "@/workers/update/tasks/useCreateVideo.js";
+import {createAudio} from "@/workers/update/core/useCreateAudio.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
@@ -59,42 +58,21 @@ export const processingMusic = async (
             ))
         }
 
-        if (music.urlWithClip && !isLink(music.urlWithClip)) {
+        if (music?.videoClipUrl && !isLink(music.videoClipUrl)) {
             try {
-                await Promise.all([
-                    deletePath(targetVideoPath),
-                    deletePath(getMasterPath(id, 'video')),
-                ])
+                await deletePath(targetVideoPath)
 
-                const videoSuffix = path.extname(music.urlWithClip).toLowerCase()
+                const videoSuffix = path.extname(music.videoClipUrl).toLowerCase()
                 if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
                     await fs.mkdir(targetVideoPath, {recursive: true})
-
-                    await createVideo(
-                        music.urlWithClip,
-                        targetVideoPath,
-                        segmentTime,
-                        {
-                            id,
-                            duration: duration > 0 ? duration : music.duration,
-                        },
-                    )
-                } else if (isLink(music.url)) {
-                    return await db.music.update({
-                        where: {
-                            id,
-                        },
-                        data: {
-                            urlWithClip: null,
-                        },
-                    })
+                    await fs.rename(music.videoClipUrl, targetVideoPath)
                 } else {
                     isVideoErr = true
                 }
             } catch {
                 const promises: Promise<unknown>[] = []
-                if (!isLink(music.urlWithClip)) {
-                    promises.push(deletePath(music.urlWithClip))
+                if (!isLink(music.videoClipUrl)) {
+                    promises.push(deletePath(music.videoClipUrl))
                     promises.push(deletePath(targetVideoPath))
                 }
                 await Promise.allSettled(promises)
@@ -108,8 +86,8 @@ export const processingMusic = async (
                     id,
                 },
                 data: {
-                    url: isLink(music.url) ? music.url : createUrl(getMasterPath(id, 'audio')),
-                    urlWithClip: isVideoErr ? null : (!isLink(music.url) && isLink(music.urlWithClip)) ? null : createUrl(getMasterPath(id, 'video')),
+                    url: isLink(music.url) ? music.url : createUrl(getMasterPath(id)),
+                    videoClipUrl: isVideoErr ? null : isLink(music.videoClipUrl) ? music.videoClipUrl : createUrl(targetVideoPath),
                     status: 'READY',
                     segmentsCount,
                     bitrates,
@@ -119,7 +97,7 @@ export const processingMusic = async (
         ]
 
         if (!isLink(music.url)) promises.push(deletePath(music.url))
-        if (!isLink(music.urlWithClip)) promises.push(deletePath(music.urlWithClip))
+        if (!isLink(music.videoClipUrl)) promises.push(deletePath(music.videoClipUrl))
 
         await Promise.allSettled(promises)
     } catch {
@@ -129,8 +107,8 @@ export const processingMusic = async (
             promises.push(deletePath(music.url))
             promises.push(deletePath(targetMusicPath))
         }
-        if (!isLink(music.urlWithClip)) {
-            promises.push(deletePath(music.urlWithClip))
+        if (!isLink(music.videoClipUrl)) {
+            promises.push(deletePath(music.videoClipUrl))
             promises.push(deletePath(targetVideoPath))
         }
 

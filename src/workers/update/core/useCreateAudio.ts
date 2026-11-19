@@ -1,13 +1,32 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-
-import {runFfmpeg} from "@/workers/update/tasks/useRunFfmpeg.js";
+import {spawn} from "node:child_process";
 
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {safeReaddir} from "@composables/useSafeReaddir.js";
 import {getMasterPath} from "@composables/useGetMasterPath.js";
 
 import {musicBitrateException} from "@utils/httpExceptions.js";
+
+const runFfmpeg = (
+    args: string[],
+    cwd: string,
+): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        const proc = spawn('ffmpeg', args, {
+            stdio: ['ignore', 'ignore', 'ignore'],
+            cwd,
+        })
+
+        proc.on('error', (e) => {
+            reject(e)
+        })
+        proc.on('close', (code, signal) => {
+            if (code === 0) resolve()
+            else reject(new Error(signal ? `ffmpeg killed by ${signal}` : `ffmpeg exited with ${code}`))
+        })
+    })
+}
 
 const segmentAudio = async (
     inputPath: string,
@@ -17,7 +36,7 @@ const segmentAudio = async (
 ): Promise<void> => {
     const args = [
         '-i', inputPath,
-        '-map', '0:a',
+        '-map', '0:a:0',
         '-c:a', 'aac',
         '-b:a', `${bitrate}k`,
         '-f', 'hls',
@@ -55,7 +74,7 @@ export const createAudio = async (
 ) => {
     const baseBitrates: number[] = [128]
 
-    const originalBitrate: number = await getAudioInfo(inputPath, 'bitrate') / 1000
+    const originalBitrate: number = Math.round(await getAudioInfo(inputPath, 'bitrate') / 1000)
     if (originalBitrate === 0) throw musicBitrateException
 
     const targetBitrates = baseBitrates.filter(bitrate => bitrate * 1.1 <= originalBitrate)

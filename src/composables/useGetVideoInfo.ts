@@ -5,7 +5,7 @@ ffmpeg.setFfprobePath(ffprobeStatic.path);
 
 export const getVideoInfo = async (
     videoPath: string,
-    infoType: 'duration' | 'height' | 'fps' = 'height',
+    infoType: 'duration' | 'height' | 'width' | 'fps' = 'height',
 ): Promise<number> => {
     return new Promise((resolve) => {
         ffmpeg.ffprobe(videoPath, (err, metadata) => {

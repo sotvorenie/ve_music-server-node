@@ -4,14 +4,11 @@ import {db} from "@/db.js";
 import {VIDEOS_DIRECTORY} from "@/config.js";
 
 import {deletePath} from "@composables/useDeletePath.js";
-import {getMasterPath} from "@composables/useGetMasterPath.js";
 
 export const deleteVideo = async (
     id: number,
 ) => {
     const videoPath = path.join(VIDEOS_DIRECTORY, String(id))
-
-    const withClipMasterPath = getMasterPath(id, 'video')
 
     await Promise.all([
         db.music.update({
@@ -19,10 +16,9 @@ export const deleteVideo = async (
                 id,
             },
             data: {
-                urlWithClip: null,
+                videoClipUrl: null,
             },
         }),
-        deletePath(videoPath),
-        deletePath(withClipMasterPath)
+        deletePath(videoPath)
     ])
 }

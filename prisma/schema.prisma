@@ -60,7 +60,7 @@ model Music {
   id             Int     @id @default(autoincrement())
   name           String
   url            String  @unique @db.Text
-  urlWithClip    String? @map("url_with_clip") @db.Text
+  videoClipUrl   String? @map("video_clip_url")
   duration       Int
   auditionsCount Int     @default(0)
   likesCount     Int     @default(0)
