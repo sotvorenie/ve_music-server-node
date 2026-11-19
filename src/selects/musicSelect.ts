@@ -7,18 +7,22 @@ export const musicBaseSelect = {
     previewUrl: true,
     previewX480Url: true,
     url: true,
-    urlWithClip: true,
 }
 
-export const musicBaseWithArtistsSelect = {
+export const musicFullSelect = {
     ...musicBaseSelect,
+    urlWithClip: true,
+    likesCount: true,
+    auditionsCount: true,
+    segmentsCount: true,
+    bitrates: true,
     artists: {
         select: artistBaseSelect
     },
 }
 
 export const musicAdminSelect = {
-    ... musicBaseWithArtistsSelect,
+    ...musicFullSelect,
     status: true,
     createdAt: true,
     updatedAt: true,

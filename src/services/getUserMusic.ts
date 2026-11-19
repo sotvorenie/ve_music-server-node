@@ -1,7 +1,7 @@
 import {getSkip} from "@composables/useGetSkip.js";
 import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
-import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+import {musicFullSelect} from "@selects/musicSelect.js";
 
 export const getUserMusic = async (
     currentUserId: number,
@@ -32,7 +32,7 @@ export const getUserMusic = async (
             where,
             select: {
                 music: {
-                    select: musicBaseWithArtistsSelect
+                    select: musicFullSelect
                 }
             },
             skip,

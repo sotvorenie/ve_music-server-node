@@ -4,7 +4,7 @@ import {db} from "@/db.js";
 import {getSkip} from "@composables/useGetSkip.js";
 import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
-import {musicAdminSelect, musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+import {musicAdminSelect, musicFullSelect} from "@selects/musicSelect.js";
 
 export const getTracks = async (
     genreId: number,
@@ -39,7 +39,7 @@ export const getTracks = async (
             where,
             skip,
             take: limit,
-            select: isAdmin ? musicAdminSelect : musicBaseWithArtistsSelect,
+            select: isAdmin ? musicAdminSelect : musicFullSelect,
         }),
         db.music.count({where})
     ])

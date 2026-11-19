@@ -4,7 +4,7 @@ import {getBackupPreview} from "@composables/useGetBackupPreview.js";
 
 import {musicException} from "@utils/httpExceptions.js";
 
-import {musicBaseWithArtistsSelect} from "@selects/musicSelect.js";
+import {musicFullSelect} from "@selects/musicSelect.js";
 
 const addMusicToHistory = async (
     userId: number,
@@ -71,12 +71,7 @@ export const getTrack = async (
                 ...(!isAdmin && { status: 'READY' })
             },
             select: {
-                ...musicBaseWithArtistsSelect,
-                url: true,
-                previewUrl: true,
-                urlWithClip: true,
-                likesCount: true,
-                auditionsCount: true,
+                ...musicFullSelect,
                 genre: {
                     select: {
                         id: true,
@@ -88,8 +83,6 @@ export const getTrack = async (
                         userId: currentUserId ?? -1,
                     },
                 },
-                segmentsCount: true,
-                bitrates: true,
             }
         }),
         (!isAdmin && setView ? db.music.update({
