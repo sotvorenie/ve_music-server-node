@@ -6,7 +6,7 @@ import {
     updateAuditionsForTrack,
     updatePreviewPathForTrack,
     updatePreviewUrlForTrack,
-    updateTrack
+    updateTrack, updateVideoPathForTrack
 } from "@routes/music/services/index.js";
 import {auditionsCountSchema, pathSchema} from "@routes/music/schemas.js";
 
@@ -31,6 +31,17 @@ adminMusicRouter.patch('/:id', getAdmin(), asyncHandler(async (req: Request, res
     await updateTrack(id, genreId, name, artists)
 
     return successResponse(res)
+}))
+
+adminMusicRouter.patch('/:id/video/path', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
+    const {id} = idSchema.parse(req.params)
+    const {path} = pathSchema.parse(req.body)
+
+    const url = await updateVideoPathForTrack(id, path)
+
+    res.json({
+        url,
+    })
 }))
 
 adminMusicRouter.patch('/:id/preview/path', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
