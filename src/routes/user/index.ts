@@ -35,9 +35,11 @@ userRouter.patch('/password', getUser(), asyncHandler(async (req: Request, res: 
     const {password, old_password: oldPassword} = passwordSchema.extend(oldPasswordSchema.shape).parse(req.body)
     const currentUser = req.user!
 
-    await updateUserPassword(currentUser.id, password, oldPassword)
+    const token = await updateUserPassword(currentUser.id, password, oldPassword)
 
-    return successResponse(res)
+    res.json({
+        token,
+    })
 }))
 
 const upload = multer({storage: uploadStorage})

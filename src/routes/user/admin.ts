@@ -66,14 +66,18 @@ adminUserRouter.patch('/:id/login', getAdmin(), asyncHandler(async (req: Request
     successResponse(res)
 }))
 
-adminUserRouter.patch('/:id/password', getAdmin(), asyncHandler(async (req: Request, _: Response) => {
+adminUserRouter.patch('/:id/password', getAdmin(), asyncHandler(async (req: Request, res: Response) => {
     const {id: userId} = idSchema.parse(req.params)
     const {password, old_password: oldPassword} = passwordSchema.extend(oldPasswordSchema.shape).parse(req.body)
 
     const user = await getUser(userId)
     if (!user) throw userException
 
-    await updateUserPassword(user.id, password, oldPassword)
+    const token = await updateUserPassword(user.id, password, oldPassword)
+
+    res.json({
+        token,
+    })
 }))
 
 adminUserRouter.delete('/:id', getAdmin(), asyncHandler(async (req: Request, res: Response) => {

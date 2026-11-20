@@ -6,6 +6,7 @@ import {deletePath} from "@composables/useDeletePath.js";
 import {createAvatar} from "@composables/useCreateAvatar.js";
 
 import {duplicationPasswordException, invalidOldPasswordException, userException} from "@utils/httpExceptions.js";
+import {createJWTToken} from "@utils/auth.js";
 
 export const updateUserName = async (
     userId: number,
@@ -46,7 +47,7 @@ export const updateUserPassword = async (
 
     const newPassword = await bcrypt.hash(password, 10)
 
-    await db.user.update({
+    const newUserData = await db.user.update({
         where: {
             id,
         },
@@ -54,7 +55,12 @@ export const updateUserPassword = async (
             password: newPassword,
             tokenVersion: {increment: 1},
         },
+        select: {
+            tokenVersion: true,
+        },
     })
+
+    return createJWTToken(id, newUserData.tokenVersion)
 }
 
 export const uploadUserAvatar = async (
