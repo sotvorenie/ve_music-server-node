@@ -10,50 +10,52 @@ const addMusicToHistory = async (
     userId: number,
     musicId: number,
 ) => {
-    const historyEntry = await db.history.findUnique({
-        where: {
-            userId_musicId: {
-                userId,
-                musicId,
-            },
-        }
-    })
-
-    if (historyEntry) {
-        await db.history.update({
+    try {
+        const historyEntry = await db.history.findUnique({
             where: {
-                id: historyEntry.id,
-            },
-            data: {
-                date: new Date(),
-            },
-        })
-    } else {
-        await db.history.create({
-            data: {
-                userId,
-                musicId,
-            },
+                userId_musicId: {
+                    userId,
+                    musicId,
+                },
+            }
         })
 
-        const total = await db.history.count({
-            where: {userId}
-        })
-        if (total > 100) {
-            const oldest = await db.history.findFirst({
-                where: {userId},
-                orderBy: {date: 'asc'},
-                select: {id: true},
+        if (historyEntry) {
+            await db.history.update({
+                where: {
+                    id: historyEntry.id,
+                },
+                data: {
+                    date: new Date(),
+                },
             })
-            if (oldest) {
-                await db.history.delete({
-                    where: {
-                        id: oldest.id,
-                    },
+        } else {
+            await db.history.create({
+                data: {
+                    userId,
+                    musicId,
+                },
+            })
+
+            const total = await db.history.count({
+                where: {userId}
+            })
+            if (total > 100) {
+                const oldest = await db.history.findFirst({
+                    where: {userId},
+                    orderBy: {date: 'asc'},
+                    select: {id: true},
                 })
+                if (oldest) {
+                    await db.history.delete({
+                        where: {
+                            id: oldest.id,
+                        },
+                    })
+                }
             }
         }
-    }
+    } catch {}
 }
 
 export const getTrack = async (
