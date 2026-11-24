@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently --raw \"npm:dev:api\" \"npm:dev:update-worker\" \"npm:dev:delete-worker\"",
+    "dev": "concurrently --raw \"npm:dev:api\" \"npm:dev:update-worker\"",
     "dev:api": "tsx watch src/index.ts",
     "dev:update-worker": "tsx watch src/workers/update/index.ts",
-    "dev:delete-worker": "tsx watch src/workers/update/index.ts",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
