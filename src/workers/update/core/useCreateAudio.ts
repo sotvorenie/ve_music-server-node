@@ -104,7 +104,7 @@ export const createAudio = async (
         masterContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},CODECS="mp4a.40.2"\n`
         masterContent += `${bitrate}k/playlist.m3u8\n`
     }
-    await fs.writeFile(getMasterPath(audioId, 'audio'), masterContent)
+    await fs.writeFile(getMasterPath(audioId), masterContent)
 
     const segmentsCount = await getSegmentsCount(outputDir)
 
