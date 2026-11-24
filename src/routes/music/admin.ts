@@ -2,7 +2,7 @@ import {type Request, type Response, Router} from "express";
 
 import {
     deletePreviewForTrack,
-    deleteTrack, deleteVideo, getPosters,
+    deleteVideo, getPosters,
     updateAuditionsForTrack,
     updatePreviewPathForTrack,
     updatePreviewUrlForTrack,
@@ -14,6 +14,8 @@ import {getHasMore} from "@composables/useGetHasMore.js";
 
 import {getAdmin} from "@utils/auth.js";
 import {asyncHandler} from "@utils/asyncHandler.js";
+
+import {deleteTrack} from "@services/deleteTrack.js";
 
 import {idSchema} from "@schemas/idSchema.js";
 import {musicInfoSchema} from "@schemas/musicInfoSchema.js";

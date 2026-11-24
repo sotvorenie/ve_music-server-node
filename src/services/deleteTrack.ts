@@ -5,7 +5,7 @@ import {TRACKS_DIRECTORY, VIDEOS_DIRECTORY} from "@/config.js";
 
 import {deletePath} from "@composables/useDeletePath.js";
 
-export const deleteData = async (
+export const deleteTrack = async (
     id: number,
 ) => {
     const trackDirectory = path.join(TRACKS_DIRECTORY, String(id))

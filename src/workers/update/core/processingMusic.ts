@@ -6,13 +6,14 @@ import type {Music} from "@/generated/prisma/client.js";
 import {ALLOWED_MUSIC_SUFFIX, ALLOWED_VIDEO_SUFFIX, segmentTime, TRACKS_DIRECTORY, VIDEOS_DIRECTORY} from "@/config.js";
 
 import {isLink} from "@/workers/update/core/isLink.js";
-import {setFailed} from "@/workers/update/core/setFailed.js";
 import {createAudio} from "@/workers/update/core/useCreateAudio.js";
 
 import {createUrl} from "@composables/useCreateUrl.js";
 import {deletePath} from "@composables/useDeletePath.js";
 import {getAudioInfo} from "@composables/useGetAudioInfo.js";
 import {getMasterPath} from "@composables/useGetMasterPath.js";
+
+import {deleteTrack} from "@services/deleteTrack.js";
 
 export const processingMusic = async (
     music: Music,
@@ -42,7 +43,7 @@ export const processingMusic = async (
 
             const musicSuffix = path.extname(music.url).toLowerCase()
             if (!ALLOWED_MUSIC_SUFFIX.has(musicSuffix)) {
-                await setFailed(id)
+                await deleteTrack(id)
                 return
             }
 
@@ -99,7 +100,7 @@ export const processingMusic = async (
 
         await Promise.allSettled(promises)
     } catch {
-        const promises: Promise<unknown>[] = [setFailed(id)]
+        const promises: Promise<unknown>[] = [deleteTrack(id)]
 
         if (!isLink(music.url)) {
             promises.push(deletePath(music.url))
