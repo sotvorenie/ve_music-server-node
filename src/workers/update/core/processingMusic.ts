@@ -63,7 +63,7 @@ export const processingMusic = async (
             try {
                 const videoSuffix = path.extname(music.videoClipUrl).toLowerCase()
                 if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
-                    targetVideoPath = path.join(VIDEOS_DIRECTORY, `${music.id}_${Date.now()}${videoSuffix}`)
+                    targetVideoPath = path.join(VIDEOS_DIRECTORY, String(id), `video${videoSuffix}`)
                     await fs.rename(music.videoClipUrl, targetVideoPath)
                 } else {
                     isVideoErr = true
