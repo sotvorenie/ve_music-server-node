@@ -20,6 +20,7 @@ export const getPosters = async (
     const entries = await safeReaddir(previewsDirectory)
     const posters = entries
         .filter(f => ALLOWED_PHOTO_SUFFIX.has(path.extname(f.name).toLowerCase()))
+        .filter(f => !f.name.includes('_mobile'))
         .map(photo => createUrl(path.join(photo.parentPath, photo.name)))
 
     const total = entries.length
