@@ -32,8 +32,8 @@ export const getUserMusic = async (
             where,
             select: {
                 music: {
-                    select: musicFullSelect
-                }
+                    select: musicFullSelect,
+                },
             },
             skip,
             take: limit,
@@ -44,7 +44,7 @@ export const getUserMusic = async (
         model.count({where})
     ])
 
-   const formattedMusic =  Promise.all(
+   const formattedMusic = await Promise.all(
         music.map(async (m: any) => {
             m.music.previewUrl = m.music.previewUrl || await getBackupPreview()
             return m.music
