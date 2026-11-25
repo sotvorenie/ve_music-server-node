@@ -36,10 +36,12 @@ export const processingMusic = async (
         let isVideoErr = false
 
         if (!isLink(music.url)) {
-            await Promise.all([
-                deletePath(targetMusicPath),
-                deletePath(targetVideoPath),
-            ])
+            const promises: Promise<unknown>[] = [deletePath(targetMusicPath)]
+
+            if (isLink(music.videoClipUrl)) {
+                promises.push(deletePath(targetVideoPath))
+            }
+            await Promise.all(promises)
 
             const musicSuffix = path.extname(music.url).toLowerCase()
             if (!ALLOWED_MUSIC_SUFFIX.has(musicSuffix)) {
@@ -63,7 +65,10 @@ export const processingMusic = async (
             try {
                 const videoSuffix = path.extname(music.videoClipUrl).toLowerCase()
                 if (ALLOWED_VIDEO_SUFFIX.has(videoSuffix)) {
-                    targetVideoPath = path.join(VIDEOS_DIRECTORY, String(id), `video${videoSuffix}`)
+                    const videoDir = path.join(VIDEOS_DIRECTORY, String(id))
+                    await fs.mkdir(videoDir, {recursive: true})
+
+                    targetVideoPath = path.join(videoDir, `video${videoSuffix}`)
                     await fs.rename(music.videoClipUrl, targetVideoPath)
                 } else {
                     isVideoErr = true
